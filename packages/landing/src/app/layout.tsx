@@ -29,6 +29,16 @@ export const metadata: Metadata = {
     template: '%s — tracers',
   },
   description: DESCRIPTION,
+  keywords: [
+    'code intelligence',
+    'code graph',
+    'repository analysis',
+    'Rust',
+    'MCP server',
+    'static analysis',
+  ],
+  authors: [{ name: 'hieudoan', url: 'https://github.com/hieudoanm/tracers' }],
+  category: 'software',
   openGraph: {
     siteName: 'tracers',
     type: 'website',
@@ -46,6 +56,28 @@ export const metadata: Metadata = {
   },
 };
 
+
+const JSON_LD = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      name: 'tracers',
+      url: 'https://hieudoanm.github.io/tracers/',
+      description: 'Tracers parses 20+ languages with Tree-sitter and builds a unified graph of symbols, calls, imports, and dependencies — query callers, callees, impact, and cycles locally, with no cloud.',
+    },
+    {
+      '@type': 'SoftwareApplication',
+      name: 'tracers',
+      applicationCategory: 'DeveloperApplication',
+      description: 'Tracers parses 20+ languages with Tree-sitter and builds a unified graph of symbols, calls, imports, and dependencies — query callers, callees, impact, and cycles locally, with no cloud.',
+      url: 'https://hieudoanm.github.io/tracers/',
+      codeRepository: 'https://github.com/hieudoanm/tracers',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    },
+  ]
+};
+
 interface RootLayoutProps {
   children: ReactNode;
 }
@@ -56,6 +88,10 @@ const RootLayout: FC<RootLayoutProps> = ({ children }) => (
     data-theme="tracers"
     className={`scroll-smooth antialiased motion-reduce:scroll-auto ${inter.className}`}>
     <body className="bg-base-100 text-base-content m-0 leading-relaxed">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
       <Navbar
         name="tracers"
         logoSrc={LOGO}

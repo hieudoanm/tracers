@@ -1,0 +1,26 @@
+# tracers
+
+> Tracers parses 20+ languages with Tree-sitter and builds a unified graph of symbols, calls, imports, and dependencies — query callers, callees, impact, and cycles locally, with no cloud.
+
+- Repository: https://github.com/hieudoanm/tracers
+- Site: https://hieudoanm.github.io/tracers/
+
+## Documentation
+
+### concepts
+
+- [Architecture](https://hieudoanm.github.io/tracers/docs/concepts/architecture/)
+- [Graph schema](https://hieudoanm.github.io/tracers/docs/concepts/graph-schema/)
+### getting-started
+
+- [Installation](https://hieudoanm.github.io/tracers/docs/getting-started/installation/)
+- [Quickstart](https://hieudoanm.github.io/tracers/docs/getting-started/quickstart/)
+### guides
+
+- [CLI reference](https://hieudoanm.github.io/tracers/docs/guides/cli-reference/)
+- [Configuration](https://hieudoanm.github.io/tracers/docs/guides/configuration/)
+- [MCP server](https://hieudoanm.github.io/tracers/docs/guides/mcp-server/)
+- [Visual graph explorer](https://hieudoanm.github.io/tracers/docs/guides/visual-explorer/)
+### overview
+
+- [tracers documentation](https://hieudoanm.github.io/tracers/docs/)
