@@ -147,6 +147,15 @@ fn str_prop(description: &str) -> Value {
     json!({"type": "string", "description": description})
 }
 
+fn annotations(read_only: bool, destructive: bool, idempotent: bool, open_world: bool) -> Value {
+    json!({
+        "readOnlyHint": read_only,
+        "destructiveHint": destructive,
+        "idempotentHint": idempotent,
+        "openWorldHint": open_world
+    })
+}
+
 fn tools_list() -> Value {
     let symbol_props = json!({
         "symbol": str_prop("Symbol selector (ID, qualified name, or short name)"),
@@ -167,7 +176,7 @@ fn tools_list() -> Value {
         "path": str_prop("Repository path to scan (defaults to current directory)"),
         "graph": str_prop("Load the graph from an exported JSON file instead of rescanning")
     });
-    let tools = json!([
+    let mut tools = json!([
         {"name": "stats", "description": "Report graph statistics for a repository", "inputSchema": schema(path_props.clone(), &[])},
         {"name": "languages", "description": "List supported programming languages", "inputSchema": schema(json!({}), &[])},
         {"name": "frameworks", "description": "Report detected frameworks in the repository", "inputSchema": schema(path_props.clone(), &[])},
@@ -199,6 +208,12 @@ fn tools_list() -> Value {
             "graph": str_prop("Load the graph from an exported JSON file instead of rescanning")
         }), &["source", "target"])}
     ]);
+    // Every tool is a pure read of the local repository graph: it never
+    // writes files, mutates state, or reaches the network.
+    let hints = annotations(true, false, true, false);
+    for tool in tools.as_array_mut().expect("tools array") {
+        tool["annotations"] = hints.clone();
+    }
     json!({"tools": tools})
 }
 
@@ -275,4 +290,64 @@ pub fn run() -> std::io::Result<()> {
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tools_list_declares_all_tools_with_four_hints() {
+        let list = tools_list();
+        let tools = list["tools"].as_array().expect("tools array");
+        let mut names: Vec<&str> = tools
+            .iter()
+            .map(|tool| tool["name"].as_str().expect("tool name"))
+            .collect();
+        names.sort_unstable();
+        assert_eq!(
+            names,
+            [
+                "callees",
+                "callers",
+                "cycles",
+                "dependents",
+                "deps",
+                "frameworks",
+                "graph_export",
+                "impact",
+                "languages",
+                "path",
+                "refs",
+                "roots",
+                "stats",
+                "validate",
+            ]
+        );
+        for tool in tools {
+            let name = tool["name"].as_str().expect("tool name");
+            let hints = &tool["annotations"];
+            for (hint, expected) in [
+                ("readOnlyHint", true),
+                ("destructiveHint", false),
+                ("idempotentHint", true),
+                ("openWorldHint", false),
+            ] {
+                assert_eq!(
+                    hints.get(hint),
+                    Some(&Value::Bool(expected)),
+                    "{name} annotation {hint}: {hints}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn annotations_serialize_with_camel_case_keys() {
+        let hints = annotations(true, false, true, false);
+        assert_eq!(hints["readOnlyHint"], json!(true));
+        assert_eq!(hints["destructiveHint"], json!(false));
+        assert_eq!(hints["idempotentHint"], json!(true));
+        assert_eq!(hints["openWorldHint"], json!(false));
+    }
 }
