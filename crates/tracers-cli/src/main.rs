@@ -2,6 +2,7 @@
 
 mod cli;
 mod mcp;
+mod mcp_http;
 
 use std::process::exit;
 
@@ -58,14 +59,24 @@ fn run() -> Result<()> {
         EnvFilter::new("warn")
     };
     let builder = fmt().with_env_filter(filter);
-    if matches!(cli.command, Commands::Mcp) {
+    if matches!(cli.command, Commands::Mcp { .. }) {
         builder.with_writer(std::io::stderr).init();
     } else {
         builder.init();
     }
 
     match cli.command {
-        Commands::Mcp => mcp::run().map_err(Into::into),
+        Commands::Mcp { http, token } => {
+            if let Some(addr) = http {
+                mcp::run_http(
+                    &addr,
+                    token.or_else(|| std::env::var("MCP_AUTH_TOKEN").ok()),
+                )
+                .map_err(Into::into)
+            } else {
+                mcp::run().map_err(Into::into)
+            }
+        }
         Commands::Scan {
             path,
             output,
