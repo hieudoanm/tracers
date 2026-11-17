@@ -284,8 +284,15 @@ pub enum Commands {
         #[arg(long)]
         graph: Option<PathBuf>,
     },
-    /// Run an MCP server over stdio JSON-RPC.
-    Mcp,
+    /// Run an MCP server (stdio by default, or streamable-HTTP with --http)
+    Mcp {
+        /// Serve MCP over HTTP at this address instead of stdio
+        #[arg(long)]
+        http: Option<String>,
+        /// Bearer token required on HTTP requests (or MCP_AUTH_TOKEN)
+        #[arg(long)]
+        token: Option<String>,
+    },
     /// Report graph statistics.
     Stats {
         /// Repository path to scan (defaults to current directory).

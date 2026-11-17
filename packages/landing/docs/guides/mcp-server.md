@@ -53,3 +53,12 @@ to the current directory). Passing `graph` loads a previously exported
 
 Symbol queries accept a symbol `id`, qualified name, or short name — the same
 selectors as the CLI. See the [CLI reference](cli-reference.md) for details.
+
+
+### Streamable HTTP
+
+`tracers mcp --http 127.0.0.1:8080` also accepts `--http <addr>` (and `--token <token>`, or the
+`MCP_AUTH_TOKEN` environment variable) to serve the same MCP surface over
+streamable HTTP at `http://<addr>/mcp` — the transport used by ChatGPT
+connectors and remote Claude clients. When a token is configured, every
+request must carry `Authorization: Bearer <token>`.
