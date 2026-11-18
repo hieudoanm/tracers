@@ -5,3 +5,6 @@
 *.dot
 .DS_Store
 .trace-cache/
+
+# Node
+node_modules/
