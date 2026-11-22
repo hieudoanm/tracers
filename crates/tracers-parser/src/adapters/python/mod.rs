@@ -11,7 +11,7 @@ use tree_sitter::{Node as TsNode, Tree};
 use tracers_core::{Language, Visibility};
 
 use crate::syntax::ParsedFile;
-use crate::util::{child_field, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, named_children};
 
 pub fn parse(language: Language, path: &str, source: &str, tree: &Tree) -> ParsedFile {
     let mut builder = SyntaxBuilder::new(source, language, path);

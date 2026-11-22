@@ -1,7 +1,7 @@
 use tracers_core::NodeKind;
 use tree_sitter::Node as TsNode;
 
-use crate::util::{child_field, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, named_children};
 
 use super::items::parse_item;
 use super::types::collect_type_refs;

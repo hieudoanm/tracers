@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use tracers_core::Language;
-use tracers_parser::{read_source, DiscoveryOptions, SyntaxParser};
+use tracers_parser::{DiscoveryOptions, SyntaxParser, read_source};
 
 fn main() {
     let path = std::env::args().nth(1).expect("usage: dump <file>");

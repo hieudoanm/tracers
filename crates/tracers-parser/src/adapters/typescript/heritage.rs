@@ -1,7 +1,7 @@
 use tree_sitter::Node as TsNode;
 
 use crate::syntax::HeritageRelation;
-use crate::util::{named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, named_children};
 
 use super::types::collect_type_identifiers;
 

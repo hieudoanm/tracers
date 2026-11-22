@@ -3,7 +3,7 @@ use tree_sitter::Node as TsNode;
 use crate::syntax::HeritageRelation;
 use tracers_core::{NodeKind, Visibility};
 
-use crate::util::{child_field, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, named_children};
 
 use super::super::calls::collect_type_refs;
 use super::super::function::collect_function_signature;
@@ -17,7 +17,39 @@ pub(crate) fn parse_impl(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     if type_name.is_empty() {
         return;
     }
-    let type_local = builder.find_symbol_by_qualified(&type_name);
+    // The impl header gives a bare or path-qualified type name (`Parser`,
+    // `crate::x::Parser`); type symbols carry module-prefixed qualified
+    // names, so fall back to a leaf-name match on type-kind symbols.
+    let type_local = builder.find_symbol_by_qualified(&type_name).or_else(|| {
+        let leaf = type_name.rsplit("::").next().unwrap_or(type_name.as_str());
+        builder
+            .symbols
+            .iter()
+            .filter(|symbol| {
+                symbol.name == leaf
+                    && matches!(
+                        symbol.kind,
+                        NodeKind::Class
+                            | NodeKind::Struct
+                            | NodeKind::Enum
+                            | NodeKind::Interface
+                            | NodeKind::Trait
+                            | NodeKind::Type
+                    )
+            })
+            .map(|symbol| symbol.local_id)
+            .next()
+    });
+    // Method qualified names must share the type symbol's qualified prefix
+    // (`crate::parser.Parser.bump`) so parent-type lookup and
+    // `Type.member` qualified keys line up.
+    let type_qualified = type_local.and_then(|local| {
+        builder
+            .symbols
+            .iter()
+            .find(|symbol| symbol.local_id == local)
+            .map(|symbol| symbol.qualified_name.clone())
+    });
     if let Some(trait_node) = child_field(node, "trait") {
         let trait_name = rust_type_name(builder, trait_node);
         if let Some(type_local) = type_local {
@@ -43,7 +75,10 @@ pub(crate) fn parse_impl(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
             };
             let name = builder.text(name_node).to_string();
             let visibility = rust_visibility(builder, item);
-            let qualified = format!("{type_name}.{name}");
+            let qualified = match &type_qualified {
+                Some(prefix) => format!("{prefix}.{name}"),
+                None => format!("{type_name}.{name}"),
+            };
             let id = builder.add_symbol_qualified(
                 NodeKind::Method,
                 name,

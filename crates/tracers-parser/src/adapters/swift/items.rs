@@ -1,6 +1,6 @@
 use tree_sitter::Node as TsNode;
 
-use crate::util::{named_children, range, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, named_children, range};
 
 pub(crate) fn parse_item(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>, exported: bool) {
     match node.kind() {

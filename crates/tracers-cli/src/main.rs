@@ -8,7 +8,7 @@ use std::process::exit;
 
 use anyhow::Result;
 use clap::Parser;
-use tracing_subscriber::{fmt, EnvFilter};
+use tracing_subscriber::{EnvFilter, fmt};
 
 use crate::cli::commands::Commands;
 

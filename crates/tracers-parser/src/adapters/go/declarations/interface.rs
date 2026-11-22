@@ -3,7 +3,7 @@ use tree_sitter::Node as TsNode;
 use tracers_core::NodeKind;
 
 use crate::syntax::HeritageRelation;
-use crate::util::{child_field, is_upper_camel, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, is_upper_camel, named_children};
 
 use super::super::calls::collect_signature_types;
 use super::super::types::{collect_go_type_refs, go_type_name};

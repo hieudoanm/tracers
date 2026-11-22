@@ -9,7 +9,7 @@ use tree_sitter::Node as TsNode;
 use tracers_core::NodeKind;
 
 use crate::syntax::CallKind;
-use crate::util::{child_field, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, named_children};
 
 use super::calls::{parse_call, parse_let, parse_struct_expression};
 use super::function::parse_function;

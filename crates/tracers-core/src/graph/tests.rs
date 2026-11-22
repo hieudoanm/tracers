@@ -1,6 +1,6 @@
 use crate::edge::{Edge, EdgeKind, ResolutionOrigin, ResolutionStatus};
-use crate::graph::filter::NodeFilter;
 use crate::graph::Graph;
+use crate::graph::filter::NodeFilter;
 use crate::location::{Position, SourceRange};
 use crate::node::{Node, NodeKind};
 

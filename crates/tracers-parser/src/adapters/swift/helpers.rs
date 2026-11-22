@@ -1,6 +1,6 @@
 use tree_sitter::Node as TsNode;
 
-use crate::util::{named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, named_children};
 
 pub(crate) fn find_modifiers(builder: &SyntaxBuilder<'_>, node: TsNode<'_>) -> String {
     named_children(node)

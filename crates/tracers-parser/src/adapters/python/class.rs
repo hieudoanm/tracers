@@ -3,7 +3,7 @@ use tree_sitter::Node as TsNode;
 use tracers_core::NodeKind;
 
 use crate::syntax::HeritageRelation;
-use crate::util::{child_field, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, named_children};
 
 use super::is_exported_name;
 use super::python_visibility;

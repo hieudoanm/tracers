@@ -1,6 +1,6 @@
 use tree_sitter::Node as TsNode;
 
-use crate::util::{named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, named_children};
 
 pub(crate) fn collect_type_refs(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     if node.kind() == "identifier" {

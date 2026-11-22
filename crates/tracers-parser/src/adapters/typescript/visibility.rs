@@ -1,7 +1,7 @@
 use tracers_core::Visibility;
 use tree_sitter::Node as TsNode;
 
-use crate::util::{children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, children};
 
 pub(crate) fn visibility(builder: &SyntaxBuilder<'_>, node: TsNode<'_>) -> Option<Visibility> {
     for child in children(node) {

@@ -3,7 +3,7 @@ use tree_sitter::{Node as TsNode, Tree};
 use tracers_core::{Language, NodeKind, Visibility};
 
 use crate::syntax::{CallKind, ImportData, ImportKind, ParsedFile};
-use crate::util::{child_field, is_upper_camel, named_children, range, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, is_upper_camel, named_children, range};
 
 pub fn parse(language: Language, path: &str, source: &str, tree: &Tree) -> ParsedFile {
     let mut builder = SyntaxBuilder::new(source, language, path);

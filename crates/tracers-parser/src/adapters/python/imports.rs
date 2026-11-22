@@ -1,7 +1,7 @@
 use tree_sitter::Node as TsNode;
 
 use crate::syntax::{ImportData, ImportItem, ImportKind};
-use crate::util::{child_field, named_children, range, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, named_children, range};
 
 pub(crate) fn parse_import_statement(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     for child in named_children(node) {

@@ -2,7 +2,7 @@ use tree_sitter::Node as TsNode;
 
 use tracers_core::{NodeKind, Visibility};
 
-use crate::util::{child_field, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, named_children};
 
 use super::super::types::rust_visibility;
 

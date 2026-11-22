@@ -1,7 +1,7 @@
 use tree_sitter::Node as TsNode;
 
 use crate::syntax::{CallKind, HeritageRelation};
-use crate::util::{named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, named_children};
 
 use super::helpers::is_upper_camel;
 use super::items::parse_item;

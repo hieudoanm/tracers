@@ -16,5 +16,5 @@ pub use lookup::{
 };
 pub use resolve::edge_kind_counts;
 pub use stats::Stats;
-pub use storage::{repository_node, Graph};
+pub use storage::{Graph, repository_node};
 pub use validation::{validate, validation_issues};

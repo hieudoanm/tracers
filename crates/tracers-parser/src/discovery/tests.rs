@@ -22,10 +22,12 @@ fn discovers_supported_files_and_respects_excludes() {
     assert_eq!(paths, vec!["README.md", "src/a.ts"]);
     assert_eq!(report.unsupported_files, 0);
     assert!(report.skipped.iter().any(|s| s.path == "src/skip.py"));
-    assert!(report
-        .skipped
-        .iter()
-        .any(|s| s.path == "src/generated.generated.ts"));
+    assert!(
+        report
+            .skipped
+            .iter()
+            .any(|s| s.path == "src/generated.generated.ts")
+    );
 }
 
 #[test]

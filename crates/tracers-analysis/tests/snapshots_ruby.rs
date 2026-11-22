@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use tracers_analysis::graph::GraphBuilder;
-use tracers_export::{export_graph, LanguageInfo};
+use tracers_export::{LanguageInfo, export_graph};
 
 fn fixtures_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/languages")

@@ -1,7 +1,7 @@
 use tree_sitter::Node as TsNode;
 
 use crate::syntax::{ImportData, ImportKind};
-use crate::util::{range, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, range};
 
 pub(crate) fn parse_use(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     let text = builder.text(node);

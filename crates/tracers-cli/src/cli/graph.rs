@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use tracers_core::{Graph, Language, NodeFilter, NodeKind};
 
 use super::scan::{build_document, build_graph_for_path, cache_enabled};

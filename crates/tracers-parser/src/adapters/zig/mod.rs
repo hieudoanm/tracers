@@ -1,5 +1,5 @@
 use crate::syntax::ParsedFile;
-use crate::util::{named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, named_children};
 use tracers_core::Language;
 use tree_sitter::Tree;
 

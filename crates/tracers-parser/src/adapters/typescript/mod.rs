@@ -14,7 +14,7 @@ use tree_sitter::Tree;
 use tracers_core::Language;
 
 use crate::syntax::ParsedFile;
-use crate::util::{named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, named_children};
 
 use items::parse_item;
 

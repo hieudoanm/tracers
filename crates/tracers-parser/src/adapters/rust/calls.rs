@@ -158,8 +158,46 @@ pub(crate) fn infer_expression_type(
                 if is_upper_camel(last) {
                     return Some(candidate);
                 }
+                // `Move::new(..)`, `Position::standard()`: the type is the
+                // path minus its lowercase associated-function segment.
+                let segments: Vec<&str> = candidate.split("::").collect();
+                if segments.len() >= 2 && is_upper_camel(segments[segments.len() - 2]) {
+                    return Some(segments[..segments.len() - 1].join("::"));
+                }
+            }
+            // `let x = value.clone()` keeps the receiver's type when the
+            // receiver is a known local (`position: &Position`).
+            if function.kind() == "field_expression" {
+                let is_clone = child_field(function, "field")
+                    .is_some_and(|field| builder.text(field) == "clone");
+                if is_clone {
+                    if let Some(value) = child_field(function, "value") {
+                        let receiver = builder.text(value).to_string();
+                        if receiver.chars().all(|c| c.is_alphanumeric() || c == '_') {
+                            let caller = builder.caller();
+                            if let Some(binding) =
+                                builder.locals.iter().rev().find(|binding| {
+                                    binding.name == receiver && binding.scope == caller
+                                })
+                            {
+                                return Some(binding.type_name.clone());
+                            }
+                        }
+                    }
+                }
             }
             None
+        }
+        // `let x = a.b` / `let x = self.a.b`: record the field path; the
+        // analysis resolves each hop through declared field types.
+        "field_expression" => {
+            let value = child_field(node, "value")?;
+            let field = child_field(node, "field")?;
+            let base = builder.text(value).to_string();
+            if base.contains(['(', ' ', '\n']) {
+                return None;
+            }
+            Some(format!("{base}.{}", builder.text(field)))
         }
         "reference_expression" | "parenthesized_expression" | "await_expression" => {
             first_named(node).and_then(|inner| infer_expression_type(builder, inner))
@@ -177,10 +215,13 @@ pub(crate) fn collect_type_refs(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_
             }
         }
         "scoped_type_identifier" => {
+            // Keep the full path (`serde_json::Value`, `crate::position::Piece`);
+            // resolution tries the qualified path first and falls back to
+            // the last segment for import-bound names.
             let text = builder.text(node).to_string();
-            let last = text.rsplit("::").next().unwrap_or(&text).to_string();
-            if !is_builtin_type(&last) {
-                builder.add_type_ref(last, node);
+            let last = text.rsplit("::").next().unwrap_or(&text);
+            if !is_builtin_type(last) {
+                builder.add_type_ref(text, node);
             }
         }
         _ => {

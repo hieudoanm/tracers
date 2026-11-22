@@ -13,7 +13,7 @@ pub mod util;
 
 pub use discovery::{DiscoveredFile, DiscoveryOptions, DiscoveryReport, SkippedFile};
 pub use language::{grammar_version, tree_sitter_language};
-pub use parser::{read_source, ParseError, SyntaxParser};
+pub use parser::{ParseError, SyntaxParser, read_source};
 pub use syntax::{
     CallData, CallKind, HeritageData, HeritageRelation, ImportData, ImportItem, ImportKind,
     LocalBinding, ParsedFile, SymbolData, TypeRefData,

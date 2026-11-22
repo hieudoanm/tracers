@@ -10,7 +10,7 @@ pub(crate) use self::property::parse_property;
 use tracers_core::{NodeKind, Visibility};
 use tree_sitter::Node as TsNode;
 
-use crate::util::{child_field, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, named_children};
 
 use super::types::collect_type_refs;
 use super::visibility::{swift_annotations, swift_visibility};

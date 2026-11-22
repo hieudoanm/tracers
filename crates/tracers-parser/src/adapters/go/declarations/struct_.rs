@@ -5,7 +5,7 @@ use tracers_core::NodeKind;
 use super::super::types::{collect_go_type_refs, go_type_name};
 use super::super::visibility::go_visibility;
 use crate::syntax::HeritageRelation;
-use crate::util::{child_field, is_upper_camel, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, is_upper_camel, named_children};
 
 pub(crate) fn parse_struct(builder: &mut SyntaxBuilder<'_>, from: u32, node: TsNode<'_>) {
     for child in named_children(node) {
