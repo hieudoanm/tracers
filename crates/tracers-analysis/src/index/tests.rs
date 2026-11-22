@@ -42,6 +42,32 @@ fn python_packages_are_detected_from_init_files() {
 }
 
 #[test]
+fn javascript_packages_are_detected_from_package_json() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::create_dir_all(dir.path().join("packages/web")).unwrap();
+    std::fs::write(dir.path().join("packages/web/package.json"), "{}").unwrap();
+    std::fs::write(dir.path().join("package.json"), "{}").unwrap();
+    let parsed = vec![
+        parse(
+            "packages/web/src/app.ts",
+            Language::TypeScript,
+            "export function app() {}\n",
+        ),
+        parse(
+            "scripts/tool.ts",
+            Language::TypeScript,
+            "export function tool() {}\n",
+        ),
+    ];
+    let index = RepositoryIndex::build(dir.path(), parsed).unwrap();
+    let web = index.files.get("packages/web/src/app.ts").unwrap();
+    assert_eq!(web.package.as_deref(), Some("package:packages/web"));
+    let script = index.files.get("scripts/tool.ts").unwrap();
+    assert_eq!(script.package.as_deref(), Some("package:"));
+    assert_eq!(index.packages.len(), 2);
+}
+
+#[test]
 fn rust_module_paths_use_crate_roots() {
     use super::helpers::rust_module_qualified;
     assert_eq!(rust_module_qualified("src/lib.rs", Some("")), "crate");

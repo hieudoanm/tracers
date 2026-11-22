@@ -1,16 +1,16 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
-use tracers_core::{file_id, module_id, package_id, Language};
+use tracers_core::{Language, file_id, module_id, package_id};
 
 use crate::index::helpers;
 use crate::index::manifest::nearest_manifest;
 use crate::index::repository::GoModule;
-use crate::index::types::{symbol_ref, FileState};
+use crate::index::types::{FileState, symbol_ref};
 use tracers_parser::ParsedFile;
 
 fn package_for(
-    _root: &Path,
+    root: &Path,
     paths: &BTreeSet<String>,
     _go_modules: &[GoModule],
     parsed: &ParsedFile,
@@ -19,6 +19,10 @@ fn package_for(
         Language::Go => {
             let directory = helpers::directory_key(&parsed.path);
             Some(package_id(if directory == "." { "" } else { &directory }))
+        }
+        Language::TypeScript | Language::Tsx | Language::JavaScript | Language::Jsx => {
+            nearest_manifest(root, &parsed.path, "package.json")
+                .map(|directory| package_id(&directory))
         }
         Language::Python => {
             let mut directory = helpers::directory_key(&parsed.path);
@@ -68,6 +72,18 @@ pub(crate) fn package_display_name(state: &FileState) -> String {
             .parsed
             .module_name
             .clone()
+            .unwrap_or_else(|| helpers::directory_key(&state.path)),
+        Language::TypeScript | Language::Tsx | Language::JavaScript | Language::Jsx => state
+            .package
+            .as_deref()
+            .map(|id| {
+                let directory = id.trim_start_matches("package:");
+                if directory.is_empty() {
+                    "root".to_string()
+                } else {
+                    directory.to_string()
+                }
+            })
             .unwrap_or_else(|| helpers::directory_key(&state.path)),
         _ => helpers::directory_key(&state.path),
     }
