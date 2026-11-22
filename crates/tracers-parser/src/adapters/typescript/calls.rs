@@ -1,6 +1,6 @@
 use tree_sitter::Node as TsNode;
 
-use crate::util::{child_field, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field};
 
 pub(crate) fn parse_call(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     let Some(function) = child_field(node, "function") else {
@@ -8,8 +8,17 @@ pub(crate) fn parse_call(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     };
     let full = builder.text(function).to_string();
     if function.kind() == "member_expression" {
-        let receiver =
-            child_field(function, "object").map(|object| builder.text(object).to_string());
+        let receiver = child_field(function, "object").map(|object| {
+            // `expect(x).toBe(y)`: the receiver is a call — keep the callee
+            // name (`expect`) rather than the whole call text.
+            if object.kind() == "call_expression" {
+                child_field(object, "function")
+                    .map(|f| callee_leaf(builder, f))
+                    .unwrap_or_else(|| builder.text(object).to_string())
+            } else {
+                builder.text(object).to_string()
+            }
+        });
         let name = child_field(function, "property")
             .map(|property| builder.text(property).to_string())
             .unwrap_or_else(|| full.rsplit('.').next().unwrap_or(&full).to_string());
@@ -25,6 +34,26 @@ pub(crate) fn parse_call(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
             .map(|property| builder.text(property).to_string())
             .unwrap_or_else(|| full.rsplit('.').next().unwrap_or(&full).trim().to_string());
         builder.add_call(None, name, full, crate::syntax::CallKind::Function, node);
+    }
+}
+
+/// Terminal identifier of a callee expression: `foo.bar()` → `bar`,
+/// `expect(x)` → `expect`.
+fn callee_leaf(builder: &SyntaxBuilder<'_>, node: TsNode<'_>) -> String {
+    match node.kind() {
+        "member_expression" => child_field(node, "property")
+            .map(|p| builder.text(p).to_string())
+            .unwrap_or_else(|| builder.text(node).to_string()),
+        "call_expression" => child_field(node, "function")
+            .map(|f| callee_leaf(builder, f))
+            .unwrap_or_else(|| builder.text(node).to_string()),
+        _ => builder
+            .text(node)
+            .rsplit(['.', ':', '('])
+            .next()
+            .unwrap_or("")
+            .trim()
+            .to_string(),
     }
 }
 

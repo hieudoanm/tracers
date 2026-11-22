@@ -1832,6 +1832,27 @@ expression: document
     },
     {
       "source": "function:src/Main.kt::main",
+      "target": "class:src/Complex.kt::Circle",
+      "kind": "calls",
+      "status": "resolved_internal",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 5,
+            "column": 9,
+            "byte": 76
+          },
+          "end": {
+            "line": 5,
+            "column": 20,
+            "byte": 87
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/Main.kt::main",
       "target": "unresolved:kotlin:format",
       "kind": "calls",
       "status": "unresolved",
@@ -1910,6 +1931,48 @@ expression: document
             "line": 9,
             "column": 59,
             "byte": 202
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/Service.kt::createService",
+      "target": "class:src/Service.kt::InMemoryRepository",
+      "kind": "calls",
+      "status": "resolved_internal",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 17,
+            "column": 25,
+            "byte": 484
+          },
+          "end": {
+            "line": 17,
+            "column": 45,
+            "byte": 504
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/Service.kt::createService",
+      "target": "class:src/Service.kt::ShapeService",
+      "kind": "calls",
+      "status": "resolved_internal",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 17,
+            "column": 12,
+            "byte": 471
+          },
+          "end": {
+            "line": 17,
+            "column": 46,
+            "byte": 505
           }
         }
       ]
@@ -2340,7 +2403,7 @@ expression: document
     "files": 4,
     "packages": 2,
     "nodes": 57,
-    "edges": 147,
+    "edges": 150,
     "symbols": 37,
     "unresolvedEdges": 11,
     "diagnostics": 0,
@@ -2359,7 +2422,7 @@ expression: document
       "unknown": 8
     },
     "byEdgeKind": {
-      "calls": 10,
+      "calls": 13,
       "contains": 49,
       "defines": 37,
       "exports": 37,
@@ -2373,7 +2436,7 @@ expression: document
     },
     "byStatus": {
       "resolved_external": 1,
-      "resolved_internal": 135,
+      "resolved_internal": 138,
       "unresolved": 11
     },
     "byFramework": {}

@@ -1640,6 +1640,27 @@ expression: document
     {
       "source": "function:pkg/service/service.go::NewMemoryRepository",
       "target": "struct:pkg/service/service.go::MemoryRepository",
+      "kind": "calls",
+      "status": "resolved_internal",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 15,
+            "column": 10,
+            "byte": 296
+          },
+          "end": {
+            "line": 15,
+            "column": 64,
+            "byte": 350
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:pkg/service/service.go::NewMemoryRepository",
+      "target": "struct:pkg/service/service.go::MemoryRepository",
       "kind": "uses_type",
       "status": "resolved_internal",
       "origin": "syntax",
@@ -1666,6 +1687,27 @@ expression: document
             "line": 15,
             "column": 26,
             "byte": 312
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:pkg/service/service.go::NewShapeService",
+      "target": "struct:pkg/service/service.go::ShapeService",
+      "kind": "calls",
+      "status": "resolved_internal",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 32,
+            "column": 10,
+            "byte": 650
+          },
+          "end": {
+            "line": 32,
+            "column": 34,
+            "byte": 674
           }
         }
       ]
@@ -2420,7 +2462,7 @@ expression: document
     "files": 4,
     "packages": 4,
     "nodes": 59,
-    "edges": 155,
+    "edges": 157,
     "symbols": 37,
     "unresolvedEdges": 12,
     "diagnostics": 1,
@@ -2439,7 +2481,7 @@ expression: document
       "variable": 5
     },
     "byEdgeKind": {
-      "calls": 5,
+      "calls": 7,
       "contains": 53,
       "defines": 37,
       "exports": 44,
@@ -2451,7 +2493,7 @@ expression: document
     },
     "byStatus": {
       "resolved_external": 3,
-      "resolved_internal": 140,
+      "resolved_internal": 142,
       "unresolved": 12
     },
     "byFramework": {}

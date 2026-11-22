@@ -1666,6 +1666,27 @@ expression: document
     },
     {
       "source": "function:src/math.ts::run",
+      "target": "class:src/math.ts::Circle",
+      "kind": "calls",
+      "status": "resolved_internal",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 12,
+            "column": 13,
+            "byte": 426
+          },
+          "end": {
+            "line": 12,
+            "column": 26,
+            "byte": 439
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/math.ts::run",
       "target": "function:src/math.ts::twice",
       "kind": "calls",
       "status": "resolved_internal",
@@ -1702,6 +1723,48 @@ expression: document
             "line": 13,
             "column": 24,
             "byte": 464
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/service.ts::createService",
+      "target": "class:src/service.ts::InMemoryRepository",
+      "kind": "calls",
+      "status": "resolved_internal",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 31,
+            "column": 16,
+            "byte": 682
+          },
+          "end": {
+            "line": 31,
+            "column": 48,
+            "byte": 714
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/service.ts::createService",
+      "target": "class:src/service.ts::ShapeService",
+      "kind": "calls",
+      "status": "resolved_internal",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 32,
+            "column": 10,
+            "byte": 725
+          },
+          "end": {
+            "line": 32,
+            "column": 32,
+            "byte": 747
           }
         }
       ]
@@ -2120,7 +2183,7 @@ expression: document
     "files": 4,
     "packages": 0,
     "nodes": 50,
-    "edges": 129,
+    "edges": 132,
     "symbols": 37,
     "unresolvedEdges": 5,
     "diagnostics": 3,
@@ -2143,7 +2206,7 @@ expression: document
       "variable": 1
     },
     "byEdgeKind": {
-      "calls": 4,
+      "calls": 7,
       "contains": 45,
       "defines": 37,
       "exports": 31,
@@ -2156,7 +2219,7 @@ expression: document
     },
     "byStatus": {
       "resolved_external": 1,
-      "resolved_internal": 123,
+      "resolved_internal": 126,
       "unresolved": 5
     },
     "byFramework": {}

@@ -1996,6 +1996,16 @@ pub(crate) fn receiver_external_target(
         return Some(format!("{receiver}.{member}"));
     }
 
+    // Test-framework receiver objects: `expect(x).toBe(y)` → `expect.toBe`,
+    // `screen.getByText(...)` → `screen.getByText`, `vi.fn()` → `vi.fn`.
+    if matches!(
+        language,
+        Language::TypeScript | Language::Tsx | Language::JavaScript | Language::Jsx
+    ) && TS_TEST_RECEIVERS.contains(&receiver)
+    {
+        return Some(format!("{receiver}.{member}"));
+    }
+
     // Declared manifest dependency: match the full receiver, its last
     // segment (`github.com/x/y` imported as `y`), or — for `::` paths —
     // its first segment (`serde_json::de::Value` → crate `serde_json`).
@@ -2019,4 +2029,77 @@ pub(crate) fn receiver_external_target(
         }
     }
     None
+}
+
+/// Receiver objects provided by test frameworks (Vitest/Jest globals,
+/// Testing Library, jest-dom). Member calls on these resolve as external
+/// `{receiver}.{member}` edges.
+const TS_TEST_RECEIVERS: &[&str] = &[
+    "assert",
+    "assertType",
+    "bench",
+    "describe",
+    "expect",
+    "expectTypeOf",
+    "fireEvent",
+    "it",
+    "jest",
+    "screen",
+    "suite",
+    "test",
+    "userEvent",
+    "vi",
+    "vitest",
+    "within",
+];
+
+/// Methods of `testing.T`/`TB`/`B`/`F` — the conventional `t`/`tb`/`b`/`f`
+/// parameters in `_test.go` files. Kept as an explicit whitelist so unknown
+/// members stay unresolved rather than being claimed as testing methods.
+const GO_TESTING_METHODS: &[&str] = &[
+    "Attr",
+    "Benchmark",
+    "Chdir",
+    "Cleanup",
+    "Context",
+    "Error",
+    "Errorf",
+    "Fail",
+    "FailNow",
+    "Failed",
+    "Fatal",
+    "Fatalf",
+    "Helper",
+    "Log",
+    "Logf",
+    "Name",
+    "Parallel",
+    "ReportAllocs",
+    "ResetTimer",
+    "Run",
+    "Setenv",
+    "Skip",
+    "SkipNow",
+    "Skipf",
+    "Skipped",
+    "StartTimer",
+    "StopTimer",
+    "TempDir",
+];
+
+/// `t.Fatalf(...)` inside a `_test.go` file → `testing.T.Fatalf`.
+/// Returns `None` outside test files, for non-testing receivers, or for
+/// members that are not testing methods.
+pub(crate) fn go_testing_target(path: &str, receiver: &str, member: &str) -> Option<String> {
+    if !path.ends_with("_test.go") || !GO_TESTING_METHODS.contains(&member) {
+        return None;
+    }
+    let ty = match receiver {
+        "t" => "T",
+        "tb" => "TB",
+        "b" => "B",
+        "f" => "F",
+        _ => return None,
+    };
+    Some(format!("testing.{ty}.{member}"))
 }

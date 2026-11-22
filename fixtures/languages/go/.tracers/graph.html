@@ -595,21 +595,9 @@
       "language": "go"
     },
     {
-      "id": "external:go:MemoryRepository",
-      "kind": "external_symbol",
-      "name": "MemoryRepository",
-      "language": "go"
-    },
-    {
       "id": "external:go:Rectangle",
       "kind": "external_symbol",
       "name": "Rectangle",
-      "language": "go"
-    },
-    {
-      "id": "external:go:ShapeService",
-      "kind": "external_symbol",
-      "name": "ShapeService",
       "language": "go"
     },
     {
@@ -2241,27 +2229,6 @@
     },
     {
       "source": "function:pkg/service/service.go::NewMemoryRepository",
-      "target": "external:go:MemoryRepository",
-      "kind": "calls",
-      "status": "resolved_external",
-      "origin": "lexical",
-      "sites": [
-        {
-          "start": {
-            "line": 15,
-            "column": 10,
-            "byte": 296
-          },
-          "end": {
-            "line": 15,
-            "column": 64,
-            "byte": 350
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:pkg/service/service.go::NewMemoryRepository",
       "target": "external:go:builtin::make",
       "kind": "calls",
       "status": "resolved_external",
@@ -2277,6 +2244,27 @@
             "line": 15,
             "column": 63,
             "byte": 349
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:pkg/service/service.go::NewMemoryRepository",
+      "target": "struct:pkg/service/service.go::MemoryRepository",
+      "kind": "calls",
+      "status": "resolved_internal",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 15,
+            "column": 10,
+            "byte": 296
+          },
+          "end": {
+            "line": 15,
+            "column": 64,
+            "byte": 350
           }
         }
       ]
@@ -2316,9 +2304,9 @@
     },
     {
       "source": "function:pkg/service/service.go::NewShapeService",
-      "target": "external:go:ShapeService",
+      "target": "struct:pkg/service/service.go::ShapeService",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -3168,13 +3156,13 @@
   "statistics": {
     "files": 4,
     "packages": 4,
-    "nodes": 66,
+    "nodes": 64,
     "edges": 162,
     "symbols": 37,
     "unresolvedEdges": 12,
     "diagnostics": 1,
     "byNodeKind": {
-      "external_symbol": 10,
+      "external_symbol": 8,
       "file": 4,
       "function": 5,
       "interface": 3,
@@ -3196,11 +3184,11 @@
       "uses_type": 13
     },
     "byLanguage": {
-      "go": 61
+      "go": 59
     },
     "byStatus": {
-      "resolved_external": 10,
-      "resolved_internal": 140,
+      "resolved_external": 8,
+      "resolved_internal": 142,
       "unresolved": 12
     },
     "byFramework": {}

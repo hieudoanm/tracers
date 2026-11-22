@@ -897,30 +897,6 @@
       "exported": false
     },
     {
-      "id": "external:python:Circle",
-      "kind": "external_symbol",
-      "name": "Circle",
-      "language": "python"
-    },
-    {
-      "id": "external:python:Rectangle",
-      "kind": "external_symbol",
-      "name": "Rectangle",
-      "language": "python"
-    },
-    {
-      "id": "external:python:Repository",
-      "kind": "external_symbol",
-      "name": "Repository",
-      "language": "python"
-    },
-    {
-      "id": "external:python:ShapeService",
-      "kind": "external_symbol",
-      "name": "ShapeService",
-      "language": "python"
-    },
-    {
       "id": "external:python:builtins::ValueError",
       "kind": "external_symbol",
       "name": "ValueError",
@@ -2411,9 +2387,9 @@
     },
     {
       "source": "function:src/main.py::main",
-      "target": "external:python:Circle",
+      "target": "class:src/shapes.py::Circle",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -2432,9 +2408,9 @@
     },
     {
       "source": "function:src/main.py::main",
-      "target": "external:python:Rectangle",
+      "target": "class:src/shapes.py::Rectangle",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -2663,9 +2639,9 @@
     },
     {
       "source": "function:src/service.py::create_service",
-      "target": "external:python:Repository",
+      "target": "class:src/service.py::Repository",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -2684,9 +2660,9 @@
     },
     {
       "source": "function:src/service.py::create_service",
-      "target": "external:python:ShapeService",
+      "target": "class:src/service.py::ShapeService",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -3416,7 +3392,7 @@
   "statistics": {
     "files": 5,
     "packages": 0,
-    "nodes": 60,
+    "nodes": 56,
     "edges": 161,
     "symbols": 33,
     "unresolvedEdges": 7,
@@ -3424,7 +3400,7 @@
     "byNodeKind": {
       "class": 8,
       "constructor": 6,
-      "external_symbol": 14,
+      "external_symbol": 10,
       "file": 5,
       "function": 6,
       "method": 10,
@@ -3443,11 +3419,11 @@
       "uses_type": 23
     },
     "byLanguage": {
-      "python": 59
+      "python": 55
     },
     "byStatus": {
-      "resolved_external": 29,
-      "resolved_internal": 125,
+      "resolved_external": 25,
+      "resolved_internal": 129,
       "unresolved": 7
     },
     "byFramework": {}

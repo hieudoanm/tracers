@@ -160,6 +160,20 @@ impl<'a> Resolver<'a> {
             );
         }
         if let Some(scope) = scope {
+            // Locals declared directly inside the calling symbol —
+            // parameters, destructured consts, nested functions — are in
+            // scope for its body.
+            candidates.extend(
+                state
+                    .symbols
+                    .iter()
+                    .filter(|symbol| {
+                        symbol.parent == Some(scope) && symbol.name == name && want.accepts(symbol)
+                    })
+                    .cloned(),
+            );
+            // Enclosing functions contribute their locals too: a call inside
+            // a nested function sees the outer function's declarations.
             let mut parent = state.symbol(scope).and_then(|symbol| symbol.parent);
             while let Some(local) = parent {
                 let Some(container) = state.symbol(local) else {
@@ -173,10 +187,6 @@ impl<'a> Resolver<'a> {
                             symbol.parent == Some(local)
                                 && symbol.name == name
                                 && want.accepts(symbol)
-                                && !matches!(
-                                    container.kind,
-                                    NodeKind::Function | NodeKind::Method | NodeKind::Constructor
-                                )
                         })
                         .cloned(),
                 );

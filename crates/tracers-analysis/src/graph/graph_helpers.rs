@@ -44,6 +44,16 @@ impl GraphBuilder {
                         {
                             return CallTarget::Internal(member.node_id);
                         }
+                        // Enum variants and other non-callable members
+                        // (`AppError::Internal`, `Position::StartPos`).
+                        if let Some(member) =
+                            self.find_type_member(index, symbol, &call.name, false)
+                        {
+                            return CallTarget::Internal(member.node_id);
+                        }
+                        // The receiver is a known internal type; an unknown
+                        // member is honestly unresolved, not external.
+                        return CallTarget::Unresolved;
                     }
                     crate::index::Binding::Module(module) => {
                         if let ModuleRef::File(path) = module {
@@ -89,6 +99,12 @@ impl GraphBuilder {
                         _ => {}
                     }
                 }
+            }
+            // `t.Fatalf` in Go test files → `testing.T.Fatalf`.
+            if let Some(qualified) =
+                crate::resolve::builtin_calls::go_testing_target(&state.path, &cleaned, &call.name)
+            {
+                return CallTarget::External(qualified);
             }
             // Receiver didn't resolve internally: it may be a stdlib or
             // manifest-declared package qualifier (`fmt.Println`,
@@ -163,6 +179,19 @@ impl GraphBuilder {
             }
         }
 
+        // Last resort: the callee may be a non-callable-kind binding —
+        // destructured hook setters (`const [x, setX] = useState()`),
+        // function-valued variables, enum constructors. An explicit binding
+        // beats builtin/external guesses.
+        if let crate::resolve::Resolution::Internal(symbol) = resolver.resolve_name(
+            state,
+            scope,
+            &call.name,
+            crate::resolve::resolve_types::Want::Any,
+        ) {
+            return CallTarget::Internal(symbol.node_id);
+        }
+
         match call.kind {
             CallKind::Constructor => CallTarget::External(
                 crate::resolve::builtin_calls::builtin_qualified(state.language, &call.name)
@@ -181,13 +210,27 @@ impl GraphBuilder {
         type_symbol: &SymbolRef,
         method_name: &str,
     ) -> Option<SymbolRef> {
-        let key = format!("{}.{}", type_symbol.qualified, method_name);
-        if let Some(candidates) = index.by_qualified.get(&key) {
-            let callables: Vec<&SymbolRef> =
-                candidates.iter().filter(|s| s.is_callable()).collect();
-            if callables.len() == 1 {
-                return Some(callables[0].clone());
-            }
+        self.find_type_member(index, type_symbol, method_name, true)
+    }
+
+    /// Look up `Type.name` in `by_qualified`. With `callable_only` set,
+    /// only function-like members match; otherwise any single member kind
+    /// (enum variants are `Constant`) resolves.
+    fn find_type_member(
+        &self,
+        index: &RepositoryIndex,
+        type_symbol: &SymbolRef,
+        member_name: &str,
+        callable_only: bool,
+    ) -> Option<SymbolRef> {
+        let key = format!("{}.{}", type_symbol.qualified, member_name);
+        let candidates = index.by_qualified.get(&key)?;
+        let matches: Vec<&SymbolRef> = candidates
+            .iter()
+            .filter(|s| !callable_only || s.is_callable())
+            .collect();
+        if matches.len() == 1 {
+            return Some(matches[0].clone());
         }
         None
     }
