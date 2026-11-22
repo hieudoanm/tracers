@@ -25,10 +25,18 @@ static ALL_SIGNATURES: OnceLock<Vec<FrameworkSignature>> = OnceLock::new();
 pub fn all_signatures() -> &'static [FrameworkSignature] {
     ALL_SIGNATURES.get_or_init(|| {
         let mut out = Vec::new();
-        out.extend_from_slice(ecmascript::ECMASCRIPT_SIGNATURES);
-        out.extend_from_slice(python::PYTHON_SIGNATURES);
-        out.extend_from_slice(go::GO_SIGNATURES);
-        out.extend_from_slice(rust::RUST_SIGNATURES);
+        for group in ecmascript::ECMASCRIPT_SIGNATURES {
+            out.extend_from_slice(group);
+        }
+        for group in python::PYTHON_SIGNATURES {
+            out.extend_from_slice(group);
+        }
+        for group in go::GO_SIGNATURES {
+            out.extend_from_slice(group);
+        }
+        for group in rust::RUST_SIGNATURES {
+            out.extend_from_slice(group);
+        }
         out.extend_from_slice(kotlin::KOTLIN_SIGNATURES);
         out.extend_from_slice(java::JAVA_SIGNATURES);
         out.extend_from_slice(csharp::CSHARP_SIGNATURES);
