@@ -4,7 +4,7 @@
   "repository": {
     "id": "repository:.",
     "name": "rust",
-    "root": "fixtures/languages/rust",
+    "root": "/Users/hieudoan/git/github.com/hieudoanm/tracers/crates/tracers-cli/../../fixtures/languages/rust",
     "fileCount": 5,
     "languageCount": 23
   },

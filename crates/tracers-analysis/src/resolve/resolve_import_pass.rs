@@ -109,8 +109,41 @@ impl<'a> ImportContext<'a> {
                         allow_private,
                         module_name.as_deref(),
                     );
-                    if let Resolution::Internal(symbol) = resolution {
-                        re_exports.insert(name, symbol.node_id);
+                    // `pub use` also binds the name locally, so record a
+                    // binding for every resolution kind — including module
+                    // re-exports (`pub use other_crate::some_module`) that
+                    // have no symbol node id for `re_exports`.
+                    match &resolution {
+                        Resolution::Internal(symbol) => {
+                            re_exports.insert(name.clone(), symbol.node_id.clone());
+                            bindings.insert(name.clone(), Binding::Symbol(symbol.clone()));
+                        }
+                        Resolution::External { qualified, .. } => {
+                            bindings.insert(
+                                name.clone(),
+                                Binding::ExternalSymbol {
+                                    node_id: tracers_core::external_id(self.language, qualified),
+                                    name: name.clone(),
+                                },
+                            );
+                        }
+                        Resolution::ExternalNode { node_id, name: en } => {
+                            bindings.insert(
+                                name.clone(),
+                                Binding::ExternalSymbol {
+                                    node_id: node_id.clone(),
+                                    name: en.clone(),
+                                },
+                            );
+                        }
+                        _ => {
+                            // `pub use path::module` re-exports the module
+                            // itself when no symbol of that name exists
+                            // inside it.
+                            if matches!(module, ModuleRef::File(_)) {
+                                bindings.insert(name.clone(), Binding::Module(module.clone()));
+                            }
+                        }
                     }
                 }
                 return;

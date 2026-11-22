@@ -138,6 +138,49 @@ impl GraphBuilder {
             // `module::func`): resolve the qualifier as a module path and
             // look the member up inside it.
             if cleaned.contains("::") {
+                // `crate::Type::Variant` / `module::Type::assoc`: the
+                // qualifier may be a type path rather than a module path.
+                if let crate::resolve::Resolution::Internal(symbol) =
+                    resolver.resolve_type_name(state, call.caller, &cleaned)
+                {
+                    if symbol.is_type() {
+                        if let crate::resolve::Resolution::Internal(member) = resolver
+                            .resolve_member(
+                                &symbol,
+                                &call.name,
+                                crate::resolve::resolve_types::Want::Callable,
+                            )
+                        {
+                            return CallTarget::Internal(member.node_id);
+                        }
+                        if let Some(member) =
+                            self.find_type_member(index, &symbol, &call.name, false)
+                        {
+                            return CallTarget::Internal(member.node_id);
+                        }
+                        return CallTarget::Unresolved;
+                    }
+                }
+                // Rust `crate::`/`self::`/`super::` paths and module
+                // re-exports (`crate::ica::fastica`).
+                if let Some(resolution) = resolver.resolve_rust_path(
+                    state,
+                    &format!("{cleaned}::{}", call.name),
+                    crate::resolve::resolve_types::Want::Callable,
+                ) {
+                    match resolution {
+                        crate::resolve::Resolution::Internal(symbol) => {
+                            return CallTarget::Internal(symbol.node_id);
+                        }
+                        crate::resolve::Resolution::External { qualified, .. } => {
+                            return CallTarget::External(qualified);
+                        }
+                        crate::resolve::Resolution::ExternalNode { node_id, .. } => {
+                            return CallTarget::Internal(node_id);
+                        }
+                        _ => {}
+                    }
+                }
                 let ctx = crate::resolve::resolve_import_pass::ImportContext {
                     index,
                     state,
