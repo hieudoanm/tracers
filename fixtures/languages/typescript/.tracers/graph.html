@@ -881,18 +881,6 @@
       "language": "typescript"
     },
     {
-      "id": "external:typescript:InMemoryRepository",
-      "kind": "external_symbol",
-      "name": "InMemoryRepository",
-      "language": "typescript"
-    },
-    {
-      "id": "external:typescript:ShapeService",
-      "kind": "external_symbol",
-      "name": "ShapeService",
-      "language": "typescript"
-    },
-    {
       "id": "external:typescript:lib::Error",
       "kind": "external_symbol",
       "name": "Error",
@@ -2322,9 +2310,9 @@
     },
     {
       "source": "function:src/math.ts::run",
-      "target": "external:typescript:Circle",
+      "target": "class:src/math.ts::Circle",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -2385,9 +2373,9 @@
     },
     {
       "source": "function:src/service.ts::createService",
-      "target": "external:typescript:InMemoryRepository",
+      "target": "class:src/service.ts::InMemoryRepository",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -2406,9 +2394,9 @@
     },
     {
       "source": "function:src/service.ts::createService",
-      "target": "external:typescript:ShapeService",
+      "target": "class:src/service.ts::ShapeService",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -2943,7 +2931,7 @@
   "statistics": {
     "files": 4,
     "packages": 0,
-    "nodes": 59,
+    "nodes": 57,
     "edges": 139,
     "symbols": 37,
     "unresolvedEdges": 5,
@@ -2953,7 +2941,7 @@
       "constant": 4,
       "constructor": 3,
       "enum": 1,
-      "external_symbol": 10,
+      "external_symbol": 8,
       "file": 4,
       "function": 6,
       "interface": 3,
@@ -2976,11 +2964,11 @@
       "uses_type": 5
     },
     "byLanguage": {
-      "typescript": 58
+      "typescript": 56
     },
     "byStatus": {
-      "resolved_external": 11,
-      "resolved_internal": 123,
+      "resolved_external": 8,
+      "resolved_internal": 126,
       "unresolved": 5
     },
     "byFramework": {}

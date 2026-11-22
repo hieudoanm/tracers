@@ -919,27 +919,9 @@
       "exported": false
     },
     {
-      "id": "external:kotlin:Circle",
-      "kind": "external_symbol",
-      "name": "Circle",
-      "language": "kotlin"
-    },
-    {
-      "id": "external:kotlin:InMemoryRepository",
-      "kind": "external_symbol",
-      "name": "InMemoryRepository",
-      "language": "kotlin"
-    },
-    {
       "id": "external:kotlin:Rectangle",
       "kind": "external_symbol",
       "name": "Rectangle",
-      "language": "kotlin"
-    },
-    {
-      "id": "external:kotlin:ShapeService",
-      "kind": "external_symbol",
-      "name": "ShapeService",
       "language": "kotlin"
     },
     {
@@ -2422,9 +2404,9 @@
     },
     {
       "source": "function:src/Main.kt::main",
-      "target": "external:kotlin:Circle",
+      "target": "class:src/Complex.kt::Circle",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -2569,9 +2551,9 @@
     },
     {
       "source": "function:src/Service.kt::createService",
-      "target": "external:kotlin:InMemoryRepository",
+      "target": "class:src/Service.kt::InMemoryRepository",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -2590,9 +2572,9 @@
     },
     {
       "source": "function:src/Service.kt::createService",
-      "target": "external:kotlin:ShapeService",
+      "target": "class:src/Service.kt::ShapeService",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -3034,7 +3016,7 @@
   "statistics": {
     "files": 4,
     "packages": 2,
-    "nodes": 62,
+    "nodes": 59,
     "edges": 152,
     "symbols": 37,
     "unresolvedEdges": 11,
@@ -3043,7 +3025,7 @@
       "class": 8,
       "constant": 2,
       "constructor": 5,
-      "external_symbol": 6,
+      "external_symbol": 3,
       "file": 4,
       "function": 4,
       "method": 11,
@@ -3064,11 +3046,11 @@
       "uses_type": 9
     },
     "byLanguage": {
-      "kotlin": 59
+      "kotlin": 56
     },
     "byStatus": {
-      "resolved_external": 6,
-      "resolved_internal": 135,
+      "resolved_external": 3,
+      "resolved_internal": 138,
       "unresolved": 11
     },
     "byFramework": {}

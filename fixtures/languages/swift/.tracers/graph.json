@@ -398,12 +398,6 @@
       "exported": false
     },
     {
-      "id": "external:swift:ShapeService",
-      "kind": "external_symbol",
-      "name": "ShapeService",
-      "language": "swift"
-    },
-    {
       "id": "external:swift:String",
       "kind": "external_symbol",
       "name": "String",
@@ -1125,12 +1119,6 @@
       "kind": "unknown",
       "name": "reduce",
       "language": "swift"
-    },
-    {
-      "id": "unresolved:swift:store",
-      "kind": "unknown",
-      "name": "store",
-      "language": "swift"
     }
   ],
   "edges": [
@@ -1759,9 +1747,9 @@
     },
     {
       "source": "function:src/Service.swift::createService",
-      "target": "external:swift:ShapeService",
+      "target": "class:src/Service.swift::ShapeService",
       "kind": "calls",
-      "status": "resolved_external",
+      "status": "resolved_internal",
       "origin": "lexical",
       "sites": [
         {
@@ -1843,10 +1831,10 @@
     },
     {
       "source": "method:src/Service.swift::InMemoryRepository.find",
-      "target": "unresolved:swift:store",
+      "target": "property:src/Service.swift::InMemoryRepository.store",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_internal",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -1864,10 +1852,10 @@
     },
     {
       "source": "method:src/Service.swift::InMemoryRepository.save",
-      "target": "unresolved:swift:store",
+      "target": "property:src/Service.swift::InMemoryRepository.store",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_internal",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2363,16 +2351,16 @@
   "statistics": {
     "files": 5,
     "packages": 0,
-    "nodes": 61,
+    "nodes": 59,
     "edges": 116,
     "symbols": 39,
-    "unresolvedEdges": 12,
+    "unresolvedEdges": 10,
     "diagnostics": 1,
     "byNodeKind": {
       "class": 6,
       "constant": 2,
       "constructor": 4,
-      "external_symbol": 3,
+      "external_symbol": 2,
       "file": 5,
       "function": 5,
       "interface": 2,
@@ -2380,7 +2368,7 @@
       "module": 5,
       "property": 7,
       "repository": 1,
-      "unknown": 8
+      "unknown": 7
     },
     "byEdgeKind": {
       "calls": 12,
@@ -2391,12 +2379,12 @@
       "uses_type": 10
     },
     "byLanguage": {
-      "swift": 60
+      "swift": 58
     },
     "byStatus": {
-      "resolved_external": 4,
-      "resolved_internal": 100,
-      "unresolved": 12
+      "resolved_external": 3,
+      "resolved_internal": 103,
+      "unresolved": 10
     },
     "byFramework": {}
   }

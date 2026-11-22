@@ -192,3 +192,51 @@ fn drops_calls_with_garbage_names() {
         }
     }
 }
+
+#[test]
+fn rust_wildcard_reexport_chain_resolves() {
+    let dir = tempdir().unwrap();
+    assert!(std::fs::create_dir_all(dir.path().join("src/handlers")).is_ok());
+    assert!(std::fs::create_dir_all(dir.path().join("src/models")).is_ok());
+    let parsed = vec![
+        parse(
+            "src/lib.rs",
+            Language::Rust,
+            "pub mod handlers;\npub mod models;\n",
+        ),
+        parse(
+            "src/models/error.rs",
+            Language::Rust,
+            "pub enum AppError {\n    Internal,\n}\n",
+        ),
+        parse(
+            "src/models.rs",
+            Language::Rust,
+            "pub mod error;\npub use error::*;\n",
+        ),
+        parse(
+            "src/handlers/mod.rs",
+            Language::Rust,
+            "use crate::models::*;\n",
+        ),
+        parse(
+            "src/handlers/sub.rs",
+            Language::Rust,
+            "use super::*;\npub fn f() -> Result<(), AppError> {\n    Err(AppError::Internal)\n}\n",
+        ),
+    ];
+    let mut index = RepositoryIndex::build(dir.path(), parsed).unwrap();
+    let import_pass = resolve_imports(&mut index);
+    let builder = GraphBuilder::new();
+    let result = builder.build_from_index(&index, &import_pass, &[]).unwrap();
+    let graph = &result.graph;
+    let unresolved: Vec<_> = graph
+        .edges()
+        .iter()
+        .filter(|edge| edge.status == ResolutionStatus::Unresolved)
+        .collect();
+    assert!(
+        unresolved.is_empty(),
+        "unexpected unresolved edges: {unresolved:?}"
+    );
+}

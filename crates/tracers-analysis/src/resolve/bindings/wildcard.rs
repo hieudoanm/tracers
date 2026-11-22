@@ -23,6 +23,19 @@ impl<'a> ImportContext<'a> {
                                 );
                             }
                         }
+                        // `pub use` re-exports and names the target file
+                        // imported itself are also visible through a private
+                        // wildcard (`use super::*` sees the parent's `use`s).
+                        for (name, ids) in &state.exports {
+                            for id in ids {
+                                if let Some(symbol) = self.index.symbol(id) {
+                                    bindings.insert(name.clone(), Binding::Symbol(symbol.clone()));
+                                }
+                            }
+                        }
+                        for (name, binding) in &state.bindings {
+                            bindings.insert(name.clone(), binding.clone());
+                        }
                     } else {
                         for (name, ids) in &state.exports {
                             for id in ids {
