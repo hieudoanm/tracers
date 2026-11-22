@@ -26,6 +26,8 @@ pub struct SyntaxBuilder<'a> {
     qualifier_prefix: Option<String>,
     ordinals: HashMap<(NodeKind, String), u32>,
     next_local: u32,
+    generic_names: Vec<String>,
+    generic_marks: Vec<usize>,
 }
 
 impl<'a> SyntaxBuilder<'a> {
@@ -45,6 +47,8 @@ impl<'a> SyntaxBuilder<'a> {
             qualifier_prefix: None,
             ordinals: HashMap::new(),
             next_local: 0,
+            generic_names: Vec::new(),
+            generic_marks: Vec::new(),
         }
     }
 
@@ -97,5 +101,33 @@ impl<'a> SyntaxBuilder<'a> {
 
     pub(crate) fn pop(&mut self) {
         self.stack.pop();
+    }
+
+    /// Record the type/const generic parameter names declared by `node`'s
+    /// `type_parameters` so uses of them (`[T; N]`, `Vec<T>`) are not
+    /// mistaken for references to declared types. Pair with `pop_generics`.
+    pub(crate) fn push_generics(&mut self, node: TsNode<'_>) {
+        self.generic_marks.push(self.generic_names.len());
+        let Some(parameters) = super::child_field(node, "type_parameters") else {
+            return;
+        };
+        for parameter in super::named_children(parameters) {
+            if !matches!(parameter.kind(), "type_parameter" | "const_parameter") {
+                continue;
+            }
+            if let Some(name) = super::child_field(parameter, "name") {
+                self.generic_names.push(self.text(name).to_string());
+            }
+        }
+    }
+
+    pub(crate) fn pop_generics(&mut self) {
+        if let Some(mark) = self.generic_marks.pop() {
+            self.generic_names.truncate(mark);
+        }
+    }
+
+    pub(crate) fn is_generic_param(&self, name: &str) -> bool {
+        self.generic_names.iter().any(|param| param == name)
     }
 }

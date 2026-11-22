@@ -4,7 +4,7 @@
   "repository": {
     "id": "repository:.",
     "name": "typescript",
-    "root": "/Users/hieudoan/git/github.com/hieudoanm/tracers/crates/tracers-cli/../../fixtures/languages/typescript",
+    "root": "fixtures/languages/typescript",
     "fileCount": 4,
     "languageCount": 23
   },
@@ -13,7 +13,28 @@
     "cacheEnabled": true,
     "semanticMode": "off",
     "languages": [
-      "typescript"
+      "bash",
+      "c",
+      "cpp",
+      "csharp",
+      "dart",
+      "gdscript",
+      "go",
+      "java",
+      "javascript",
+      "jsx",
+      "kotlin",
+      "matlab",
+      "php",
+      "python",
+      "r",
+      "ruby",
+      "rust",
+      "scala",
+      "swift",
+      "tsx",
+      "typescript",
+      "zig"
     ]
   },
   "languages": [

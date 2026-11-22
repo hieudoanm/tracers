@@ -46,6 +46,27 @@ impl<'a> Resolver<'a> {
                     .collect();
             }
         }
+        // Qualified names aren't package-qualified, so `AuthService.Register`
+        // can collide across packages (a struct method and an interface
+        // method). Prefer candidates in the type's own directory — for Go
+        // that's the same package.
+        if candidates.len() > 1 {
+            let type_dir = type_symbol.path.rsplit_once('/').map(|(dir, _)| dir);
+            let same_dir: Vec<SymbolRef> = candidates
+                .iter()
+                .filter(|symbol| {
+                    symbol
+                        .path
+                        .rsplit_once('/')
+                        .map(|(dir, _)| Some(dir) == type_dir)
+                        .unwrap_or(false)
+                })
+                .cloned()
+                .collect();
+            if !same_dir.is_empty() {
+                candidates = same_dir;
+            }
+        }
         candidates.retain(|symbol| want.accepts(symbol));
         if !candidates.is_empty() {
             return choose(name, candidates);

@@ -22,6 +22,7 @@ pub(crate) fn parse_struct(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>, ex
         exported || visibility == Some(Visibility::Public),
     );
     builder.push(id);
+    builder.push_generics(node);
     if let Some(type_parameters) = child_field(node, "type_parameters") {
         collect_type_refs(builder, type_parameters);
     }
@@ -58,5 +59,6 @@ pub(crate) fn parse_struct(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>, ex
             }
         }
     }
+    builder.pop_generics();
     builder.pop();
 }

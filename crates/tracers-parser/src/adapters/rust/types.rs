@@ -17,9 +17,11 @@ pub(crate) fn parse_type_item(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>,
         visibility,
         exported || visibility == Some(Visibility::Public),
     );
+    builder.push_generics(node);
     if let Some(type_node) = child_field(node, "type") {
         super::calls::collect_type_refs(builder, type_node);
     }
+    builder.pop_generics();
 }
 
 pub(crate) fn parse_const(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>, exported: bool) {

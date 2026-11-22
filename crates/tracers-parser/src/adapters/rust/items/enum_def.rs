@@ -15,6 +15,7 @@ pub(crate) fn parse_enum(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>, expo
     let enum_exported = exported || visibility == Some(Visibility::Public);
     let id = builder.add_symbol(NodeKind::Enum, name, node, visibility, enum_exported);
     builder.push(id);
+    builder.push_generics(node);
     if let Some(body) = child_field(node, "body") {
         for variant in named_children(body) {
             if variant.kind() != "enum_variant" {
@@ -31,5 +32,6 @@ pub(crate) fn parse_enum(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>, expo
             }
         }
     }
+    builder.pop_generics();
     builder.pop();
 }

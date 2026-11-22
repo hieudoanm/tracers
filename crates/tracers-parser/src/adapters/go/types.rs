@@ -16,11 +16,15 @@ pub(crate) fn collect_go_type_refs(builder: &mut SyntaxBuilder<'_>, node: TsNode
             }
         }
         "qualified_type" => {
+            // Keep the package qualifier (`models.AccountEvent`,
+            // `jwt.RegisteredClaims`); resolution uses the qualifier to find
+            // the import binding and falls back to the leaf name.
+            let text = builder.text(node).to_string();
             let name = child_field(node, "name")
                 .map(|name| builder.text(name).to_string())
-                .unwrap_or_else(|| builder.text(node).to_string());
+                .unwrap_or_else(|| text.clone());
             if !is_builtin_type(&name) {
-                builder.add_type_ref(name, node);
+                builder.add_type_ref(text, node);
             }
         }
         _ => {
@@ -32,13 +36,36 @@ pub(crate) fn collect_go_type_refs(builder: &mut SyntaxBuilder<'_>, node: TsNode
 }
 
 pub(crate) fn go_type_name(builder: &SyntaxBuilder<'_>, node: TsNode<'_>) -> String {
+    go_type_name_inner(builder, node, false)
+}
+
+/// Type expression text that keeps package qualifiers (`gocql.Session`,
+/// `models.AccountEvent`) so local/field type bindings can resolve through
+/// import bindings. `go_type_name` strips them for symbol naming.
+pub(crate) fn go_type_expr_name(builder: &SyntaxBuilder<'_>, node: TsNode<'_>) -> String {
+    go_type_name_inner(builder, node, true)
+}
+
+fn go_type_name_inner(
+    builder: &SyntaxBuilder<'_>,
+    node: TsNode<'_>,
+    keep_qualifier: bool,
+) -> String {
     match node.kind() {
-        "pointer_expression" | "parenthesized_type" | "generic_type" => first_named(node)
-            .map(|child| go_type_name(builder, child))
-            .unwrap_or_default(),
-        "qualified_type" => child_field(node, "name")
-            .map(|name| builder.text(name).to_string())
-            .unwrap_or_else(|| builder.text(node).to_string()),
+        "pointer_expression" | "pointer_type" | "parenthesized_type" | "generic_type" => {
+            first_named(node)
+                .map(|child| go_type_name_inner(builder, child, keep_qualifier))
+                .unwrap_or_default()
+        }
+        "qualified_type" => {
+            if keep_qualifier {
+                builder.text(node).to_string()
+            } else {
+                child_field(node, "name")
+                    .map(|name| builder.text(name).to_string())
+                    .unwrap_or_else(|| builder.text(node).to_string())
+            }
+        }
         "type_identifier" | "identifier" => builder.text(node).to_string(),
         _ => builder.text(node).to_string(),
     }

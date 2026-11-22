@@ -208,6 +208,20 @@ pub(crate) fn infer_expression_type(
 
 pub(crate) fn collect_type_refs(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     match node.kind() {
+        // `[T; N]`: the length is a const expression (`N`, `L1 * 2`), not a
+        // type — only the element type produces type references.
+        "array_type" => {
+            if let Some(element) = child_field(node, "element") {
+                collect_type_refs(builder, element);
+            }
+        }
+        // `const N: usize = L1` inside generic lists: `name`/`value` are a
+        // declaration and a const expression; only `type` is a type use.
+        "const_parameter" => {
+            if let Some(type_node) = child_field(node, "type") {
+                collect_type_refs(builder, type_node);
+            }
+        }
         "type_identifier" | "identifier" => {
             let name = builder.text(node).to_string();
             if !is_builtin_type(&name) && is_upper_camel(&name) {
