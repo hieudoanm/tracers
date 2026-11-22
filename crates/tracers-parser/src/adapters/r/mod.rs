@@ -3,7 +3,7 @@ use tree_sitter::Tree;
 use tracers_core::Language;
 
 use crate::syntax::ParsedFile;
-use crate::util::{named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, named_children};
 
 pub fn parse(language: Language, path: &str, source: &str, tree: &Tree) -> ParsedFile {
     let mut builder = SyntaxBuilder::new(source, language, path);

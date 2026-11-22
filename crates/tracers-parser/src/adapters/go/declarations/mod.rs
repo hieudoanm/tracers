@@ -11,7 +11,7 @@ use tree_sitter::Node as TsNode;
 use tracers_core::NodeKind;
 
 use crate::syntax::LocalBinding;
-use crate::util::{child_field, first_named, is_upper_camel, named_children, range, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, first_named, is_upper_camel, named_children, range};
 
 use super::imports::collect_specs_named;
 use super::items::parse_item;

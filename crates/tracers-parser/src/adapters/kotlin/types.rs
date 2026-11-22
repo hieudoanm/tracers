@@ -1,6 +1,6 @@
 use tree_sitter::Node as TsNode;
 
-use crate::util::{is_builtin_type, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, is_builtin_type, named_children};
 
 pub(crate) fn collect_function_types(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     for child in named_children(node) {

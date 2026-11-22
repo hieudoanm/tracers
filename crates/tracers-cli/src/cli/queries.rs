@@ -2,9 +2,9 @@
 
 use std::path::Path;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use tracers_core::query::resolve_unique;
-use tracers_core::{file_id, module_id, package_id, EdgeKind, Graph, Node, Query, QueryOptions};
+use tracers_core::{EdgeKind, Graph, Node, Query, QueryOptions, file_id, module_id, package_id};
 
 use crate::cli::scan::load_or_build_graph;
 

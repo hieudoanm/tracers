@@ -2,7 +2,7 @@ use tree_sitter::Node as TsNode;
 
 use tracers_core::{NodeKind, Visibility};
 
-use crate::util::{child_field, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, named_children};
 
 use super::calls::collect_type_refs;
 use super::types::rust_visibility;
@@ -38,6 +38,14 @@ pub(crate) fn collect_function_signature(builder: &mut SyntaxBuilder<'_>, node: 
         for parameter in named_children(parameters) {
             if let Some(type_node) = child_field(parameter, "type") {
                 collect_type_refs(builder, type_node);
+                // Record `name: Type` so receiver calls like
+                // `position.get_piece()` can resolve through the param type.
+                if let Some(pattern) = child_field(parameter, "pattern") {
+                    if pattern.kind() == "identifier" {
+                        let type_name = super::types::rust_type_name(builder, type_node);
+                        builder.add_local(builder.text(pattern).to_string(), type_name, parameter);
+                    }
+                }
             }
         }
     }

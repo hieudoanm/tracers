@@ -1,7 +1,7 @@
 use tracers_core::{NodeKind, Visibility};
 use tree_sitter::Node as TsNode;
 
-use crate::util::{child_field, find_descendant, first_named, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, find_descendant, first_named, named_children};
 
 use super::super::calls::infer_call_type;
 use super::super::items::parse_item;

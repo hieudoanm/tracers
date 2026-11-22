@@ -2,7 +2,7 @@ use tree_sitter::Node as TsNode;
 
 use tracers_core::NodeKind;
 
-use crate::util::{child_field, is_upper_camel, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, is_upper_camel};
 
 use super::is_exported_name;
 use super::python_visibility;

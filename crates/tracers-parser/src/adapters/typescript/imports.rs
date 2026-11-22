@@ -1,7 +1,7 @@
 use tree_sitter::Node as TsNode;
 
 use crate::syntax::{ImportData, ImportItem, ImportKind};
-use crate::util::{child_field, named_children, range, strip_quotes, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, named_children, range, strip_quotes};
 
 use super::items::parse_item;
 

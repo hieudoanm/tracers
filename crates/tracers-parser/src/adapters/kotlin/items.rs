@@ -3,7 +3,7 @@ use tree_sitter::Node as TsNode;
 use tracers_core::NodeKind;
 
 use crate::syntax::{ImportData, ImportItem, ImportKind};
-use crate::util::{named_children, range, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, named_children, range};
 
 use super::class::{parse_class, parse_object};
 use super::delegation::parse_call;

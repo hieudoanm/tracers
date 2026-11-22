@@ -8,8 +8,8 @@
 use std::path::{Path, PathBuf};
 
 use thiserror::Error;
-use tracers_core::error::Result as CoreResult;
 use tracers_core::Graph;
+use tracers_core::error::Result as CoreResult;
 
 use crate::export::SCHEMA_VERSION;
 use crate::types::GraphDocument;

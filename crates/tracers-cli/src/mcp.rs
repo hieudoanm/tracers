@@ -4,7 +4,7 @@
 //! always matches the CLI. Configure an MCP client with:
 //! `tracers mcp`
 
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::io::{BufRead, Write};
 use std::process::Command;
 
@@ -110,7 +110,7 @@ fn run_cli(args: &[String]) -> Value {
             return json!({
                 "content": [{"type": "text", "text": format!("cannot locate tracers binary: {err}")}],
                 "isError": true
-            })
+            });
         }
     };
     match Command::new(exe).args(args).output() {

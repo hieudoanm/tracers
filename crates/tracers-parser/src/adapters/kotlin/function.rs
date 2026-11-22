@@ -2,7 +2,7 @@ use tree_sitter::Node as TsNode;
 
 use tracers_core::{NodeKind, Visibility};
 
-use crate::util::{child_field, first_named, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, first_named, named_children};
 
 use super::helpers::{
     find_modifiers, is_upper_camel, kotlin_annotations, kotlin_visibility, last_type_name,

@@ -143,6 +143,20 @@ impl<'a> Resolver<'a> {
         None
     }
 
+    /// Declared type of a field on `type_symbol`, recorded by the parser as
+    /// a local binding scoped to the type. Field types live in the file
+    /// that declares the type, which may differ from the call site.
+    pub fn field_type(&self, type_symbol: &SymbolRef, name: &str) -> Option<String> {
+        let state = self.index.files.get(&type_symbol.path)?;
+        state
+            .parsed
+            .locals
+            .iter()
+            .filter(|binding| binding.scope == Some(type_symbol.local_id) && binding.name == name)
+            .max_by_key(|binding| binding.range.start.byte)
+            .map(|binding| binding.type_name.clone())
+    }
+
     pub(crate) fn lexical_candidates(
         &self,
         state: &FileState,

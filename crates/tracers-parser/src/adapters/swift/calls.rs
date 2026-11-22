@@ -1,7 +1,7 @@
 use tree_sitter::Node as TsNode;
 
 use crate::syntax::CallKind;
-use crate::util::{child_field, first_named, is_upper_camel, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, first_named, is_upper_camel, named_children};
 
 use super::types::collect_type_refs;
 

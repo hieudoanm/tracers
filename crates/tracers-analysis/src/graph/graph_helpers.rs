@@ -23,16 +23,79 @@ impl GraphBuilder {
         // member method on it.
         if let Some(receiver) = &call.receiver {
             let cleaned = clean_name(receiver);
-            if let Some(scope) = call.caller {
-                if let Some(parent) = index.parent_type_of(state, scope) {
-                    let member = resolver.resolve_member(
-                        &parent,
-                        &cleaned,
-                        crate::resolve::resolve_types::Want::Callable,
-                    );
-                    if let crate::resolve::Resolution::Internal(symbol) = member {
-                        return CallTarget::Internal(symbol.node_id);
+            // `self.foo()` / `this.foo()`: the member lives on the enclosing
+            // type, so look up the call name — not the receiver text.
+            if matches!(cleaned.as_str(), "self" | "this" | "Self") {
+                if let Some(scope) = call.caller {
+                    if let Some(parent) = index.parent_type_of(state, scope) {
+                        let member = resolver.resolve_member(
+                            &parent,
+                            &call.name,
+                            crate::resolve::resolve_types::Want::Callable,
+                        );
+                        if let crate::resolve::Resolution::Internal(symbol) = member {
+                            return CallTarget::Internal(symbol.node_id);
+                        }
                     }
+                }
+            }
+            // Receiver is a local with a recorded type
+            // (`position.get_piece()` where `position: &Position`).
+            if !cleaned.contains("::") && !cleaned.contains('.') {
+                if let Some(type_name) =
+                    resolver.local_type(state, call.caller, &cleaned, call.range.start.byte)
+                {
+                    // `let x = a.b` records the field path as the type
+                    // expression; resolve it through declared field types.
+                    let typed = if type_name.contains('.') {
+                        self.resolve_type_expr(
+                            index,
+                            state,
+                            resolver,
+                            call.caller,
+                            &type_name,
+                            call.range.start.byte,
+                        )
+                    } else {
+                        match resolver.resolve_type_name(state, call.caller, &type_name) {
+                            crate::resolve::Resolution::Internal(symbol) if symbol.is_type() => {
+                                Some(symbol)
+                            }
+                            crate::resolve::Resolution::External { qualified, .. } => {
+                                return CallTarget::External(format!("{qualified}.{}", call.name));
+                            }
+                            _ => None,
+                        }
+                    };
+                    if let Some(symbol) = typed {
+                        // `resolve_member` walks supertypes, so trait
+                        // default methods (`visitor.visit_source_file`)
+                        // resolve through `impl Trait for Type`.
+                        if let crate::resolve::Resolution::Internal(member) = resolver
+                            .resolve_member(
+                                &symbol,
+                                &call.name,
+                                crate::resolve::resolve_types::Want::Callable,
+                            )
+                        {
+                            return CallTarget::Internal(member.node_id);
+                        }
+                        if let Some(member) =
+                            self.find_type_member(index, &symbol, &call.name, false)
+                        {
+                            return CallTarget::Internal(member.node_id);
+                        }
+                    }
+                }
+            }
+            // Dotted receiver (`position.side_to_move.opponent()`,
+            // `self.engine.position.get_piece()`): walk declared field
+            // types from the base local/self type, then resolve the member.
+            if cleaned.contains('.') && !cleaned.contains("::") {
+                if let Some(target) =
+                    self.resolve_dotted_receiver(index, state, resolver, call, &cleaned)
+                {
+                    return target;
                 }
             }
             // Receiver resolved as a type in bindings.
@@ -201,6 +264,76 @@ impl GraphBuilder {
                 .map(CallTarget::External)
                 .unwrap_or(CallTarget::Unresolved),
         }
+    }
+
+    /// Resolve a possibly dotted type expression (`position`, `self.engine`,
+    /// `pos.side_to_move`) to a type symbol by walking declared field types.
+    /// Returns `None` when any hop lacks type info.
+    fn resolve_type_expr(
+        &self,
+        index: &RepositoryIndex,
+        state: &FileState,
+        resolver: &Resolver,
+        scope: Option<u32>,
+        expr: &str,
+        at_byte: u32,
+    ) -> Option<SymbolRef> {
+        use crate::resolve::Resolution;
+
+        let mut segments = expr.split('.');
+        let base = segments.next()?;
+        let mut ty = if matches!(base, "self" | "this" | "Self") {
+            index.parent_type_of(state, scope?)?
+        } else {
+            let type_name = resolver
+                .local_type(state, scope, base, at_byte)
+                .or_else(|| {
+                    (base.chars().next().is_some_and(|c| c.is_uppercase()))
+                        .then(|| base.to_string())
+                })?;
+            match resolver.resolve_type_name(state, scope, &type_name) {
+                Resolution::Internal(symbol) if symbol.is_type() => symbol,
+                _ => return None,
+            }
+        };
+        for segment in segments {
+            let field_type = resolver.field_type(&ty, segment)?;
+            match resolver.resolve_type_name(state, scope, &field_type) {
+                Resolution::Internal(symbol) if symbol.is_type() => ty = symbol,
+                _ => return None,
+            }
+        }
+        Some(ty)
+    }
+
+    /// Resolve `a.b.c.name()` where `a` is a local/self/type and `b`, `c`
+    /// are field accesses. Returns `None` when any hop lacks type info.
+    fn resolve_dotted_receiver(
+        &self,
+        index: &RepositoryIndex,
+        state: &FileState,
+        resolver: &Resolver,
+        call: &CallData,
+        receiver: &str,
+    ) -> Option<CallTarget> {
+        use crate::resolve::Resolution;
+        use crate::resolve::resolve_types::Want;
+
+        let ty = self.resolve_type_expr(
+            index,
+            state,
+            resolver,
+            call.caller,
+            receiver,
+            call.range.start.byte,
+        )?;
+        if let Resolution::Internal(member) =
+            resolver.resolve_member(&ty, &call.name, Want::Callable)
+        {
+            return Some(CallTarget::Internal(member.node_id));
+        }
+        self.find_type_member(index, &ty, &call.name, false)
+            .map(|member| CallTarget::Internal(member.node_id))
     }
 
     fn find_method_on_type(

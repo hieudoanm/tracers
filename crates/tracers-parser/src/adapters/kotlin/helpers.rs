@@ -2,7 +2,7 @@ use tree_sitter::Node as TsNode;
 
 use tracers_core::Visibility;
 
-use crate::util::{named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, named_children};
 
 pub(crate) fn first_of_kind<'a>(node: TsNode<'a>, kind: &str) -> Option<TsNode<'a>> {
     named_children(node)

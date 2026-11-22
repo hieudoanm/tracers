@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 use tracers_analysis::cache::SyntaxCache;
 use tracers_analysis::config::TracersConfig;

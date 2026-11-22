@@ -1558,12 +1558,6 @@
       "language": "swift"
     },
     {
-      "id": "unresolved:swift:find",
-      "kind": "unknown",
-      "name": "find",
-      "language": "swift"
-    },
-    {
       "id": "unresolved:swift:print",
       "kind": "unknown",
       "name": "print",
@@ -2328,6 +2322,27 @@
     },
     {
       "source": "method:src/Service.swift::ShapeService.area",
+      "target": "method:src/Service.swift::InMemoryRepository.find",
+      "kind": "calls",
+      "status": "resolved_internal",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 19,
+            "column": 27,
+            "byte": 407
+          },
+          "end": {
+            "line": 19,
+            "column": 44,
+            "byte": 424
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/Service.swift::ShapeService.area",
       "target": "unresolved:swift:area",
       "kind": "calls",
       "status": "unresolved",
@@ -2364,27 +2379,6 @@
             "line": 20,
             "column": 36,
             "byte": 467
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:src/Service.swift::ShapeService.area",
-      "target": "unresolved:swift:find",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 19,
-            "column": 27,
-            "byte": 407
-          },
-          "end": {
-            "line": 19,
-            "column": 44,
-            "byte": 424
           }
         }
       ]
@@ -2806,10 +2800,10 @@
   "statistics": {
     "files": 5,
     "packages": 0,
-    "nodes": 59,
+    "nodes": 58,
     "edges": 116,
     "symbols": 39,
-    "unresolvedEdges": 10,
+    "unresolvedEdges": 9,
     "diagnostics": 1,
     "byNodeKind": {
       "class": 6,
@@ -2823,7 +2817,7 @@
       "module": 5,
       "property": 7,
       "repository": 1,
-      "unknown": 7
+      "unknown": 6
     },
     "byEdgeKind": {
       "calls": 12,
@@ -2834,12 +2828,12 @@
       "uses_type": 10
     },
     "byLanguage": {
-      "swift": 58
+      "swift": 57
     },
     "byStatus": {
       "resolved_external": 3,
-      "resolved_internal": 103,
-      "unresolved": 10
+      "resolved_internal": 104,
+      "unresolved": 9
     },
     "byFramework": {}
   }

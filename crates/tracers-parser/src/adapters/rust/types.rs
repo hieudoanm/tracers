@@ -2,7 +2,7 @@ use tree_sitter::Node as TsNode;
 
 use tracers_core::Visibility;
 
-use crate::util::{child_field, first_named, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, first_named, named_children};
 
 pub(crate) fn parse_type_item(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>, exported: bool) {
     let Some(name_node) = child_field(node, "name") else {

@@ -1,7 +1,7 @@
 use tree_sitter::Node as TsNode;
 
 use crate::syntax::CallKind;
-use crate::util::{child_field, first_named, is_upper_camel, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, first_named, is_upper_camel};
 
 pub(crate) fn parse_call(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     if node.kind() == "method_invocation" {
