@@ -20,7 +20,10 @@ pub fn language_matches(family: FrameworkFamily, language: Language) -> bool {
         FrameworkFamily::Go => matches!(language, Language::Go),
         FrameworkFamily::Rust => matches!(language, Language::Rust),
         FrameworkFamily::Kotlin => matches!(language, Language::Kotlin),
-        FrameworkFamily::Java => matches!(language, Language::Java),
+        // Kotlin runs on the JVM and uses the same import namespaces
+        // (org.springframework, jakarta.*, etc.), so Java-family signatures
+        // apply at full confidence to Kotlin sources too.
+        FrameworkFamily::Java => matches!(language, Language::Java | Language::Kotlin),
         FrameworkFamily::CSharp => matches!(language, Language::CSharp),
         FrameworkFamily::Php => matches!(language, Language::Php),
         FrameworkFamily::Ruby => matches!(language, Language::Ruby),
