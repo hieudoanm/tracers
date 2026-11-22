@@ -20,6 +20,7 @@ const MANIFEST_BASENAMES: &[&str] = &[
     "build.gradle",
     "build.gradle.kts",
     "settings.gradle",
+    "libs.versions.toml",
     "angular.json",
     "next.config.js",
     "next.config.mjs",

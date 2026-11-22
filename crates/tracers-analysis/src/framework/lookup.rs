@@ -10,9 +10,11 @@ use crate::framework::types::FrameworkSignature;
 /// Look up all signatures whose import prefixes match a given import path.
 ///
 /// A prefix matches only at a package boundary: the import path must equal
-/// the prefix, or be followed by `/` (a subpath import). Prefixes ending in
-/// `/` (scoped package scopes like `@angular/`) also match any package within
-/// that scope. This prevents `react-native` from matching the `react` prefix.
+/// the prefix, or be followed by a package separator. Recognised separators
+/// are `/` (JS/TS subpaths, Go, Ruby), `\` (PHP namespaces), `.` (Python,
+/// JVM, C#), and `::` (Rust). Prefixes ending in a separator (scoped package
+/// scopes like `@angular/` or `jakarta.`) also match any package within that
+/// scope. This prevents `react-native` from matching the `react` prefix.
 pub fn signatures_for_import(import_path: &str) -> Vec<&'static FrameworkSignature> {
     // PHP namespaces use `\` separators and may carry a leading `\`;
     // normalize both so prefix matching works like `/`-separated modules.
@@ -30,8 +32,11 @@ pub fn signatures_for_import(import_path: &str) -> Vec<&'static FrameworkSignatu
                 rest.is_empty()
                     || rest.starts_with('/')
                     || rest.starts_with('\\')
+                    || rest.starts_with('.')
+                    || rest.starts_with("::")
                     || prefix.ends_with('/')
                     || prefix.ends_with('\\')
+                    || prefix.ends_with('.')
             })
         })
         .collect()
@@ -90,6 +95,59 @@ mod tests {
 
         // A leading backslash and unrelated namespaces must not match.
         assert!(signatures_for_import("App\\Models\\User").is_empty());
+    }
+
+    #[test]
+    fn dotted_and_colon_separated_imports_match_prefixes() {
+        // JVM/Kotlin/C# use `.` separators, Rust uses `::`, Python uses `.`.
+        for (path, expected) in [
+            ("io.ktor.server.netty.embeddedServer", "ktor"),
+            ("org.springframework.boot.SpringApplication", "spring-boot"),
+            ("jakarta.ws.rs.core.Application", "jakarta-ee"),
+            ("serde::Serialize", "serde"),
+            ("tokio::fs::read", "tokio"),
+            ("django.db.models.Model", "django"),
+            ("sqlalchemy.orm.Session", "sqlalchemy"),
+            ("Newtonsoft.Json.JsonConvert", "newtonsoft"),
+            ("androidx.compose.ui.Button", "compose"),
+        ] {
+            let names: Vec<&str> = signatures_for_import(path)
+                .iter()
+                .map(|sig| sig.name)
+                .collect();
+            assert!(
+                names.contains(&expected),
+                "{path} missing {expected}: {names:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn separators_do_not_weaken_package_boundaries() {
+        // `io.ktorx` is not `io.ktor`; `serde_json` is not `serde`.
+        assert!(
+            signatures_for_import("io.ktorx.server")
+                .iter()
+                .all(|s| s.name != "ktor")
+        );
+        // `serde_json` is explicitly part of the serde signature, so it
+        // matches; `serdefoo` must not.
+        assert!(
+            signatures_for_import("serde_json::Value")
+                .iter()
+                .any(|s| s.name == "serde")
+        );
+        assert!(
+            signatures_for_import("serdefoo::Value")
+                .iter()
+                .all(|s| s.name != "serde")
+        );
+        // `daggerfoo` must not match the `dagger` prefix.
+        assert!(
+            signatures_for_import("daggerfoo.Module")
+                .iter()
+                .all(|s| s.name != "hilt")
+        );
     }
 
     #[test]
