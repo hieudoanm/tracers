@@ -48,6 +48,11 @@ impl<'a> Resolver<'a> {
                     return resolution;
                 }
             }
+            // Rust `crate::`/`self::`/`super::`/module paths that never
+            // appear as import bindings.
+            if let Some(resolution) = self.resolve_rust_path(state, &name, want) {
+                return resolution;
+            }
         }
 
         // Lexical scope: declarations in the same file. Sibling methods are
