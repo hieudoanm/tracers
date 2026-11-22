@@ -63,6 +63,7 @@ pub(crate) fn build_repository_with_options(
 
     let mut index = RepositoryIndex::build(root, parsed_files_ok)?;
     index.external_deps = crate::deps::extract_external_deps(&manifests);
+    index.rust_crates = crate::deps::extract_rust_crates(&manifests);
     let import_pass = crate::resolve::resolve_imports(&mut index);
 
     let mut result = build_from_index(builder, &index, &import_pass, &detection.frameworks)?;

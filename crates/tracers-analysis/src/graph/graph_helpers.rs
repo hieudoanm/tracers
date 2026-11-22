@@ -61,6 +61,35 @@ impl GraphBuilder {
                     _ => {}
                 }
             }
+            // Path-qualified receiver (`crate::util::child_field`,
+            // `module::func`): resolve the qualifier as a module path and
+            // look the member up inside it.
+            if cleaned.contains("::") {
+                let ctx = crate::resolve::resolve_import_pass::ImportContext {
+                    index,
+                    state,
+                    path: state.path.clone(),
+                    language: state.language,
+                    diagnostics: Vec::new(),
+                    edges: Vec::new(),
+                    package_pairs: Default::default(),
+                };
+                if let Some(module) = ctx.resolve_module_path(&cleaned) {
+                    let allow_private = ctx.allow_private(&module);
+                    match ctx.resolve_module_name(&module, &call.name, allow_private, None) {
+                        crate::resolve::Resolution::Internal(symbol) => {
+                            return CallTarget::Internal(symbol.node_id);
+                        }
+                        crate::resolve::Resolution::External { qualified, .. } => {
+                            return CallTarget::External(qualified);
+                        }
+                        crate::resolve::Resolution::ExternalNode { node_id, .. } => {
+                            return CallTarget::Internal(node_id);
+                        }
+                        _ => {}
+                    }
+                }
+            }
             // Receiver didn't resolve internally: it may be a stdlib or
             // manifest-declared package qualifier (`fmt.Println`,
             // `serde_json::json!`, `os.path.join`, `console.log`).

@@ -1144,12 +1144,6 @@ expression: document
       "language": "rust"
     },
     {
-      "id": "unresolved:rust:cloned",
-      "kind": "unknown",
-      "name": "cloned",
-      "language": "rust"
-    },
-    {
       "id": "variable:src/main.rs::main.shapes",
       "kind": "variable",
       "name": "shapes",
@@ -1987,27 +1981,6 @@ expression: document
       ]
     },
     {
-      "source": "method:src/service.rs::InMemoryRepository.find",
-      "target": "unresolved:rust:cloned",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 22,
-            "column": 9,
-            "byte": 498
-          },
-          "end": {
-            "line": 22,
-            "column": 36,
-            "byte": 525
-          }
-        }
-      ]
-    },
-    {
       "source": "method:src/service.rs::ShapeService.add",
       "target": "struct:src/shapes.rs::Circle",
       "kind": "uses_type",
@@ -2738,10 +2711,10 @@ expression: document
   "statistics": {
     "files": 5,
     "packages": 0,
-    "nodes": 62,
-    "edges": 166,
+    "nodes": 61,
+    "edges": 165,
     "symbols": 48,
-    "unresolvedEdges": 5,
+    "unresolvedEdges": 4,
     "diagnostics": 0,
     "byNodeKind": {
       "file": 5,
@@ -2752,11 +2725,11 @@ expression: document
       "repository": 1,
       "struct": 7,
       "trait": 4,
-      "unknown": 2,
+      "unknown": 1,
       "variable": 2
     },
     "byEdgeKind": {
-      "calls": 5,
+      "calls": 4,
       "contains": 59,
       "defines": 49,
       "exports": 32,
@@ -2765,11 +2738,11 @@ expression: document
       "uses_type": 13
     },
     "byLanguage": {
-      "rust": 61
+      "rust": 60
     },
     "byStatus": {
       "resolved_internal": 161,
-      "unresolved": 5
+      "unresolved": 4
     },
     "byFramework": {}
   }

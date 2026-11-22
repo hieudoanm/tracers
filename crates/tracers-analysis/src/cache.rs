@@ -18,7 +18,7 @@ use crate::config::TracersConfig;
 // Bump when parser adapter extraction semantics change: cached `ParsedFile`
 // results would otherwise go stale across releases since source hashes and
 // grammar versions don't capture adapter logic.
-const CACHE_FORMAT_VERSION: &str = "2";
+const CACHE_FORMAT_VERSION: &str = "3";
 const TRACERS_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]

@@ -45,6 +45,8 @@ pub(crate) fn resolve_module_path(ctx: &ImportContext<'_>, raw: &str) -> Option<
     }
     let mut module_segments: Vec<String> = Vec::new();
     let first = segments.first()?.as_str();
+    let explicit_root = matches!(first, "crate" | "self" | "super");
+    let plain_ident = !explicit_root;
     match first {
         "crate" => {
             segments.remove(0);
@@ -66,18 +68,48 @@ pub(crate) fn resolve_module_path(ctx: &ImportContext<'_>, raw: &str) -> Option<
         }
         _ => {}
     }
-    let crate_root = state.crate_root.clone().unwrap_or_default();
-
-    let mut full = module_segments.clone();
-    full.extend(segments.iter().cloned());
-    if let Some(path) = rust_file_for(ctx, &crate_root, &full) {
-        return Some(ModuleRef::File(path));
+    // Candidate (crate_root, segments) pairs. Rust 2018 uniform paths let a
+    // plain first segment resolve against the current module first
+    // (`use tree_sitter::x` inside `util/mod.rs` means `util::tree_sitter`),
+    // then the crate root, then — for known workspace crate names — that
+    // crate's root with the leading segment consumed (`use chess_core::X`).
+    let mut attempts: Vec<(String, Vec<String>, bool)> = Vec::new();
+    if plain_ident && module_segments.is_empty() {
+        let local = rust_current_module(ctx, state);
+        if !local.is_empty() {
+            let mut scoped = local.clone();
+            scoped.extend(segments.iter().cloned());
+            attempts.push((state.crate_root.clone().unwrap_or_default(), scoped, false));
+        }
+        if let Some(first) = segments.first() {
+            if let Some(other_root) = ctx.index.rust_crates.get(first) {
+                attempts.push((other_root.clone(), segments[1..].to_vec(), true));
+            }
+        }
     }
-    if segments.len() > 1 {
-        let mut module = module_segments.clone();
-        module.extend(segments[..segments.len() - 1].iter().cloned());
-        if let Some(path) = rust_file_for(ctx, &crate_root, &module) {
+    attempts.push((
+        state.crate_root.clone().unwrap_or_default(),
+        segments.clone(),
+        false,
+    ));
+
+    for (crate_root, segs, cross_crate) in attempts {
+        let mut full = module_segments.clone();
+        full.extend(segs.iter().cloned());
+        if let Some(path) = rust_file_for(ctx, &crate_root, &full) {
             return Some(ModuleRef::File(path));
+        }
+        // The crate root itself (`lib.rs`) is a valid module target for
+        // cross-crate paths and explicit `crate::`/`self::`/`super::` roots —
+        // but a bare `use foo;` must not bind to our own root.
+        let mut module = module_segments.clone();
+        module.extend(segs[..segs.len().saturating_sub(1)].iter().cloned());
+        if !segs.is_empty()
+            && (segs.len() > 1 || cross_crate || explicit_root || !module.is_empty())
+        {
+            if let Some(path) = rust_file_for(ctx, &crate_root, &module) {
+                return Some(ModuleRef::File(path));
+            }
         }
     }
     None
