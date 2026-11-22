@@ -78,6 +78,29 @@ fn detects_actix_web_on_fixture() {
 }
 
 #[test]
+fn nextjs_use_router_does_not_detect_nuxt() {
+    use tracers_core::Language;
+    use tracers_parser::SyntaxParser;
+
+    let mut parser = SyntaxParser::new().unwrap();
+    let parsed = parser
+        .parse(
+            "app/page.tsx",
+            Language::Tsx,
+            "import { useRouter } from 'next/navigation';\nexport default function Page() {\n  const router = useRouter();\n  return null;\n}\n",
+        )
+        .unwrap();
+    let detector = FrameworkDetector::new();
+    let result = detector.detect(
+        std::path::Path::new("."),
+        &[parsed],
+        &ManifestContents::empty(),
+    );
+    let names: Vec<&str> = result.frameworks.iter().map(|f| f.name.as_str()).collect();
+    assert!(!names.contains(&"nuxt"), "nuxt false positive: {names:?}");
+}
+
+#[test]
 fn detector_manifest_only_detection() {
     let mut manifests = ManifestContents::empty();
     manifests.files.insert(
