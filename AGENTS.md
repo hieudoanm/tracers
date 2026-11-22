@@ -1206,7 +1206,7 @@ Tracers is framework aware: it detects which application frameworks are used in 
 | PHP                   | Symfony      | `symfony` import, `@Route`, `extends AbstractController`                  |
 | Ruby                  | Rails        | `rails` import, `ApplicationController`, `ActiveRecord::Base`             |
 
-Framework fixtures exist for all frameworks above in `fixtures/frameworks/` and are verified detectable by `tracers scan`.
+Framework fixtures exist for all frameworks above in `fixtures/frameworks/`, grouped by language (`fixtures/frameworks/<language>/<framework>/`), and are verified detectable by `tracers scan`.
 
 ### 18.3 Graph model additions
 
@@ -1292,7 +1292,7 @@ All Rust source files exceeding ~200 lines have been split into focused submodul
 - Frameworks detected (with family, confidence, version)
 - Nodes/edges by kind, resolution status, nodes by framework
 - Supported languages list
-File output (`--output`, `--write-tracers-dir`) still writes `graph.json`, `graph.dot`, `graph.html`.
+  File output (`--output`, `--write-tracers-dir`) still writes `graph.json`, `graph.dot`, `graph.html`.
 
 Removed the `--format`/`--f` flag from the `scan` command.
 

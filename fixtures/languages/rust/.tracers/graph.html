@@ -1,0 +1,4850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracers Graph Explorer</title>
+    <!-- D3.js with fallback -->
+    <script src="https://unpkg.com/d3@7/dist/d3.min.js"></script>
+    <script>
+        if (!window.d3) {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"><\/script>');
+        }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background: #0e0e12;
+            color: #dcddde;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            user-select: none;
+        }
+
+        #canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: grab;
+        }
+        #canvas.dragging { cursor: grabbing; }
+
+        /* ── Top Bar ─────────────────────────────────────────── */
+        #topbar {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0 16px;
+            background: rgba(14, 14, 18, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #f1f5f9;
+        }
+        .brand-icon {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: #a78bfa;
+            stroke-width: 2;
+        }
+
+        .sep { width: 1px; height: 20px; background: rgba(255, 255, 255, 0.1); }
+
+        .stat-pill {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.45);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .stat-pill b { color: rgba(255, 255, 255, 0.85); font-weight: 600; }
+
+        #searchWrap {
+            margin-left: auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        #searchWrap svg {
+            position: absolute;
+            left: 9px;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        #search {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #f1f5f9;
+            border-radius: 6px;
+            padding: 5px 28px 5px 30px;
+            font-size: 12px;
+            width: 210px;
+            outline: none;
+            transition: all .15s ease;
+        }
+        #search:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(167, 139, 250, 0.7);
+            width: 260px;
+            box-shadow: 0 0 12px rgba(167, 139, 250, 0.2);
+        }
+        #search::placeholder { color: rgba(255, 255, 255, 0.28); }
+        #searchClear {
+            position: absolute;
+            right: 8px;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
+        }
+        #searchClear:hover { color: #fff; }
+
+        .top-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .top-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        /* ── Collapsible Left Panel ───────────────────────────── */
+        #panel {
+            position: absolute;
+            top: 46px; left: 0; bottom: 0;
+            width: 240px;
+            background: rgba(14, 14, 18, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255, 255, 255, 0.07);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            padding: 16px 0;
+            gap: 4px;
+            transition: transform .25s cubic-bezier(.4, 0, .2, 1);
+            overflow-y: auto;
+        }
+        #panel.hidden { transform: translateX(-100%); }
+
+        .panel-section { padding: 0 16px; margin-bottom: 12px; }
+        .panel-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 0;
+            cursor: pointer;
+            transition: opacity .15s;
+        }
+        .filter-row.disabled { opacity: 0.3; }
+        .filter-row:hover .filter-name { color: rgba(255, 255, 255, .95); }
+        .filter-dot {
+            width: 9px; height: 9px; border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 6px currentColor;
+        }
+        .filter-name {
+            font-size: 12px;
+            color: rgba(255, 255, 255, .65);
+            flex: 1;
+            margin-left: 8px;
+            transition: color .1s;
+        }
+        .filter-count {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .3);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 12px;
+            color: rgba(255, 255, 255, .6);
+            cursor: pointer;
+        }
+        .toggle-row:hover { color: rgba(255, 255, 255, .9); }
+        .toggle {
+            width: 30px; height: 16px;
+            background: rgba(255, 255, 255, .15);
+            border-radius: 9px;
+            position: relative;
+            cursor: pointer;
+            transition: background .15s;
+            flex-shrink: 0;
+        }
+        .toggle.on { background: #8b5cf6; }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 12px; height: 12px;
+            background: white;
+            border-radius: 50%;
+            top: 2px; left: 2px;
+            transition: transform .15s cubic-bezier(.4, 0, .2, 1);
+        }
+        .toggle.on::after { transform: translateX(14px); }
+
+        .range-box { margin-top: 8px; }
+        .range-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: rgba(255, 255, 255, .4);
+            margin-bottom: 2px;
+        }
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, .15);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            margin: 6px 0;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px; height: 12px;
+            background: #a78bfa;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(167, 139, 250, 0.6);
+        }
+
+        .hsep {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.07);
+            margin: 6px 16px 12px;
+        }
+
+        /* ── Panel Toggle Handle ─────────────────────────────── */
+        #panelToggle {
+            position: absolute;
+            top: 56px; left: 240px;
+            width: 22px; height: 36px;
+            background: rgba(14, 14, 18, 0.88);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: none;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 60;
+            transition: left .25s cubic-bezier(.4, 0, .2, 1), background .15s;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 11px;
+        }
+        #panelToggle:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+        #panelToggle.closed { left: 0; }
+
+        /* ── Zoom Controls ───────────────────────────────────── */
+        #zoomControls {
+            position: absolute;
+            bottom: 20px; left: 256px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 100;
+            transition: left .25s cubic-bezier(.4, 0, .2, 1);
+        }
+        .zoom-btn {
+            width: 32px; height: 32px;
+            background: rgba(14, 14, 18, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+        }
+        .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        /* ── Info Card (Bottom-Right) ────────────────────────── */
+        #infoCard {
+            position: absolute;
+            bottom: 20px; right: 20px;
+            width: 280px;
+            max-height: 420px;
+            background: rgba(18, 18, 24, 0.94);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            z-index: 100;
+            font-size: 12px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+            animation: cardFadeIn .2s ease;
+        }
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        #infoCard.visible { display: flex; }
+        .ic-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .ic-kind {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            display: inline-block;
+        }
+        .ic-close {
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+        .ic-close:hover { color: #fff; }
+        .ic-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+        .ic-path {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 11px;
+            margin-bottom: 12px;
+            word-break: break-all;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+        .ic-stats {
+            display: flex;
+            gap: 12px;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .ic-stat {
+            flex: 1;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.45);
+        }
+        .ic-stat b {
+            display: block;
+            font-size: 14px;
+            color: #f1f5f9;
+            font-weight: 600;
+        }
+        .ic-neighbors-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .ic-neighbors {
+            overflow-y: auto;
+            max-height: 140px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .ic-neighbor-item {
+            padding: 4px 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background .12s;
+        }
+        .ic-neighbor-item:hover {
+            background: rgba(167, 139, 250, 0.15);
+            color: #fff;
+        }
+
+        /* ── Loading Overlay ─────────────────────────────────── */
+        #loader {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #0e0e12;
+            z-index: 200;
+            gap: 14px;
+            transition: opacity .3s ease;
+        }
+        #loader.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .spinner {
+            width: 38px;
+            height: 38px;
+            border: 3px solid rgba(167, 139, 250, 0.15);
+            border-top-color: #a78bfa;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 0.04em;
+        }
+    </style>
+<script>window.__TRACERS_DATA__ = {
+  "schemaVersion": "1.0",
+  "tracersVersion": "0.0.1",
+  "repository": {
+    "id": "repository:.",
+    "name": "rust",
+    "root": "/Users/hieudoan/git/github.com/hieudoanm/tracers/crates/tracers-cli/../../fixtures/languages/rust",
+    "fileCount": 5,
+    "languageCount": 23
+  },
+  "analysis": {
+    "format": "json",
+    "cacheEnabled": true,
+    "semanticMode": "off",
+    "languages": [
+      "bash",
+      "c",
+      "cpp",
+      "csharp",
+      "dart",
+      "gdscript",
+      "go",
+      "java",
+      "javascript",
+      "jsx",
+      "kotlin",
+      "matlab",
+      "php",
+      "python",
+      "r",
+      "ruby",
+      "rust",
+      "scala",
+      "swift",
+      "tsx",
+      "typescript",
+      "zig"
+    ]
+  },
+  "languages": [
+    {
+      "language": "typescript",
+      "grammar": "tree-sitter-typescript 0.23.2"
+    },
+    {
+      "language": "tsx",
+      "grammar": "tree-sitter-typescript 0.23.2"
+    },
+    {
+      "language": "javascript",
+      "grammar": "tree-sitter-javascript 0.25.0"
+    },
+    {
+      "language": "jsx",
+      "grammar": "tree-sitter-javascript 0.25.0"
+    },
+    {
+      "language": "python",
+      "grammar": "tree-sitter-python 0.25.0"
+    },
+    {
+      "language": "go",
+      "grammar": "tree-sitter-go 0.25.0"
+    },
+    {
+      "language": "rust",
+      "grammar": "tree-sitter-rust 0.24.2"
+    },
+    {
+      "language": "kotlin",
+      "grammar": "tree-sitter-kt 0.1.0"
+    },
+    {
+      "language": "swift",
+      "grammar": "tree-sitter-swift 0.7.4"
+    },
+    {
+      "language": "java",
+      "grammar": "tree-sitter-java 0.23.5"
+    },
+    {
+      "language": "csharp",
+      "grammar": "tree-sitter-c-sharp 0.23.1"
+    },
+    {
+      "language": "php",
+      "grammar": "tree-sitter-php 0.23.11"
+    },
+    {
+      "language": "ruby",
+      "grammar": "tree-sitter-ruby 0.23.1"
+    },
+    {
+      "language": "c",
+      "grammar": "tree-sitter-c 0.23.6"
+    },
+    {
+      "language": "cpp",
+      "grammar": "tree-sitter-cpp 0.23.4"
+    },
+    {
+      "language": "dart",
+      "grammar": "tree-sitter-dart 0.0.4"
+    },
+    {
+      "language": "scala",
+      "grammar": "tree-sitter-scala 0.24.0"
+    },
+    {
+      "language": "r",
+      "grammar": "tree-sitter-r 1.2.0"
+    },
+    {
+      "language": "zig",
+      "grammar": "tree-sitter-zig 1.1.2"
+    },
+    {
+      "language": "matlab",
+      "grammar": "tree-sitter-matlab 1.3.1"
+    },
+    {
+      "language": "gdscript",
+      "grammar": "tree-sitter-gdscript 6.1.0"
+    },
+    {
+      "language": "bash",
+      "grammar": "tree-sitter-bash 0.25.1"
+    },
+    {
+      "language": "markdown",
+      "grammar": "n/a"
+    }
+  ],
+  "frameworks": [],
+  "nodes": [
+    {
+      "id": "external:rust:Self",
+      "kind": "external_symbol",
+      "name": "Self",
+      "language": "rust"
+    },
+    {
+      "id": "external:rust:std::collections::HashMap.new",
+      "kind": "external_symbol",
+      "name": "new",
+      "language": "rust"
+    },
+    {
+      "id": "file:src/complex.rs",
+      "kind": "file",
+      "name": "src/complex.rs",
+      "file": "src/complex.rs",
+      "language": "rust"
+    },
+    {
+      "id": "file:src/lib.rs",
+      "kind": "file",
+      "name": "src/lib.rs",
+      "file": "src/lib.rs",
+      "language": "rust"
+    },
+    {
+      "id": "file:src/main.rs",
+      "kind": "file",
+      "name": "src/main.rs",
+      "file": "src/main.rs",
+      "language": "rust"
+    },
+    {
+      "id": "file:src/service.rs",
+      "kind": "file",
+      "name": "src/service.rs",
+      "file": "src/service.rs",
+      "language": "rust"
+    },
+    {
+      "id": "file:src/shapes.rs",
+      "kind": "file",
+      "name": "src/shapes.rs",
+      "file": "src/shapes.rs",
+      "language": "rust"
+    },
+    {
+      "id": "function:src/complex.rs::total",
+      "kind": "function",
+      "name": "total",
+      "qualifiedName": "total",
+      "file": "src/complex.rs",
+      "range": {
+        "start": {
+          "line": 12,
+          "column": 1,
+          "byte": 192
+        },
+        "end": {
+          "line": 14,
+          "column": 2,
+          "byte": 284
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/complex.rs",
+      "exported": true
+    },
+    {
+      "id": "function:src/lib.rs::total_area",
+      "kind": "function",
+      "name": "total_area",
+      "qualifiedName": "total_area",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 39,
+          "column": 1,
+          "byte": 742
+        },
+        "end": {
+          "line": 41,
+          "column": 2,
+          "byte": 835
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/lib.rs",
+      "exported": true
+    },
+    {
+      "id": "function:src/main.rs::main",
+      "kind": "function",
+      "name": "main",
+      "qualifiedName": "main",
+      "file": "src/main.rs",
+      "range": {
+        "start": {
+          "line": 5,
+          "column": 1,
+          "byte": 66
+        },
+        "end": {
+          "line": 14,
+          "column": 2,
+          "byte": 296
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/main.rs",
+      "exported": false
+    },
+    {
+      "id": "function:src/shapes.rs::total_area",
+      "kind": "function",
+      "name": "total_area",
+      "qualifiedName": "total_area",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 39,
+          "column": 1,
+          "byte": 742
+        },
+        "end": {
+          "line": 41,
+          "column": 2,
+          "byte": 835
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/shapes.rs",
+      "exported": true
+    },
+    {
+      "id": "method:src/complex.rs::Circle.area",
+      "kind": "method",
+      "name": "area",
+      "qualifiedName": "Circle.area",
+      "file": "src/complex.rs",
+      "range": {
+        "start": {
+          "line": 8,
+          "column": 5,
+          "byte": 113
+        },
+        "end": {
+          "line": 10,
+          "column": 6,
+          "byte": 189
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/complex.rs::Circle",
+      "exported": false
+    },
+    {
+      "id": "method:src/complex.rs::Shape.area",
+      "kind": "method",
+      "name": "area",
+      "qualifiedName": "Shape.area",
+      "file": "src/complex.rs",
+      "range": {
+        "start": {
+          "line": 2,
+          "column": 5,
+          "byte": 22
+        },
+        "end": {
+          "line": 2,
+          "column": 27,
+          "byte": 44
+        }
+      },
+      "language": "rust",
+      "parent": "trait:src/complex.rs::Shape",
+      "exported": false
+    },
+    {
+      "id": "method:src/lib.rs::Circle.area",
+      "kind": "method",
+      "name": "area",
+      "qualifiedName": "Circle.area",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 13,
+          "column": 5,
+          "byte": 234
+        },
+        "end": {
+          "line": 15,
+          "column": 6,
+          "byte": 320
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/lib.rs::Circle",
+      "exported": false
+    },
+    {
+      "id": "method:src/lib.rs::Circle.perimeter",
+      "kind": "method",
+      "name": "perimeter",
+      "qualifiedName": "Circle.perimeter",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 17,
+          "column": 5,
+          "byte": 326
+        },
+        "end": {
+          "line": 19,
+          "column": 6,
+          "byte": 409
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/lib.rs::Circle",
+      "exported": false
+    },
+    {
+      "id": "method:src/lib.rs::Rectangle.area",
+      "kind": "method",
+      "name": "area",
+      "qualifiedName": "Rectangle.area",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 29,
+          "column": 5,
+          "byte": 550
+        },
+        "end": {
+          "line": 31,
+          "column": 6,
+          "byte": 612
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/lib.rs::Rectangle",
+      "exported": false
+    },
+    {
+      "id": "method:src/lib.rs::Rectangle.perimeter",
+      "kind": "method",
+      "name": "perimeter",
+      "qualifiedName": "Rectangle.perimeter",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 33,
+          "column": 5,
+          "byte": 618
+        },
+        "end": {
+          "line": 35,
+          "column": 6,
+          "byte": 693
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/lib.rs::Rectangle",
+      "exported": false
+    },
+    {
+      "id": "method:src/lib.rs::Shape.area",
+      "kind": "method",
+      "name": "area",
+      "qualifiedName": "Shape.area",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 3,
+          "column": 5,
+          "byte": 70
+        },
+        "end": {
+          "line": 3,
+          "column": 27,
+          "byte": 92
+        }
+      },
+      "language": "rust",
+      "parent": "trait:src/lib.rs::Shape",
+      "exported": false
+    },
+    {
+      "id": "method:src/lib.rs::Shape.perimeter",
+      "kind": "method",
+      "name": "perimeter",
+      "qualifiedName": "Shape.perimeter",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 4,
+          "column": 5,
+          "byte": 97
+        },
+        "end": {
+          "line": 4,
+          "column": 32,
+          "byte": 124
+        }
+      },
+      "language": "rust",
+      "parent": "trait:src/lib.rs::Shape",
+      "exported": false
+    },
+    {
+      "id": "method:src/service.rs::InMemoryRepository.find",
+      "kind": "method",
+      "name": "find",
+      "qualifiedName": "InMemoryRepository.find",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 21,
+          "column": 5,
+          "byte": 450
+        },
+        "end": {
+          "line": 23,
+          "column": 6,
+          "byte": 531
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/service.rs::InMemoryRepository",
+      "exported": false
+    },
+    {
+      "id": "method:src/service.rs::InMemoryRepository.new",
+      "kind": "method",
+      "name": "new",
+      "qualifiedName": "InMemoryRepository.new",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 13,
+          "column": 5,
+          "byte": 279
+        },
+        "end": {
+          "line": 17,
+          "column": 6,
+          "byte": 385
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/service.rs::InMemoryRepository",
+      "exported": true
+    },
+    {
+      "id": "method:src/service.rs::InMemoryRepository.save",
+      "kind": "method",
+      "name": "save",
+      "qualifiedName": "InMemoryRepository.save",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 25,
+          "column": 5,
+          "byte": 537
+        },
+        "end": {
+          "line": 27,
+          "column": 6,
+          "byte": 625
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/service.rs::InMemoryRepository",
+      "exported": false
+    },
+    {
+      "id": "method:src/service.rs::Repository.find",
+      "kind": "method",
+      "name": "find",
+      "qualifiedName": "Repository.find",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 4,
+          "column": 5,
+          "byte": 67
+        },
+        "end": {
+          "line": 4,
+          "column": 43,
+          "byte": 105
+        }
+      },
+      "language": "rust",
+      "parent": "trait:src/service.rs::Repository",
+      "exported": false
+    },
+    {
+      "id": "method:src/service.rs::Repository.save",
+      "kind": "method",
+      "name": "save",
+      "qualifiedName": "Repository.save",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 5,
+          "column": 5,
+          "byte": 110
+        },
+        "end": {
+          "line": 5,
+          "column": 47,
+          "byte": 152
+        }
+      },
+      "language": "rust",
+      "parent": "trait:src/service.rs::Repository",
+      "exported": false
+    },
+    {
+      "id": "method:src/service.rs::ShapeService.add",
+      "kind": "method",
+      "name": "add",
+      "qualifiedName": "ShapeService.add",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 41,
+          "column": 5,
+          "byte": 846
+        },
+        "end": {
+          "line": 43,
+          "column": 6,
+          "byte": 941
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/service.rs::ShapeService",
+      "exported": true
+    },
+    {
+      "id": "method:src/service.rs::ShapeService.area",
+      "kind": "method",
+      "name": "area",
+      "qualifiedName": "ShapeService.area",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 45,
+          "column": 5,
+          "byte": 947
+        },
+        "end": {
+          "line": 48,
+          "column": 6,
+          "byte": 1072
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/service.rs::ShapeService",
+      "exported": true
+    },
+    {
+      "id": "method:src/service.rs::ShapeService.new",
+      "kind": "method",
+      "name": "new",
+      "qualifiedName": "ShapeService.new",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 35,
+          "column": 5,
+          "byte": 735
+        },
+        "end": {
+          "line": 39,
+          "column": 6,
+          "byte": 840
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/service.rs::ShapeService",
+      "exported": true
+    },
+    {
+      "id": "method:src/shapes.rs::Circle.area",
+      "kind": "method",
+      "name": "area",
+      "qualifiedName": "Circle.area",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 13,
+          "column": 5,
+          "byte": 234
+        },
+        "end": {
+          "line": 15,
+          "column": 6,
+          "byte": 320
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/shapes.rs::Circle",
+      "exported": false
+    },
+    {
+      "id": "method:src/shapes.rs::Circle.perimeter",
+      "kind": "method",
+      "name": "perimeter",
+      "qualifiedName": "Circle.perimeter",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 17,
+          "column": 5,
+          "byte": 326
+        },
+        "end": {
+          "line": 19,
+          "column": 6,
+          "byte": 409
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/shapes.rs::Circle",
+      "exported": false
+    },
+    {
+      "id": "method:src/shapes.rs::Rectangle.area",
+      "kind": "method",
+      "name": "area",
+      "qualifiedName": "Rectangle.area",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 29,
+          "column": 5,
+          "byte": 550
+        },
+        "end": {
+          "line": 31,
+          "column": 6,
+          "byte": 612
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/shapes.rs::Rectangle",
+      "exported": false
+    },
+    {
+      "id": "method:src/shapes.rs::Rectangle.perimeter",
+      "kind": "method",
+      "name": "perimeter",
+      "qualifiedName": "Rectangle.perimeter",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 33,
+          "column": 5,
+          "byte": 618
+        },
+        "end": {
+          "line": 35,
+          "column": 6,
+          "byte": 693
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/shapes.rs::Rectangle",
+      "exported": false
+    },
+    {
+      "id": "method:src/shapes.rs::Shape.area",
+      "kind": "method",
+      "name": "area",
+      "qualifiedName": "Shape.area",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 3,
+          "column": 5,
+          "byte": 70
+        },
+        "end": {
+          "line": 3,
+          "column": 27,
+          "byte": 92
+        }
+      },
+      "language": "rust",
+      "parent": "trait:src/shapes.rs::Shape",
+      "exported": false
+    },
+    {
+      "id": "method:src/shapes.rs::Shape.perimeter",
+      "kind": "method",
+      "name": "perimeter",
+      "qualifiedName": "Shape.perimeter",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 4,
+          "column": 5,
+          "byte": 97
+        },
+        "end": {
+          "line": 4,
+          "column": 32,
+          "byte": 124
+        }
+      },
+      "language": "rust",
+      "parent": "trait:src/shapes.rs::Shape",
+      "exported": false
+    },
+    {
+      "id": "module:src/complex.rs",
+      "kind": "module",
+      "name": "crate::complex",
+      "file": "src/complex.rs",
+      "language": "rust"
+    },
+    {
+      "id": "module:src/lib.rs",
+      "kind": "module",
+      "name": "crate",
+      "file": "src/lib.rs",
+      "language": "rust"
+    },
+    {
+      "id": "module:src/main.rs",
+      "kind": "module",
+      "name": "crate",
+      "file": "src/main.rs",
+      "language": "rust"
+    },
+    {
+      "id": "module:src/main.rs::shapes",
+      "kind": "module",
+      "name": "shapes",
+      "qualifiedName": "shapes",
+      "file": "src/main.rs",
+      "range": {
+        "start": {
+          "line": 1,
+          "column": 1,
+          "byte": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 12,
+          "byte": 11
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/main.rs",
+      "exported": false
+    },
+    {
+      "id": "module:src/service.rs",
+      "kind": "module",
+      "name": "crate::service",
+      "file": "src/service.rs",
+      "language": "rust"
+    },
+    {
+      "id": "module:src/shapes.rs",
+      "kind": "module",
+      "name": "crate::shapes",
+      "file": "src/shapes.rs",
+      "language": "rust"
+    },
+    {
+      "id": "property:src/complex.rs::Circle.r",
+      "kind": "property",
+      "name": "r",
+      "qualifiedName": "Circle.r",
+      "file": "src/complex.rs",
+      "range": {
+        "start": {
+          "line": 5,
+          "column": 5,
+          "byte": 71
+        },
+        "end": {
+          "line": 5,
+          "column": 15,
+          "byte": 81
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/complex.rs::Circle",
+      "exported": false
+    },
+    {
+      "id": "property:src/lib.rs::Circle.radius",
+      "kind": "property",
+      "name": "radius",
+      "qualifiedName": "Circle.radius",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 9,
+          "column": 5,
+          "byte": 186
+        },
+        "end": {
+          "line": 9,
+          "column": 20,
+          "byte": 201
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/lib.rs::Circle",
+      "exported": false
+    },
+    {
+      "id": "property:src/lib.rs::Rectangle.height",
+      "kind": "property",
+      "name": "height",
+      "qualifiedName": "Rectangle.height",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 25,
+          "column": 5,
+          "byte": 499
+        },
+        "end": {
+          "line": 25,
+          "column": 20,
+          "byte": 514
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/lib.rs::Rectangle",
+      "exported": false
+    },
+    {
+      "id": "property:src/lib.rs::Rectangle.width",
+      "kind": "property",
+      "name": "width",
+      "qualifiedName": "Rectangle.width",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 24,
+          "column": 5,
+          "byte": 479
+        },
+        "end": {
+          "line": 24,
+          "column": 19,
+          "byte": 493
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/lib.rs::Rectangle",
+      "exported": false
+    },
+    {
+      "id": "property:src/service.rs::InMemoryRepository.store",
+      "kind": "property",
+      "name": "store",
+      "qualifiedName": "InMemoryRepository.store",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 9,
+          "column": 5,
+          "byte": 195
+        },
+        "end": {
+          "line": 9,
+          "column": 48,
+          "byte": 238
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/service.rs::InMemoryRepository",
+      "exported": false
+    },
+    {
+      "id": "property:src/service.rs::ShapeService.repo",
+      "kind": "property",
+      "name": "repo",
+      "qualifiedName": "ShapeService.repo",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 31,
+          "column": 5,
+          "byte": 659
+        },
+        "end": {
+          "line": 31,
+          "column": 52,
+          "byte": 706
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/service.rs::ShapeService",
+      "exported": false
+    },
+    {
+      "id": "property:src/shapes.rs::Circle.radius",
+      "kind": "property",
+      "name": "radius",
+      "qualifiedName": "Circle.radius",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 9,
+          "column": 5,
+          "byte": 186
+        },
+        "end": {
+          "line": 9,
+          "column": 20,
+          "byte": 201
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/shapes.rs::Circle",
+      "exported": false
+    },
+    {
+      "id": "property:src/shapes.rs::Rectangle.height",
+      "kind": "property",
+      "name": "height",
+      "qualifiedName": "Rectangle.height",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 25,
+          "column": 5,
+          "byte": 499
+        },
+        "end": {
+          "line": 25,
+          "column": 20,
+          "byte": 514
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/shapes.rs::Rectangle",
+      "exported": false
+    },
+    {
+      "id": "property:src/shapes.rs::Rectangle.width",
+      "kind": "property",
+      "name": "width",
+      "qualifiedName": "Rectangle.width",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 24,
+          "column": 5,
+          "byte": 479
+        },
+        "end": {
+          "line": 24,
+          "column": 19,
+          "byte": 493
+        }
+      },
+      "language": "rust",
+      "parent": "struct:src/shapes.rs::Rectangle",
+      "exported": false
+    },
+    {
+      "id": "repository:.",
+      "kind": "repository",
+      "name": "repository"
+    },
+    {
+      "id": "struct:src/complex.rs::Circle",
+      "kind": "struct",
+      "name": "Circle",
+      "qualifiedName": "Circle",
+      "file": "src/complex.rs",
+      "range": {
+        "start": {
+          "line": 4,
+          "column": 1,
+          "byte": 47
+        },
+        "end": {
+          "line": 6,
+          "column": 2,
+          "byte": 84
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/complex.rs",
+      "exported": true
+    },
+    {
+      "id": "struct:src/lib.rs::Circle",
+      "kind": "struct",
+      "name": "Circle",
+      "qualifiedName": "Circle",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 8,
+          "column": 1,
+          "byte": 162
+        },
+        "end": {
+          "line": 10,
+          "column": 2,
+          "byte": 204
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/lib.rs",
+      "exported": true
+    },
+    {
+      "id": "struct:src/lib.rs::Rectangle",
+      "kind": "struct",
+      "name": "Rectangle",
+      "qualifiedName": "Rectangle",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 23,
+          "column": 1,
+          "byte": 452
+        },
+        "end": {
+          "line": 26,
+          "column": 2,
+          "byte": 517
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/lib.rs",
+      "exported": true
+    },
+    {
+      "id": "struct:src/service.rs::InMemoryRepository",
+      "kind": "struct",
+      "name": "InMemoryRepository",
+      "qualifiedName": "InMemoryRepository",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 8,
+          "column": 1,
+          "byte": 156
+        },
+        "end": {
+          "line": 10,
+          "column": 2,
+          "byte": 241
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/service.rs",
+      "exported": true
+    },
+    {
+      "id": "struct:src/service.rs::ShapeService",
+      "kind": "struct",
+      "name": "ShapeService",
+      "qualifiedName": "ShapeService",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 30,
+          "column": 1,
+          "byte": 629
+        },
+        "end": {
+          "line": 32,
+          "column": 2,
+          "byte": 709
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/service.rs",
+      "exported": true
+    },
+    {
+      "id": "struct:src/shapes.rs::Circle",
+      "kind": "struct",
+      "name": "Circle",
+      "qualifiedName": "Circle",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 8,
+          "column": 1,
+          "byte": 162
+        },
+        "end": {
+          "line": 10,
+          "column": 2,
+          "byte": 204
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/shapes.rs",
+      "exported": true
+    },
+    {
+      "id": "struct:src/shapes.rs::Rectangle",
+      "kind": "struct",
+      "name": "Rectangle",
+      "qualifiedName": "Rectangle",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 23,
+          "column": 1,
+          "byte": 452
+        },
+        "end": {
+          "line": 26,
+          "column": 2,
+          "byte": 517
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/shapes.rs",
+      "exported": true
+    },
+    {
+      "id": "trait:src/complex.rs::Shape",
+      "kind": "trait",
+      "name": "Shape",
+      "qualifiedName": "Shape",
+      "file": "src/complex.rs",
+      "range": {
+        "start": {
+          "line": 1,
+          "column": 1,
+          "byte": 0
+        },
+        "end": {
+          "line": 3,
+          "column": 2,
+          "byte": 46
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/complex.rs",
+      "exported": true
+    },
+    {
+      "id": "trait:src/lib.rs::Shape",
+      "kind": "trait",
+      "name": "Shape",
+      "qualifiedName": "Shape",
+      "file": "src/lib.rs",
+      "range": {
+        "start": {
+          "line": 2,
+          "column": 1,
+          "byte": 48
+        },
+        "end": {
+          "line": 5,
+          "column": 2,
+          "byte": 126
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/lib.rs",
+      "exported": true
+    },
+    {
+      "id": "trait:src/service.rs::Repository",
+      "kind": "trait",
+      "name": "Repository",
+      "qualifiedName": "Repository",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 3,
+          "column": 1,
+          "byte": 37
+        },
+        "end": {
+          "line": 6,
+          "column": 2,
+          "byte": 154
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/service.rs",
+      "exported": true
+    },
+    {
+      "id": "trait:src/shapes.rs::Shape",
+      "kind": "trait",
+      "name": "Shape",
+      "qualifiedName": "Shape",
+      "file": "src/shapes.rs",
+      "range": {
+        "start": {
+          "line": 2,
+          "column": 1,
+          "byte": 48
+        },
+        "end": {
+          "line": 5,
+          "column": 2,
+          "byte": 126
+        }
+      },
+      "language": "rust",
+      "parent": "module:src/shapes.rs",
+      "exported": true
+    },
+    {
+      "id": "unresolved:rust:T",
+      "kind": "unknown",
+      "name": "T",
+      "language": "rust"
+    },
+    {
+      "id": "unresolved:rust:area",
+      "kind": "unknown",
+      "name": "area",
+      "language": "rust"
+    },
+    {
+      "id": "unresolved:rust:cloned",
+      "kind": "unknown",
+      "name": "cloned",
+      "language": "rust"
+    },
+    {
+      "id": "unresolved:rust:expect",
+      "kind": "unknown",
+      "name": "expect",
+      "language": "rust"
+    },
+    {
+      "id": "unresolved:rust:get",
+      "kind": "unknown",
+      "name": "get",
+      "language": "rust"
+    },
+    {
+      "id": "unresolved:rust:insert",
+      "kind": "unknown",
+      "name": "insert",
+      "language": "rust"
+    },
+    {
+      "id": "unresolved:rust:iter",
+      "kind": "unknown",
+      "name": "iter",
+      "language": "rust"
+    },
+    {
+      "id": "unresolved:rust:map",
+      "kind": "unknown",
+      "name": "map",
+      "language": "rust"
+    },
+    {
+      "id": "unresolved:rust:println",
+      "kind": "unknown",
+      "name": "println",
+      "language": "rust"
+    },
+    {
+      "id": "unresolved:rust:sum",
+      "kind": "unknown",
+      "name": "sum",
+      "language": "rust"
+    },
+    {
+      "id": "unresolved:rust:vec",
+      "kind": "unknown",
+      "name": "vec",
+      "language": "rust"
+    },
+    {
+      "id": "variable:src/main.rs::main.shapes",
+      "kind": "variable",
+      "name": "shapes",
+      "qualifiedName": "main.shapes",
+      "file": "src/main.rs",
+      "range": {
+        "start": {
+          "line": 6,
+          "column": 5,
+          "byte": 82
+        },
+        "end": {
+          "line": 12,
+          "column": 7,
+          "byte": 238
+        }
+      },
+      "language": "rust",
+      "parent": "function:src/main.rs::main",
+      "exported": false
+    },
+    {
+      "id": "variable:src/service.rs::ShapeService.area.circle",
+      "kind": "variable",
+      "name": "circle",
+      "qualifiedName": "ShapeService.area.circle",
+      "file": "src/service.rs",
+      "range": {
+        "start": {
+          "line": 46,
+          "column": 9,
+          "byte": 993
+        },
+        "end": {
+          "line": 46,
+          "column": 60,
+          "byte": 1044
+        }
+      },
+      "language": "rust",
+      "parent": "method:src/service.rs::ShapeService.area",
+      "exported": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/complex.rs",
+      "target": "function:src/complex.rs::total",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "method:src/complex.rs::Circle.area",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "method:src/complex.rs::Shape.area",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "module:src/complex.rs",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "property:src/complex.rs::Circle.r",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "struct:src/complex.rs::Circle",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "trait:src/complex.rs::Shape",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "function:src/complex.rs::total",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "function:src/complex.rs::total",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "struct:src/complex.rs::Circle",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "struct:src/complex.rs::Circle",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "trait:src/complex.rs::Shape",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/complex.rs",
+      "target": "trait:src/complex.rs::Shape",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "function:src/lib.rs::total_area",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "method:src/lib.rs::Circle.area",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "method:src/lib.rs::Circle.perimeter",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "method:src/lib.rs::Rectangle.area",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "method:src/lib.rs::Rectangle.perimeter",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "method:src/lib.rs::Shape.area",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "method:src/lib.rs::Shape.perimeter",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "module:src/lib.rs",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "property:src/lib.rs::Circle.radius",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "property:src/lib.rs::Rectangle.height",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "property:src/lib.rs::Rectangle.width",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "struct:src/lib.rs::Circle",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "struct:src/lib.rs::Rectangle",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "trait:src/lib.rs::Shape",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "function:src/lib.rs::total_area",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "function:src/lib.rs::total_area",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "struct:src/lib.rs::Circle",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "struct:src/lib.rs::Circle",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "struct:src/lib.rs::Rectangle",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "struct:src/lib.rs::Rectangle",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "trait:src/lib.rs::Shape",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/lib.rs",
+      "target": "trait:src/lib.rs::Shape",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/main.rs",
+      "target": "function:src/main.rs::main",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/main.rs",
+      "target": "module:src/main.rs",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/main.rs",
+      "target": "module:src/main.rs::shapes",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/main.rs",
+      "target": "variable:src/main.rs::main.shapes",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/main.rs",
+      "target": "file:src/shapes.rs",
+      "kind": "imports",
+      "status": "resolved_internal",
+      "origin": "import",
+      "sites": [
+        {
+          "start": {
+            "line": 3,
+            "column": 1,
+            "byte": 13
+          },
+          "end": {
+            "line": 3,
+            "column": 52,
+            "byte": 64
+          }
+        }
+      ]
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::InMemoryRepository.find",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::InMemoryRepository.new",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::InMemoryRepository.save",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::Repository.find",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::Repository.save",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::ShapeService.add",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::ShapeService.area",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::ShapeService.new",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "module:src/service.rs",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "property:src/service.rs::InMemoryRepository.store",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "property:src/service.rs::ShapeService.repo",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "struct:src/service.rs::InMemoryRepository",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "struct:src/service.rs::ShapeService",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "trait:src/service.rs::Repository",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "variable:src/service.rs::ShapeService.area.circle",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "file:src/shapes.rs",
+      "kind": "imports",
+      "status": "resolved_internal",
+      "origin": "import",
+      "sites": [
+        {
+          "start": {
+            "line": 1,
+            "column": 1,
+            "byte": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 36,
+            "byte": 35
+          }
+        }
+      ]
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::InMemoryRepository.new",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::ShapeService.add",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::ShapeService.area",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "method:src/service.rs::ShapeService.new",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "struct:src/service.rs::InMemoryRepository",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "struct:src/service.rs::InMemoryRepository",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "struct:src/service.rs::ShapeService",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "struct:src/service.rs::ShapeService",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "trait:src/service.rs::Repository",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/service.rs",
+      "target": "trait:src/service.rs::Repository",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "function:src/shapes.rs::total_area",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "method:src/shapes.rs::Circle.area",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "method:src/shapes.rs::Circle.perimeter",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "method:src/shapes.rs::Rectangle.area",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "method:src/shapes.rs::Rectangle.perimeter",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "method:src/shapes.rs::Shape.area",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "method:src/shapes.rs::Shape.perimeter",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "module:src/shapes.rs",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "property:src/shapes.rs::Circle.radius",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "property:src/shapes.rs::Rectangle.height",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "property:src/shapes.rs::Rectangle.width",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "struct:src/shapes.rs::Circle",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "struct:src/shapes.rs::Rectangle",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "trait:src/shapes.rs::Shape",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "function:src/shapes.rs::total_area",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "function:src/shapes.rs::total_area",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "struct:src/shapes.rs::Circle",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "struct:src/shapes.rs::Circle",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "struct:src/shapes.rs::Rectangle",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "struct:src/shapes.rs::Rectangle",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "trait:src/shapes.rs::Shape",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:src/shapes.rs",
+      "target": "trait:src/shapes.rs::Shape",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "import"
+    },
+    {
+      "source": "function:src/complex.rs::total",
+      "target": "unresolved:rust:area",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 13,
+            "column": 27,
+            "byte": 267
+          },
+          "end": {
+            "line": 13,
+            "column": 35,
+            "byte": 275
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/complex.rs::total",
+      "target": "unresolved:rust:iter",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 13,
+            "column": 5,
+            "byte": 245
+          },
+          "end": {
+            "line": 13,
+            "column": 18,
+            "byte": 258
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/complex.rs::total",
+      "target": "unresolved:rust:map",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 13,
+            "column": 5,
+            "byte": 245
+          },
+          "end": {
+            "line": 13,
+            "column": 36,
+            "byte": 276
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/complex.rs::total",
+      "target": "unresolved:rust:sum",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 13,
+            "column": 5,
+            "byte": 245
+          },
+          "end": {
+            "line": 13,
+            "column": 42,
+            "byte": 282
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/complex.rs::total",
+      "target": "trait:src/complex.rs::Shape",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 12,
+            "column": 32,
+            "byte": 223
+          },
+          "end": {
+            "line": 12,
+            "column": 37,
+            "byte": 228
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/lib.rs::total_area",
+      "target": "unresolved:rust:area",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 40,
+            "column": 27,
+            "byte": 818
+          },
+          "end": {
+            "line": 40,
+            "column": 35,
+            "byte": 826
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/lib.rs::total_area",
+      "target": "unresolved:rust:iter",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 40,
+            "column": 5,
+            "byte": 796
+          },
+          "end": {
+            "line": 40,
+            "column": 18,
+            "byte": 809
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/lib.rs::total_area",
+      "target": "unresolved:rust:map",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 40,
+            "column": 5,
+            "byte": 796
+          },
+          "end": {
+            "line": 40,
+            "column": 36,
+            "byte": 827
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/lib.rs::total_area",
+      "target": "unresolved:rust:sum",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 40,
+            "column": 5,
+            "byte": 796
+          },
+          "end": {
+            "line": 40,
+            "column": 42,
+            "byte": 833
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/lib.rs::total_area",
+      "target": "trait:src/lib.rs::Shape",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 39,
+            "column": 34,
+            "byte": 775
+          },
+          "end": {
+            "line": 39,
+            "column": 39,
+            "byte": 780
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/main.rs::main",
+      "target": "unresolved:rust:println",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 13,
+            "column": 5,
+            "byte": 243
+          },
+          "end": {
+            "line": 13,
+            "column": 55,
+            "byte": 293
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/main.rs::main",
+      "target": "unresolved:rust:vec",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 6,
+            "column": 35,
+            "byte": 112
+          },
+          "end": {
+            "line": 12,
+            "column": 6,
+            "byte": 237
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/main.rs::main",
+      "target": "trait:src/shapes.rs::Shape",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 6,
+            "column": 26,
+            "byte": 103
+          },
+          "end": {
+            "line": 6,
+            "column": 31,
+            "byte": 108
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/shapes.rs::total_area",
+      "target": "unresolved:rust:area",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 40,
+            "column": 27,
+            "byte": 818
+          },
+          "end": {
+            "line": 40,
+            "column": 35,
+            "byte": 826
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/shapes.rs::total_area",
+      "target": "unresolved:rust:iter",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 40,
+            "column": 5,
+            "byte": 796
+          },
+          "end": {
+            "line": 40,
+            "column": 18,
+            "byte": 809
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/shapes.rs::total_area",
+      "target": "unresolved:rust:map",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 40,
+            "column": 5,
+            "byte": 796
+          },
+          "end": {
+            "line": 40,
+            "column": 36,
+            "byte": 827
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/shapes.rs::total_area",
+      "target": "unresolved:rust:sum",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 40,
+            "column": 5,
+            "byte": 796
+          },
+          "end": {
+            "line": 40,
+            "column": 42,
+            "byte": 833
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/shapes.rs::total_area",
+      "target": "trait:src/shapes.rs::Shape",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 39,
+            "column": 34,
+            "byte": 775
+          },
+          "end": {
+            "line": 39,
+            "column": 39,
+            "byte": 780
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::InMemoryRepository.find",
+      "target": "unresolved:rust:cloned",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 22,
+            "column": 9,
+            "byte": 498
+          },
+          "end": {
+            "line": 22,
+            "column": 36,
+            "byte": 525
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::InMemoryRepository.find",
+      "target": "unresolved:rust:get",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 22,
+            "column": 9,
+            "byte": 498
+          },
+          "end": {
+            "line": 22,
+            "column": 27,
+            "byte": 516
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::InMemoryRepository.find",
+      "target": "unresolved:rust:T",
+      "kind": "uses_type",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 21,
+            "column": 40,
+            "byte": 485
+          },
+          "end": {
+            "line": 21,
+            "column": 41,
+            "byte": 486
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::InMemoryRepository.new",
+      "target": "external:rust:Self",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 14,
+            "column": 9,
+            "byte": 310
+          },
+          "end": {
+            "line": 16,
+            "column": 10,
+            "byte": 379
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::InMemoryRepository.new",
+      "target": "external:rust:std::collections::HashMap.new",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 15,
+            "column": 20,
+            "byte": 336
+          },
+          "end": {
+            "line": 15,
+            "column": 52,
+            "byte": 368
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::InMemoryRepository.save",
+      "target": "unresolved:rust:insert",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 26,
+            "column": 9,
+            "byte": 589
+          },
+          "end": {
+            "line": 26,
+            "column": 38,
+            "byte": 618
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::InMemoryRepository.save",
+      "target": "unresolved:rust:T",
+      "kind": "uses_type",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 25,
+            "column": 44,
+            "byte": 576
+          },
+          "end": {
+            "line": 25,
+            "column": 45,
+            "byte": 577
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::Repository.find",
+      "target": "unresolved:rust:T",
+      "kind": "uses_type",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 4,
+            "column": 40,
+            "byte": 102
+          },
+          "end": {
+            "line": 4,
+            "column": 41,
+            "byte": 103
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::Repository.save",
+      "target": "unresolved:rust:T",
+      "kind": "uses_type",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 5,
+            "column": 44,
+            "byte": 149
+          },
+          "end": {
+            "line": 5,
+            "column": 45,
+            "byte": 150
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::ShapeService.add",
+      "target": "unresolved:rust:insert",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 42,
+            "column": 9,
+            "byte": 906
+          },
+          "end": {
+            "line": 42,
+            "column": 37,
+            "byte": 934
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::ShapeService.add",
+      "target": "struct:src/shapes.rs::Circle",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 41,
+            "column": 47,
+            "byte": 888
+          },
+          "end": {
+            "line": 41,
+            "column": 53,
+            "byte": 894
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::ShapeService.area",
+      "target": "unresolved:rust:area",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 47,
+            "column": 9,
+            "byte": 1053
+          },
+          "end": {
+            "line": 47,
+            "column": 22,
+            "byte": 1066
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::ShapeService.area",
+      "target": "unresolved:rust:expect",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 46,
+            "column": 22,
+            "byte": 1006
+          },
+          "end": {
+            "line": 46,
+            "column": 59,
+            "byte": 1043
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::ShapeService.area",
+      "target": "unresolved:rust:get",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 46,
+            "column": 22,
+            "byte": 1006
+          },
+          "end": {
+            "line": 46,
+            "column": 39,
+            "byte": 1023
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::ShapeService.new",
+      "target": "external:rust:Self",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 36,
+            "column": 9,
+            "byte": 766
+          },
+          "end": {
+            "line": 38,
+            "column": 10,
+            "byte": 834
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::ShapeService.new",
+      "target": "external:rust:std::collections::HashMap.new",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 37,
+            "column": 19,
+            "byte": 791
+          },
+          "end": {
+            "line": 37,
+            "column": 51,
+            "byte": 823
+          }
+        }
+      ]
+    },
+    {
+      "source": "module:src/complex.rs",
+      "target": "struct:src/complex.rs::Circle",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 7,
+            "column": 16,
+            "byte": 100
+          },
+          "end": {
+            "line": 7,
+            "column": 22,
+            "byte": 106
+          }
+        }
+      ]
+    },
+    {
+      "source": "module:src/complex.rs",
+      "target": "function:src/complex.rs::total",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/complex.rs",
+      "target": "method:src/complex.rs::Circle.area",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/complex.rs",
+      "target": "method:src/complex.rs::Shape.area",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/complex.rs",
+      "target": "property:src/complex.rs::Circle.r",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/complex.rs",
+      "target": "struct:src/complex.rs::Circle",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/complex.rs",
+      "target": "trait:src/complex.rs::Shape",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "struct:src/lib.rs::Circle",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 12,
+            "column": 16,
+            "byte": 221
+          },
+          "end": {
+            "line": 12,
+            "column": 22,
+            "byte": 227
+          }
+        }
+      ]
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "struct:src/lib.rs::Rectangle",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 28,
+            "column": 16,
+            "byte": 534
+          },
+          "end": {
+            "line": 28,
+            "column": 25,
+            "byte": 543
+          }
+        }
+      ]
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "function:src/lib.rs::total_area",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "method:src/lib.rs::Circle.area",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "method:src/lib.rs::Circle.perimeter",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "method:src/lib.rs::Rectangle.area",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "method:src/lib.rs::Rectangle.perimeter",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "method:src/lib.rs::Shape.area",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "method:src/lib.rs::Shape.perimeter",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "property:src/lib.rs::Circle.radius",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "property:src/lib.rs::Rectangle.height",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "property:src/lib.rs::Rectangle.width",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "struct:src/lib.rs::Circle",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "struct:src/lib.rs::Rectangle",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/lib.rs",
+      "target": "trait:src/lib.rs::Shape",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/main.rs",
+      "target": "function:src/main.rs::main",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/main.rs",
+      "target": "module:src/main.rs::shapes",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/main.rs",
+      "target": "variable:src/main.rs::main.shapes",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "struct:src/service.rs::InMemoryRepository",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 12,
+            "column": 9,
+            "byte": 251
+          },
+          "end": {
+            "line": 12,
+            "column": 27,
+            "byte": 269
+          }
+        },
+        {
+          "start": {
+            "line": 20,
+            "column": 34,
+            "byte": 422
+          },
+          "end": {
+            "line": 20,
+            "column": 52,
+            "byte": 440
+          }
+        }
+      ]
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "struct:src/service.rs::ShapeService",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 34,
+            "column": 6,
+            "byte": 716
+          },
+          "end": {
+            "line": 34,
+            "column": 18,
+            "byte": 728
+          }
+        }
+      ]
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "unresolved:rust:T",
+      "kind": "uses_type",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 12,
+            "column": 28,
+            "byte": 270
+          },
+          "end": {
+            "line": 12,
+            "column": 29,
+            "byte": 271
+          }
+        },
+        {
+          "start": {
+            "line": 20,
+            "column": 53,
+            "byte": 441
+          },
+          "end": {
+            "line": 20,
+            "column": 54,
+            "byte": 442
+          }
+        }
+      ]
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "method:src/service.rs::InMemoryRepository.find",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "method:src/service.rs::InMemoryRepository.new",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "method:src/service.rs::InMemoryRepository.save",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "method:src/service.rs::Repository.find",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "method:src/service.rs::Repository.save",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "method:src/service.rs::ShapeService.add",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "method:src/service.rs::ShapeService.area",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "method:src/service.rs::ShapeService.new",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "property:src/service.rs::InMemoryRepository.store",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "property:src/service.rs::ShapeService.repo",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "struct:src/service.rs::InMemoryRepository",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "struct:src/service.rs::ShapeService",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "trait:src/service.rs::Repository",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/service.rs",
+      "target": "variable:src/service.rs::ShapeService.area.circle",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "struct:src/shapes.rs::Circle",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 12,
+            "column": 16,
+            "byte": 221
+          },
+          "end": {
+            "line": 12,
+            "column": 22,
+            "byte": 227
+          }
+        }
+      ]
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "struct:src/shapes.rs::Rectangle",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 28,
+            "column": 16,
+            "byte": 534
+          },
+          "end": {
+            "line": 28,
+            "column": 25,
+            "byte": 543
+          }
+        }
+      ]
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "function:src/shapes.rs::total_area",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "method:src/shapes.rs::Circle.area",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "method:src/shapes.rs::Circle.perimeter",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "method:src/shapes.rs::Rectangle.area",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "method:src/shapes.rs::Rectangle.perimeter",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "method:src/shapes.rs::Shape.area",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "method:src/shapes.rs::Shape.perimeter",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "property:src/shapes.rs::Circle.radius",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "property:src/shapes.rs::Rectangle.height",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "property:src/shapes.rs::Rectangle.width",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "struct:src/shapes.rs::Circle",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "struct:src/shapes.rs::Rectangle",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:src/shapes.rs",
+      "target": "trait:src/shapes.rs::Shape",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "repository:.",
+      "target": "file:src/complex.rs",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "repository:.",
+      "target": "file:src/lib.rs",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "repository:.",
+      "target": "file:src/main.rs",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "repository:.",
+      "target": "file:src/service.rs",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "repository:.",
+      "target": "file:src/shapes.rs",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "struct:src/complex.rs::Circle",
+      "target": "trait:src/complex.rs::Shape",
+      "kind": "implements",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 7,
+            "column": 6,
+            "byte": 90
+          },
+          "end": {
+            "line": 7,
+            "column": 11,
+            "byte": 95
+          }
+        }
+      ]
+    },
+    {
+      "source": "struct:src/lib.rs::Circle",
+      "target": "trait:src/lib.rs::Shape",
+      "kind": "implements",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 12,
+            "column": 6,
+            "byte": 211
+          },
+          "end": {
+            "line": 12,
+            "column": 11,
+            "byte": 216
+          }
+        }
+      ]
+    },
+    {
+      "source": "struct:src/lib.rs::Rectangle",
+      "target": "trait:src/lib.rs::Shape",
+      "kind": "implements",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 28,
+            "column": 6,
+            "byte": 524
+          },
+          "end": {
+            "line": 28,
+            "column": 11,
+            "byte": 529
+          }
+        }
+      ]
+    },
+    {
+      "source": "struct:src/service.rs::InMemoryRepository",
+      "target": "trait:src/service.rs::Repository",
+      "kind": "implements",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 20,
+            "column": 16,
+            "byte": 404
+          },
+          "end": {
+            "line": 20,
+            "column": 29,
+            "byte": 417
+          }
+        }
+      ]
+    },
+    {
+      "source": "struct:src/service.rs::InMemoryRepository",
+      "target": "unresolved:rust:T",
+      "kind": "uses_type",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 8,
+            "column": 31,
+            "byte": 186
+          },
+          "end": {
+            "line": 8,
+            "column": 32,
+            "byte": 187
+          }
+        },
+        {
+          "start": {
+            "line": 9,
+            "column": 46,
+            "byte": 236
+          },
+          "end": {
+            "line": 9,
+            "column": 47,
+            "byte": 237
+          }
+        }
+      ]
+    },
+    {
+      "source": "struct:src/service.rs::ShapeService",
+      "target": "struct:src/shapes.rs::Circle",
+      "kind": "uses_type",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 31,
+            "column": 45,
+            "byte": 699
+          },
+          "end": {
+            "line": 31,
+            "column": 51,
+            "byte": 705
+          }
+        }
+      ]
+    },
+    {
+      "source": "struct:src/shapes.rs::Circle",
+      "target": "trait:src/shapes.rs::Shape",
+      "kind": "implements",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 12,
+            "column": 6,
+            "byte": 211
+          },
+          "end": {
+            "line": 12,
+            "column": 11,
+            "byte": 216
+          }
+        }
+      ]
+    },
+    {
+      "source": "struct:src/shapes.rs::Rectangle",
+      "target": "trait:src/shapes.rs::Shape",
+      "kind": "implements",
+      "status": "resolved_internal",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 28,
+            "column": 6,
+            "byte": 524
+          },
+          "end": {
+            "line": 28,
+            "column": 11,
+            "byte": 529
+          }
+        }
+      ]
+    }
+  ],
+  "diagnostics": [],
+  "statistics": {
+    "files": 5,
+    "packages": 0,
+    "nodes": 73,
+    "edges": 192,
+    "symbols": 48,
+    "unresolvedEdges": 27,
+    "diagnostics": 0,
+    "byNodeKind": {
+      "external_symbol": 2,
+      "file": 5,
+      "function": 4,
+      "method": 22,
+      "module": 6,
+      "property": 9,
+      "repository": 1,
+      "struct": 7,
+      "trait": 4,
+      "unknown": 11,
+      "variable": 2
+    },
+    "byEdgeKind": {
+      "calls": 25,
+      "contains": 59,
+      "defines": 49,
+      "exports": 32,
+      "implements": 6,
+      "imports": 2,
+      "uses_type": 19
+    },
+    "byLanguage": {
+      "rust": 72
+    },
+    "byStatus": {
+      "resolved_external": 4,
+      "resolved_internal": 161,
+      "unresolved": 27
+    },
+    "byFramework": {}
+  }
+};</script>
+</head>
+<body>
+
+    <!-- HTML5 Canvas for D3 Force Simulation -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Top Bar -->
+    <div id="topbar">
+        <div class="brand">
+            <svg class="brand-icon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3" fill="#a78bfa"/>
+                <circle cx="4" cy="8" r="2"/>
+                <circle cx="20" cy="8" r="2"/>
+                <circle cx="7" cy="19" r="2"/>
+                <circle cx="17" cy="19" r="2"/>
+                <line x1="6" y1="9" x2="10" y2="11"/>
+                <line x1="18" y1="9" x2="14" y2="11"/>
+                <line x1="8.5" y1="17.5" x2="11" y2="14"/>
+                <line x1="15.5" y1="17.5" x2="13" y2="14"/>
+            </svg>
+            Tracers
+        </div>
+        <div class="sep"></div>
+        <div class="stat-pill">Nodes <b id="statNodes">—</b></div>
+        <div class="stat-pill">Edges <b id="statEdges">—</b></div>
+        <div class="stat-pill">Files <b id="statFiles">—</b></div>
+
+        <div id="searchWrap">
+            <svg width="13" height="13" viewBox="0 0 20 20" fill="none">
+                <circle cx="9" cy="9" r="6" stroke="white" stroke-width="2"/>
+                <path d="M13.5 13.5L17 17" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input type="text" id="search" placeholder="Search nodes or files…">
+            <span id="searchClear">×</span>
+        </div>
+
+        <button class="top-btn" id="btnFit" title="Fit graph to view">Fit View</button>
+        <button class="top-btn" id="btnReheat" title="Restart simulation forces">Re-heat</button>
+    </div>
+
+    <!-- Left Controls Panel (Obsidian Style) -->
+    <div id="panel">
+        <div class="panel-section">
+            <div class="panel-label">Node Types</div>
+            <div id="nodeFiltersList"></div>
+        </div>
+
+        <div class="hsep"></div>
+
+        <div class="panel-section">
+            <div class="panel-label">Edge Types</div>
+            <div id="edgeFiltersList"></div>
+        </div>
+
+        <div class="hsep"></div>
+
+        <div class="panel-section">
+            <div class="panel-label">Display</div>
+            <div class="toggle-row" id="togLabelsRow">
+                <span>Node labels</span>
+                <div class="toggle on" id="togLabels"></div>
+            </div>
+            <div class="toggle-row" id="togScaleRow">
+                <span>Scale by degree</span>
+                <div class="toggle on" id="togScale"></div>
+            </div>
+        </div>
+
+        <div class="hsep"></div>
+
+        <div class="panel-section">
+            <div class="panel-label">Physics Forces</div>
+            <div class="range-box">
+                <div class="range-label"><span>Node Size</span><span id="valNodeSize">5</span></div>
+                <input type="range" id="sliderNodeSize" min="2" max="16" value="5">
+            </div>
+            <div class="range-box">
+                <div class="range-label"><span>Link Distance</span><span id="valLinkDist">50</span></div>
+                <input type="range" id="sliderLinkDist" min="15" max="180" value="50">
+            </div>
+            <div class="range-box">
+                <div class="range-label"><span>Repulsion</span><span id="valRepulsion">120</span></div>
+                <input type="range" id="sliderRepulsion" min="20" max="400" value="120">
+            </div>
+            <div class="range-box">
+                <div class="range-label"><span>Center Gravity</span><span id="valGravity">0.12</span></div>
+                <input type="range" id="sliderGravity" min="0.01" max="0.5" step="0.01" value="0.12">
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel Toggle Button -->
+    <div id="panelToggle">◀</div>
+
+    <!-- Zoom Controls -->
+    <div id="zoomControls">
+        <div class="zoom-btn" id="zoomIn" title="Zoom In">+</div>
+        <div class="zoom-btn" id="zoomFit" title="Fit to Screen">⊡</div>
+        <div class="zoom-btn" id="zoomOut" title="Zoom Out">−</div>
+    </div>
+
+    <!-- Node Detail Card -->
+    <div id="infoCard">
+        <div class="ic-header">
+            <span class="ic-kind" id="icKind">CLASS</span>
+            <span class="ic-close" id="icClose">×</span>
+        </div>
+        <div class="ic-name" id="icName">SymbolName</div>
+        <div class="ic-path" id="icPath">src/path/to/file.rs</div>
+        <div class="ic-stats">
+            <div class="ic-stat"><b id="icIn">0</b> Inbound</div>
+            <div class="ic-stat"><b id="icOut">0</b> Outbound</div>
+            <div class="ic-stat"><b id="icTotal">0</b> Total Degree</div>
+        </div>
+        <div class="ic-neighbors-title">Connected Symbols</div>
+        <div class="ic-neighbors" id="icNeighbors"></div>
+    </div>
+
+    <!-- Initial Loading Spinner -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <div class="loader-text">Loading Tracers Graph…</div>
+    </div>
+
+    <script>
+    (function() {
+        // ── Obsidian Theme Node & Edge Colors ─────────────────────
+        const KIND_CONFIG = {
+            file:            { color: '#10b981', label: 'File' },
+            module:          { color: '#06b6d4', label: 'Module' },
+            package:         { color: '#06b6d4', label: 'Package' },
+            namespace:       { color: '#06b6d4', label: 'Namespace' },
+            class:           { color: '#8b5cf6', label: 'Class' },
+            struct:          { color: '#8b5cf6', label: 'Struct' },
+            interface:       { color: '#a78bfa', label: 'Interface' },
+            trait:           { color: '#a78bfa', label: 'Trait' },
+            function:        { color: '#f59e0b', label: 'Function' },
+            method:          { color: '#ec4899', label: 'Method' },
+            constructor:     { color: '#fb7185', label: 'Constructor' },
+            enum:            { color: '#f97316', label: 'Enum' },
+            property:        { color: '#94a3b8', label: 'Property' },
+            variable:        { color: '#94a3b8', label: 'Variable' },
+            constant:        { color: '#94a3b8', label: 'Constant' },
+            type:            { color: '#38bdf8', label: 'Type' },
+            external_symbol: { color: '#64748b', label: 'External' },
+            repository:      { color: '#a855f7', label: 'Repository' },
+            unknown:         { color: '#64748b', label: 'Unknown' },
+        };
+
+        const EDGE_CONFIG = {
+            contains:   { color: '#6366f1', label: 'Contains' },
+            calls:      { color: '#f59e0b', label: 'Calls' },
+            imports:    { color: '#10b981', label: 'Imports' },
+            exports:    { color: '#10b981', label: 'Exports' },
+            uses_type:  { color: '#7c4dff', label: 'Uses Type' },
+            inherits:   { color: '#ec4899', label: 'Inherits' },
+            implements: { color: '#a78bfa', label: 'Implements' },
+            references: { color: '#94a3b8', label: 'References' },
+            defines:    { color: '#6366f1', label: 'Defines' },
+            depends_on: { color: '#f97316', label: 'Depends On' },
+            overrides:  { color: '#fb7185', label: 'Overrides' },
+        };
+
+        function getNodeColor(kind) {
+            return (KIND_CONFIG[kind] && KIND_CONFIG[kind].color) || '#8b5cf6';
+        }
+        function getEdgeColor(kind) {
+            return (EDGE_CONFIG[kind] && EDGE_CONFIG[kind].color) || '#475569';
+        }
+
+        // ── Canvas Setup ──────────────────────────────────────────
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let animFrameId = null;
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        let dpr = window.devicePixelRatio || 1;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            dpr = window.devicePixelRatio || 1;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.resetTransform();
+            ctx.scale(dpr, dpr);
+            requestRender();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // ── Simulation & Graph State ──────────────────────────────
+        let allNodes = [];
+        let allEdges = [];
+        let nodeMap = new Map();
+        let filteredNodes = [];
+        let filteredEdges = [];
+        let simulation = null;
+        let transform = d3.zoomIdentity;
+
+        // Settings
+        let showLabels = true;
+        let scaleByDegree = true;
+        let baseNodeRadius = 5;
+        let linkDistance = 50;
+        let repulsion = 120;
+        let centerGravity = 0.12;
+
+        // Interactive States
+        let hoveredNode = null;
+        let selectedNode = null;
+        let searchTerm = '';
+        let disabledNodeKinds = new Set();
+        let disabledEdgeKinds = new Set();
+
+        function requestRender() {
+            if (!animFrameId) {
+                animFrameId = requestAnimationFrame(() => {
+                    animFrameId = null;
+                    render();
+                });
+            }
+        }
+
+        // ── Fetch & Ingest Data ───────────────────────────────────
+        // `tracers scan`/`graph` embed the document as window.__TRACERS_DATA__
+        // so the file works standalone (including file://); the fetch below is
+        // a fallback for a bare template opened next to graph.json.
+        const loadData = window.__TRACERS_DATA__
+            ? Promise.resolve(window.__TRACERS_DATA__)
+            : fetch('graph.json')
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+                    return res.json();
+                });
+
+        loadData
+            .then(data => {
+                initGraph(data);
+                document.getElementById('loader').classList.add('fade-out');
+                setTimeout(() => document.getElementById('loader').remove(), 350);
+            })
+            .catch(err => {
+                const loader = document.getElementById('loader');
+                loader.innerHTML = `
+                    <div style="color:#ef4444;font-size:14px;max-width:380px;text-align:center;line-height:1.5;">
+                        Failed to load graph.json.<br>
+                        <span style="font-size:12px;color:rgba(255,255,255,0.4);">${err.message}</span>
+                    </div>`;
+            });
+
+        function initGraph(data) {
+            nodeMap.clear();
+            const rawNodes = data.nodes || [];
+            const rawEdges = data.edges || [];
+
+            // Stats
+            document.getElementById('statNodes').textContent = rawNodes.length.toLocaleString();
+            document.getElementById('statEdges').textContent = rawEdges.length.toLocaleString();
+            document.getElementById('statFiles').textContent = (data.repository && data.repository.fileCount != null)
+                ? data.repository.fileCount.toLocaleString()
+                : rawNodes.filter(n => n.kind === 'file').length.toLocaleString();
+
+            // Populate Nodes
+            allNodes = rawNodes.map((n, idx) => {
+                const nodeObj = {
+                    id: n.id,
+                    name: n.name || n.id,
+                    kind: n.kind || 'unknown',
+                    file: n.file || '',
+                    inDegree: 0,
+                    outDegree: 0,
+                    degree: 0,
+                    neighbors: new Set(),
+                    inEdges: [],
+                    outEdges: [],
+                    color: getNodeColor(n.kind),
+                    x: (Math.random() - 0.5) * 800 + width / 2,
+                    y: (Math.random() - 0.5) * 800 + height / 2,
+                };
+                nodeMap.set(n.id, nodeObj);
+                return nodeObj;
+            });
+
+            // Populate Edges (safely filtering out missing / unresolved endpoints)
+            allEdges = [];
+            rawEdges.forEach(e => {
+                const sourceNode = nodeMap.get(e.source);
+                const targetNode = nodeMap.get(e.target);
+                if (sourceNode && targetNode && sourceNode !== targetNode) {
+                    sourceNode.outDegree++;
+                    targetNode.inDegree++;
+                    sourceNode.degree++;
+                    targetNode.degree++;
+                    sourceNode.neighbors.add(targetNode);
+                    targetNode.neighbors.add(sourceNode);
+
+                    const edgeObj = {
+                        source: sourceNode,
+                        target: targetNode,
+                        kind: e.kind || 'contains',
+                        color: getEdgeColor(e.kind),
+                    };
+                    sourceNode.outEdges.push(edgeObj);
+                    targetNode.inEdges.push(edgeObj);
+                    allEdges.push(edgeObj);
+                }
+            });
+
+            // Setup Filter Checkboxes in Sidebar
+            populateFilterPanels();
+
+            // Setup D3 Simulation
+            applyFilters();
+            setupSimulation();
+            setupInteractions();
+        }
+
+        // ── Populate Filter Controls ──────────────────────────────
+        function populateFilterPanels() {
+            // Node kinds count
+            const nodeKindCounts = {};
+            allNodes.forEach(n => {
+                nodeKindCounts[n.kind] = (nodeKindCounts[n.kind] || 0) + 1;
+            });
+
+            const nodeFiltersList = document.getElementById('nodeFiltersList');
+            nodeFiltersList.innerHTML = '';
+            Object.keys(nodeKindCounts)
+                .sort((a, b) => nodeKindCounts[b] - nodeKindCounts[a])
+                .forEach(kind => {
+                    const cfg = KIND_CONFIG[kind] || { color: '#8b5cf6', label: kind };
+                    const row = document.createElement('div');
+                    row.className = 'filter-row';
+                    row.innerHTML = `
+                        <span class="filter-dot" style="background:${cfg.color};color:${cfg.color}"></span>
+                        <span class="filter-name">${cfg.label}</span>
+                        <span class="filter-count">${nodeKindCounts[kind]}</span>
+                    `;
+                    row.addEventListener('click', () => {
+                        if (disabledNodeKinds.has(kind)) {
+                            disabledNodeKinds.delete(kind);
+                            row.classList.remove('disabled');
+                        } else {
+                            disabledNodeKinds.add(kind);
+                            row.classList.add('disabled');
+                        }
+                        applyFilters();
+                    });
+                    nodeFiltersList.appendChild(row);
+                });
+
+            // Edge kinds count
+            const edgeKindCounts = {};
+            allEdges.forEach(e => {
+                edgeKindCounts[e.kind] = (edgeKindCounts[e.kind] || 0) + 1;
+            });
+
+            const edgeFiltersList = document.getElementById('edgeFiltersList');
+            edgeFiltersList.innerHTML = '';
+            Object.keys(edgeKindCounts)
+                .sort((a, b) => edgeKindCounts[b] - edgeKindCounts[a])
+                .forEach(kind => {
+                    const cfg = EDGE_CONFIG[kind] || { color: '#475569', label: kind };
+                    const row = document.createElement('div');
+                    row.className = 'filter-row';
+                    row.innerHTML = `
+                        <span class="filter-dot" style="background:${cfg.color};color:${cfg.color}"></span>
+                        <span class="filter-name">${cfg.label}</span>
+                        <span class="filter-count">${edgeKindCounts[kind]}</span>
+                    `;
+                    row.addEventListener('click', () => {
+                        if (disabledEdgeKinds.has(kind)) {
+                            disabledEdgeKinds.delete(kind);
+                            row.classList.remove('disabled');
+                        } else {
+                            disabledEdgeKinds.add(kind);
+                            row.classList.add('disabled');
+                        }
+                        applyFilters();
+                    });
+                    edgeFiltersList.appendChild(row);
+                });
+        }
+
+        // ── Filter Application ────────────────────────────────────
+        function applyFilters() {
+            const activeNodeSet = new Set();
+            filteredNodes = allNodes.filter(n => {
+                const matchKind = !disabledNodeKinds.has(n.kind);
+                if (matchKind) activeNodeSet.add(n);
+                return matchKind;
+            });
+
+            filteredEdges = allEdges.filter(e => {
+                const s = typeof e.source === 'object' ? e.source : nodeMap.get(e.source);
+                const t = typeof e.target === 'object' ? e.target : nodeMap.get(e.target);
+                return activeNodeSet.has(s) && activeNodeSet.has(t) && !disabledEdgeKinds.has(e.kind);
+            });
+
+            if (simulation) {
+                simulation.nodes(filteredNodes);
+                simulation.force('link').links(filteredEdges);
+                simulation.alpha(0.3).restart();
+            }
+            requestRender();
+        }
+
+        // ── D3 Force Simulation ───────────────────────────────────
+        function setupSimulation() {
+            simulation = d3.forceSimulation(filteredNodes)
+                .force('link', d3.forceLink(filteredEdges)
+                    .id(d => d.id)
+                    .distance(linkDistance)
+                    .strength(0.4)
+                )
+                .force('charge', d3.forceManyBody()
+                    .strength(-repulsion)
+                    .distanceMax(650)
+                )
+                .force('center', d3.forceCenter(width / 2, height / 2).strength(centerGravity))
+                .force('collide', d3.forceCollide().radius(d => getNodeRadius(d) + 2).iterations(1))
+                .alphaDecay(0.02)
+                .on('tick', requestRender);
+        }
+
+        function getNodeRadius(node) {
+            if (!scaleByDegree) return baseNodeRadius;
+            return Math.max(2.5, Math.min(18, baseNodeRadius * 0.7 + Math.sqrt(node.degree || 0) * 1.3));
+        }
+
+        // ── Canvas Rendering (60fps Canvas Loop) ──────────────────
+        function render() {
+            ctx.save();
+            ctx.clearRect(0, 0, width, height);
+
+            // Apply zoom & pan transform
+            ctx.translate(transform.x, transform.y);
+            ctx.scale(transform.k, transform.k);
+
+            const isFocusActive = hoveredNode || selectedNode;
+            const focusNode = hoveredNode || selectedNode;
+            const focusNeighbors = focusNode ? focusNode.neighbors : null;
+
+            // 1. Draw Edges
+            const edgeCount = filteredEdges.length;
+            for (let i = 0; i < edgeCount; i++) {
+                const e = filteredEdges[i];
+                const s = e.source;
+                const t = e.target;
+                if (!s.x || !t.x) continue;
+
+                const isConnected = focusNode && (s === focusNode || t === focusNode);
+
+                ctx.beginPath();
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(t.x, t.y);
+
+                if (isFocusActive) {
+                    if (isConnected) {
+                        ctx.strokeStyle = e.color || '#a78bfa';
+                        ctx.globalAlpha = 0.9;
+                        ctx.lineWidth = 1.8 / Math.sqrt(transform.k);
+                        ctx.stroke();
+                    } else {
+                        // Dimmed out
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+                        ctx.globalAlpha = 0.05;
+                        ctx.lineWidth = 0.5 / transform.k;
+                        ctx.stroke();
+                    }
+                } else {
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+                    ctx.globalAlpha = 0.35;
+                    ctx.lineWidth = 0.8 / transform.k;
+                    ctx.stroke();
+                }
+            }
+
+            // 2. Draw Nodes
+            const nodeCount = filteredNodes.length;
+            const isSearching = searchTerm.length > 0;
+
+            for (let i = 0; i < nodeCount; i++) {
+                const n = filteredNodes[i];
+                if (!n.x) continue;
+
+                const r = getNodeRadius(n);
+                let alpha = 1.0;
+                let isMatch = true;
+
+                if (isSearching) {
+                    isMatch = n.name.toLowerCase().includes(searchTerm) || n.file.toLowerCase().includes(searchTerm);
+                }
+
+                if (isFocusActive) {
+                    const isSelf = (n === focusNode);
+                    const isNeighbor = focusNeighbors && focusNeighbors.has(n);
+                    if (!isSelf && !isNeighbor) {
+                        alpha = 0.08;
+                    }
+                } else if (isSearching && !isMatch) {
+                    alpha = 0.08;
+                }
+
+                ctx.globalAlpha = alpha;
+
+                // Node Body
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = n.color;
+                ctx.fill();
+
+                // Glow / Border for selected or hovered
+                if (n === focusNode) {
+                    ctx.shadowBlur = 16;
+                    ctx.shadowColor = n.color;
+                    ctx.lineWidth = 2.5 / transform.k;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
+                    ctx.shadowBlur = 0; // reset
+                } else if (isFocusActive && focusNeighbors && focusNeighbors.has(n)) {
+                    ctx.lineWidth = 1.2 / transform.k;
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.stroke();
+                }
+            }
+
+            // 3. Draw Labels
+            // Draw labels for hovered, selected, search matches, or if showLabels is active and visible
+            if (showLabels || isFocusActive || isSearching) {
+                const fontSize = Math.max(9, Math.min(14, 11 / transform.k));
+                ctx.font = `${fontSize}px Inter, -apple-system, BlinkMacSystemFont, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+
+                for (let i = 0; i < nodeCount; i++) {
+                    const n = filteredNodes[i];
+                    if (!n.x) continue;
+
+                    const isSelf = (n === focusNode);
+                    const isNeighbor = focusNeighbors && focusNeighbors.has(n);
+                    const isMatch = isSearching && (n.name.toLowerCase().includes(searchTerm) || n.file.toLowerCase().includes(searchTerm));
+
+                    const shouldDraw = isSelf || isNeighbor || isMatch || (showLabels && transform.k >= 0.7 && n.degree >= 3) || (showLabels && transform.k >= 1.5);
+
+                    if (!shouldDraw) continue;
+
+                    const r = getNodeRadius(n);
+                    const textY = n.y + r + 3;
+                    const text = n.name;
+
+                    // Text background pill
+                    const textWidth = ctx.measureText(text).width;
+                    const padX = 3;
+                    const padY = 1.5;
+
+                    ctx.globalAlpha = isFocusActive && !isSelf && !isNeighbor ? 0.15 : 0.85;
+                    ctx.fillStyle = '#0e0e12';
+                    ctx.fillRect(n.x - textWidth / 2 - padX, textY - padY, textWidth + padX * 2, fontSize + padY * 2);
+
+                    ctx.globalAlpha = isFocusActive && !isSelf && !isNeighbor ? 0.2 : 0.95;
+                    ctx.fillStyle = isSelf ? '#ffffff' : (isNeighbor ? '#f1f5f9' : 'rgba(255, 255, 255, 0.75)');
+                    ctx.fillText(text, n.x, textY);
+                }
+            }
+
+            ctx.restore();
+        }
+
+        // ── Interaction: Zoom, Drag & Click ───────────────────────
+        let isDraggingNode = false;
+        let dragTarget = null;
+
+        function setupInteractions() {
+            // D3 Zoom Setup
+            const zoomBehavior = d3.zoom()
+                .scaleExtent([0.04, 10])
+                .on('zoom', (event) => {
+                    transform = event.transform;
+                    requestRender();
+                });
+
+            d3.select(canvas)
+                .call(zoomBehavior)
+                .on('dblclick.zoom', null); // Disable double click zoom
+
+            // Find node at screen coordinate
+            function getNodeAt(screenX, screenY) {
+                const [modelX, modelY] = transform.invert([screenX, screenY]);
+                let bestNode = null;
+                let minDist = Infinity;
+
+                for (let i = 0; i < filteredNodes.length; i++) {
+                    const n = filteredNodes[i];
+                    if (!n.x) continue;
+                    const dx = n.x - modelX;
+                    const dy = n.y - modelY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const hitRadius = Math.max(getNodeRadius(n), 7 / transform.k);
+                    if (dist <= hitRadius && dist < minDist) {
+                        minDist = dist;
+                        bestNode = n;
+                    }
+                }
+                return bestNode;
+            }
+
+            // Mouse Move (Hover testing)
+            canvas.addEventListener('mousemove', (e) => {
+                if (isDraggingNode) return;
+                const node = getNodeAt(e.clientX, e.clientY);
+                if (node !== hoveredNode) {
+                    hoveredNode = node;
+                    canvas.style.cursor = hoveredNode ? 'pointer' : 'grab';
+                    requestRender();
+                }
+            });
+
+            // Mouse Leave canvas
+            canvas.addEventListener('mouseleave', () => {
+                if (hoveredNode && !isDraggingNode) {
+                    hoveredNode = null;
+                    requestRender();
+                }
+            });
+
+            // Drag behavior for nodes
+            d3.select(canvas).call(
+                d3.drag()
+                    .container(canvas)
+                    .subject((event) => getNodeAt(event.x, event.y))
+                    .on('start', (event) => {
+                        if (!event.subject) return;
+                        isDraggingNode = true;
+                        dragTarget = event.subject;
+                        canvas.classList.add('dragging');
+                        simulation.alphaTarget(0.2).restart();
+                        dragTarget.fx = dragTarget.x;
+                        dragTarget.fy = dragTarget.y;
+                    })
+                    .on('drag', (event) => {
+                        if (!dragTarget) return;
+                        const [mx, my] = transform.invert([event.x, event.y]);
+                        dragTarget.fx = mx;
+                        dragTarget.fy = my;
+                        requestRender();
+                    })
+                    .on('end', () => {
+                        if (!dragTarget) return;
+                        isDraggingNode = false;
+                        canvas.classList.remove('dragging');
+                        simulation.alphaTarget(0);
+                        dragTarget.fx = null;
+                        dragTarget.fy = null;
+                        dragTarget = null;
+                    })
+            );
+
+            // Click / Tap to select node or dismiss
+            canvas.addEventListener('click', (e) => {
+                const node = getNodeAt(e.clientX, e.clientY);
+                if (node) {
+                    selectNode(node);
+                } else {
+                    clearSelection();
+                }
+            });
+
+            // Top Buttons
+            document.getElementById('btnFit').addEventListener('click', fitGraph);
+            document.getElementById('btnReheat').addEventListener('click', () => {
+                simulation.alpha(0.6).restart();
+            });
+
+            // Zoom Buttons
+            document.getElementById('zoomIn').addEventListener('click', () => {
+                d3.select(canvas).transition().duration(250).call(zoomBehavior.scaleBy, 1.3);
+            });
+            document.getElementById('zoomOut').addEventListener('click', () => {
+                d3.select(canvas).transition().duration(250).call(zoomBehavior.scaleBy, 0.7);
+            });
+            document.getElementById('zoomFit').addEventListener('click', fitGraph);
+
+            // Fit Graph Function
+            function fitGraph() {
+                if (!filteredNodes.length) return;
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                filteredNodes.forEach(n => {
+                    if (n.x < minX) minX = n.x;
+                    if (n.x > maxX) maxX = n.x;
+                    if (n.y < minY) minY = n.y;
+                    if (n.y > maxY) maxY = n.y;
+                });
+                const graphW = Math.max(maxX - minX, 100);
+                const graphH = Math.max(maxY - minY, 100);
+                const padding = 80;
+                const scale = Math.max(0.06, Math.min(2.5, Math.min(
+                    (width - padding * 2) / graphW,
+                    (height - padding * 2) / graphH
+                )));
+                const centerX = (minX + maxX) / 2;
+                const centerY = (minY + maxY) / 2;
+
+                const targetTransform = d3.zoomIdentity
+                    .translate(width / 2, height / 2)
+                    .scale(scale)
+                    .translate(-centerX, -centerY);
+
+                d3.select(canvas).transition().duration(600).call(zoomBehavior.transform, targetTransform);
+            }
+
+            // Search Bar Input
+            const searchInput = document.getElementById('search');
+            const searchClear = document.getElementById('searchClear');
+
+            searchInput.addEventListener('input', (e) => {
+                searchTerm = e.target.value.trim().toLowerCase();
+                searchClear.style.display = searchTerm ? 'block' : 'none';
+                requestRender();
+            });
+            searchClear.addEventListener('click', () => {
+                searchInput.value = '';
+                searchTerm = '';
+                searchClear.style.display = 'none';
+                requestRender();
+            });
+
+            // Controls: Labels Toggle
+            const togLabels = document.getElementById('togLabels');
+            document.getElementById('togLabelsRow').addEventListener('click', () => {
+                showLabels = !showLabels;
+                togLabels.classList.toggle('on', showLabels);
+                requestRender();
+            });
+
+            // Controls: Scale Degree Toggle
+            const togScale = document.getElementById('togScale');
+            document.getElementById('togScaleRow').addEventListener('click', () => {
+                scaleByDegree = !scaleByDegree;
+                togScale.classList.toggle('on', scaleByDegree);
+                if (simulation) simulation.alpha(0.15).restart();
+                requestRender();
+            });
+
+            // Controls: Node Size Slider
+            const sliderNodeSize = document.getElementById('sliderNodeSize');
+            const valNodeSize = document.getElementById('valNodeSize');
+            sliderNodeSize.addEventListener('input', (e) => {
+                baseNodeRadius = parseFloat(e.target.value);
+                valNodeSize.textContent = baseNodeRadius;
+                requestRender();
+            });
+
+            // Controls: Link Distance Slider
+            const sliderLinkDist = document.getElementById('sliderLinkDist');
+            const valLinkDist = document.getElementById('valLinkDist');
+            sliderLinkDist.addEventListener('input', (e) => {
+                linkDistance = parseFloat(e.target.value);
+                valLinkDist.textContent = linkDistance;
+                if (simulation) {
+                    simulation.force('link').distance(linkDistance);
+                    simulation.alpha(0.2).restart();
+                }
+            });
+
+            // Controls: Repulsion Slider
+            const sliderRepulsion = document.getElementById('sliderRepulsion');
+            const valRepulsion = document.getElementById('valRepulsion');
+            sliderRepulsion.addEventListener('input', (e) => {
+                repulsion = parseFloat(e.target.value);
+                valRepulsion.textContent = repulsion;
+                if (simulation) {
+                    simulation.force('charge').strength(-repulsion);
+                    simulation.alpha(0.2).restart();
+                }
+            });
+
+            // Controls: Center Gravity Slider
+            const sliderGravity = document.getElementById('sliderGravity');
+            const valGravity = document.getElementById('valGravity');
+            sliderGravity.addEventListener('input', (e) => {
+                centerGravity = parseFloat(e.target.value);
+                valGravity.textContent = centerGravity;
+                if (simulation) {
+                    simulation.force('center').strength(centerGravity);
+                    simulation.alpha(0.2).restart();
+                }
+            });
+
+            // Panel Collapsible Toggle
+            const panel = document.getElementById('panel');
+            const panelToggle = document.getElementById('panelToggle');
+            const zoomControls = document.getElementById('zoomControls');
+            let isPanelOpen = true;
+
+            panelToggle.addEventListener('click', () => {
+                isPanelOpen = !isPanelOpen;
+                panel.classList.toggle('hidden', !isPanelOpen);
+                panelToggle.classList.toggle('closed', !isPanelOpen);
+                panelToggle.textContent = isPanelOpen ? '◀' : '▶';
+                zoomControls.style.left = isPanelOpen ? '256px' : '20px';
+            });
+
+            // Info Card Close Button
+            document.getElementById('icClose').addEventListener('click', clearSelection);
+        }
+
+        // ── Node Selection & Info Card ────────────────────────────
+        function selectNode(node) {
+            selectedNode = node;
+            const infoCard = document.getElementById('infoCard');
+            const icKind = document.getElementById('icKind');
+            const icName = document.getElementById('icName');
+            const icPath = document.getElementById('icPath');
+            const icIn = document.getElementById('icIn');
+            const icOut = document.getElementById('icOut');
+            const icTotal = document.getElementById('icTotal');
+            const icNeighbors = document.getElementById('icNeighbors');
+
+            icKind.textContent = (node.kind || 'unknown').replace(/_/g, ' ');
+            icKind.style.color = node.color;
+            icKind.style.backgroundColor = `${node.color}22`;
+            icName.textContent = node.name;
+            icPath.textContent = node.file || node.id;
+            icIn.textContent = node.inDegree || 0;
+            icOut.textContent = node.outDegree || 0;
+            icTotal.textContent = node.degree || 0;
+
+            // Render neighbors list
+            icNeighbors.innerHTML = '';
+            const neighborList = Array.from(node.neighbors);
+            if (neighborList.length === 0) {
+                icNeighbors.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:11px;">No connected symbols</div>';
+            } else {
+                neighborList.slice(0, 30).forEach(neighbor => {
+                    const item = document.createElement('div');
+                    item.className = 'ic-neighbor-item';
+                    item.innerHTML = `
+                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${neighbor.name}</span>
+                        <span style="font-size:9px;color:${neighbor.color};text-transform:uppercase;">${neighbor.kind}</span>
+                    `;
+                    item.addEventListener('click', () => {
+                        selectNode(neighbor);
+                        centerOnNode(neighbor);
+                    });
+                    icNeighbors.appendChild(item);
+                });
+            }
+
+            infoCard.classList.add('visible');
+            requestRender();
+        }
+
+        function clearSelection() {
+            selectedNode = null;
+            document.getElementById('infoCard').classList.remove('visible');
+            requestRender();
+        }
+
+        function centerOnNode(node) {
+            if (!node.x) return;
+            const targetTransform = d3.zoomIdentity
+                .translate(width / 2, height / 2)
+                .scale(Math.max(transform.k, 1.2))
+                .translate(-node.x, -node.y);
+            d3.select(canvas).transition().duration(500).call(
+                d3.zoom().transform,
+                targetTransform
+            );
+        }
+
+    })();
+    </script>
+</body>
+</html>
