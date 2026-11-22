@@ -4,7 +4,7 @@ use tracers_core::NodeKind;
 
 use crate::syntax::{CallKind, LocalBinding};
 use crate::util::{
-    child_field, first_named, is_builtin_type, is_upper_camel, named_children, range, SyntaxBuilder,
+    SyntaxBuilder, child_field, first_named, is_builtin_type, is_upper_camel, named_children, range,
 };
 
 use super::items::parse_item;
@@ -47,17 +47,53 @@ pub(crate) fn parse_call(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
         "generic_function" => {
             if let Some(inner) = child_field(function, "function") {
                 let full = builder.text(inner).to_string();
-                let name = full.rsplit("::").next().unwrap_or(&full).trim().to_string();
-                builder.add_call(None, name, full, CallKind::Function, node);
+                if inner.kind() == "field_expression" {
+                    let receiver = child_field(inner, "value").map(|v| builder.text(v).to_string());
+                    if let Some(field) = child_field(inner, "field") {
+                        let name = builder.text(field).to_string();
+                        builder.add_call(receiver, name, full, CallKind::Method, node);
+                    }
+                } else if let Some(leaf) = callee_leaf(inner) {
+                    let name = builder.text(leaf).to_string();
+                    builder.add_call(None, name, full, CallKind::Function, node);
+                }
             }
         }
         _ => {
             let full = builder.text(function).to_string();
-            let name = full.rsplit("::").next().unwrap_or(&full).trim().to_string();
-            if !name.is_empty() {
+            if let Some(leaf) = callee_leaf(function) {
+                let name = builder.text(leaf).to_string();
                 builder.add_call(None, name, full, CallKind::Function, node);
             }
         }
+    }
+}
+
+/// Walk a callee expression down to its terminal identifier node.
+///
+/// Chained calls (`a.b().c()`), generic arguments, and wrappers
+/// (`await`, `?`, parentheses) otherwise leak whole expression text into
+/// the call name.
+fn callee_leaf<'a>(node: TsNode<'a>) -> Option<TsNode<'a>> {
+    match node.kind() {
+        "identifier" | "field_identifier" | "type_identifier" => Some(node),
+        "field_expression" => child_field(node, "field"),
+        "scoped_identifier" => child_field(node, "name"),
+        "generic_function" | "call_expression" => {
+            child_field(node, "function").and_then(|inner| callee_leaf(inner))
+        }
+        "await_expression"
+        | "try_expression"
+        | "reference_expression"
+        | "parenthesized_expression"
+        | "index_expression"
+        | "subscript_expression"
+        | "cast_expression"
+        | "borrow_expression"
+        | "deref_expression" => first_named(node).and_then(|inner| callee_leaf(inner)),
+        _ => named_children(node)
+            .last()
+            .and_then(|child| callee_leaf(*child)),
     }
 }
 

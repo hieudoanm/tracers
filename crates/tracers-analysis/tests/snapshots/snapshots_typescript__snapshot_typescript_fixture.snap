@@ -906,30 +906,6 @@ expression: document
       "language": "typescript"
     },
     {
-      "id": "unresolved:typescript:find",
-      "kind": "unknown",
-      "name": "find",
-      "language": "typescript"
-    },
-    {
-      "id": "unresolved:typescript:get",
-      "kind": "unknown",
-      "name": "get",
-      "language": "typescript"
-    },
-    {
-      "id": "unresolved:typescript:reduce",
-      "kind": "unknown",
-      "name": "reduce",
-      "language": "typescript"
-    },
-    {
-      "id": "unresolved:typescript:set",
-      "kind": "unknown",
-      "name": "set",
-      "language": "typescript"
-    },
-    {
       "id": "variable:src/extra.ts::plain",
       "kind": "variable",
       "name": "plain",
@@ -1669,27 +1645,6 @@ expression: document
     },
     {
       "source": "function:src/complex.ts::total",
-      "target": "unresolved:typescript:reduce",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 6,
-            "column": 57,
-            "byte": 234
-          },
-          "end": {
-            "line": 6,
-            "column": 91,
-            "byte": 268
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/complex.ts::total",
       "target": "interface:src/complex.ts::Shape",
       "kind": "uses_type",
       "status": "resolved_internal",
@@ -1807,27 +1762,6 @@ expression: document
     },
     {
       "source": "method:src/service.ts::InMemoryRepository.find",
-      "target": "unresolved:typescript:get",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 12,
-            "column": 12,
-            "byte": 280
-          },
-          "end": {
-            "line": 12,
-            "column": 30,
-            "byte": 298
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:src/service.ts::InMemoryRepository.find",
       "target": "unresolved:typescript:T",
       "kind": "uses_type",
       "status": "unresolved",
@@ -1843,27 +1777,6 @@ expression: document
             "line": 11,
             "column": 22,
             "byte": 254
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:src/service.ts::InMemoryRepository.save",
-      "target": "unresolved:typescript:set",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 16,
-            "column": 5,
-            "byte": 335
-          },
-          "end": {
-            "line": 16,
-            "column": 47,
-            "byte": 377
           }
         }
       ]
@@ -1906,27 +1819,6 @@ expression: document
             "line": 26,
             "column": 24,
             "byte": 610
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:src/service.ts::ShapeService.area",
-      "target": "unresolved:typescript:find",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 24,
-            "column": 19,
-            "byte": 521
-          },
-          "end": {
-            "line": 24,
-            "column": 37,
-            "byte": 539
           }
         }
       ]
@@ -2302,10 +2194,10 @@ expression: document
   "statistics": {
     "files": 4,
     "packages": 0,
-    "nodes": 54,
-    "edges": 136,
+    "nodes": 50,
+    "edges": 132,
     "symbols": 37,
-    "unresolvedEdges": 12,
+    "unresolvedEdges": 8,
     "diagnostics": 3,
     "byNodeKind": {
       "class": 5,
@@ -2322,11 +2214,11 @@ expression: document
       "property": 2,
       "repository": 1,
       "type": 1,
-      "unknown": 7,
+      "unknown": 3,
       "variable": 1
     },
     "byEdgeKind": {
-      "calls": 8,
+      "calls": 4,
       "contains": 45,
       "defines": 37,
       "exports": 31,
@@ -2335,12 +2227,12 @@ expression: document
       "uses_type": 8
     },
     "byLanguage": {
-      "typescript": 53
+      "typescript": 49
     },
     "byStatus": {
       "resolved_external": 1,
       "resolved_internal": 123,
-      "unresolved": 12
+      "unresolved": 8
     },
     "byFramework": {}
   }

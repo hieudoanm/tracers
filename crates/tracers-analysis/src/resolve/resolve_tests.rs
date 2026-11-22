@@ -33,10 +33,11 @@ fn resolves_relative_typescript_imports() {
         ),
     ]);
     let pass = resolve_imports(&mut index);
-    assert!(pass
-        .edges
-        .iter()
-        .any(|edge| matches!(&edge.module, ModuleRef::File(path) if path == "src/math.ts")));
+    assert!(
+        pass.edges
+            .iter()
+            .any(|edge| matches!(&edge.module, ModuleRef::File(path) if path == "src/math.ts"))
+    );
     let main = index.files.get("src/main.ts").unwrap();
     assert!(
         matches!(main.bindings.get("twice"), Some(Binding::Symbol(symbol)) if symbol.name == "twice")
@@ -78,10 +79,11 @@ fn resolves_python_package_imports() {
         ),
     ]);
     let pass = resolve_imports(&mut index);
-    assert!(pass
-        .edges
-        .iter()
-        .any(|edge| matches!(&edge.module, ModuleRef::File(path) if path == "pkg/util.py")));
+    assert!(
+        pass.edges
+            .iter()
+            .any(|edge| matches!(&edge.module, ModuleRef::File(path) if path == "pkg/util.py"))
+    );
     let main = index.files.get("pkg/main.py").unwrap();
     assert!(matches!(
         main.bindings.get("helper"),
@@ -104,10 +106,11 @@ fn resolves_rust_use_paths() {
         ),
     ]);
     let pass = resolve_imports(&mut index);
-    assert!(pass
-        .edges
-        .iter()
-        .any(|edge| matches!(&edge.module, ModuleRef::File(path) if path == "src/util.rs")));
+    assert!(
+        pass.edges
+            .iter()
+            .any(|edge| matches!(&edge.module, ModuleRef::File(path) if path == "src/util.rs"))
+    );
     let state = index.files.get("src/lib.rs").unwrap();
     assert!(matches!(
         state.bindings.get("helper"),
@@ -143,8 +146,9 @@ fn reports_unresolved_relative_imports() {
         "import { missing } from './nope';\n",
     )]);
     let pass = resolve_imports(&mut index);
-    assert!(pass
-        .diagnostics
-        .iter()
-        .any(|diagnostic| diagnostic.kind == DiagnosticKind::UnresolvedImport));
+    assert!(
+        pass.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.kind == DiagnosticKind::UnresolvedImport)
+    );
 }

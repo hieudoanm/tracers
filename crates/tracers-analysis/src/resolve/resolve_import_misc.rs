@@ -5,10 +5,10 @@
 
 use tracers_core::{Diagnostic, DiagnosticKind};
 
-use crate::index::{python_module_name, ModuleRef};
+use crate::index::{ModuleRef, python_module_name};
 
 use super::resolve_import_pass::ImportContext;
-use super::resolve_resolution_ext::{choose, join_external, ResolutionExt};
+use super::resolve_resolution_ext::{ResolutionExt, choose, join_external};
 use super::resolve_types::{Resolution, Want};
 
 impl<'a> ImportContext<'a> {

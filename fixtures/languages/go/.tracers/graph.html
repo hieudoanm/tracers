@@ -619,6 +619,18 @@
       "language": "go"
     },
     {
+      "id": "external:go:builtin::make",
+      "kind": "external_symbol",
+      "name": "make",
+      "language": "go"
+    },
+    {
+      "id": "external:go:builtin::panic",
+      "kind": "external_symbol",
+      "name": "panic",
+      "language": "go"
+    },
+    {
       "id": "external:unknown:fmt",
       "kind": "external_symbol",
       "name": "fmt",
@@ -1464,18 +1476,6 @@
       "language": "go"
     },
     {
-      "id": "unresolved:go:make",
-      "kind": "unknown",
-      "name": "make",
-      "language": "go"
-    },
-    {
-      "id": "unresolved:go:panic",
-      "kind": "unknown",
-      "name": "panic",
-      "language": "go"
-    },
-    {
       "id": "variable:pkg/service/service.go::*MemoryRepository.Find.c",
       "kind": "variable",
       "name": "c",
@@ -2268,10 +2268,10 @@
     },
     {
       "source": "function:pkg/service/service.go::NewMemoryRepository",
-      "target": "unresolved:go:make",
+      "target": "external:go:builtin::make",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2724,6 +2724,27 @@
     },
     {
       "source": "method:pkg/service/service.go::*ShapeService.Area",
+      "target": "external:go:builtin::panic",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 38,
+            "column": 3,
+            "byte": 765
+          },
+          "end": {
+            "line": 38,
+            "column": 21,
+            "byte": 783
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:pkg/service/service.go::*ShapeService.Area",
       "target": "unresolved:go:Area",
       "kind": "calls",
       "status": "unresolved",
@@ -2760,27 +2781,6 @@
             "line": 36,
             "column": 26,
             "byte": 752
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:pkg/service/service.go::*ShapeService.Area",
-      "target": "unresolved:go:panic",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 38,
-            "column": 3,
-            "byte": 765
-          },
-          "end": {
-            "line": 38,
-            "column": 21,
-            "byte": 783
           }
         }
       ]
@@ -3198,10 +3198,10 @@
     "nodes": 67,
     "edges": 163,
     "symbols": 37,
-    "unresolvedEdges": 15,
+    "unresolvedEdges": 13,
     "diagnostics": 1,
     "byNodeKind": {
-      "external_symbol": 8,
+      "external_symbol": 10,
       "file": 4,
       "function": 5,
       "interface": 3,
@@ -3211,7 +3211,7 @@
       "property": 6,
       "repository": 1,
       "struct": 5,
-      "unknown": 9,
+      "unknown": 7,
       "variable": 5
     },
     "byEdgeKind": {
@@ -3226,9 +3226,9 @@
       "go": 62
     },
     "byStatus": {
-      "resolved_external": 8,
+      "resolved_external": 10,
       "resolved_internal": 140,
-      "unresolved": 15
+      "unresolved": 13
     },
     "byFramework": {}
   }

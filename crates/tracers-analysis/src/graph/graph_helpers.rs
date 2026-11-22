@@ -5,7 +5,7 @@ use tracers_parser::{CallData, CallKind};
 
 use crate::index::{FileState, ModuleRef, RepositoryIndex, SymbolRef};
 use crate::resolve::resolve_path_helpers::last_path_segment;
-use crate::resolve::resolve_resolver::{clean_name, Resolver};
+use crate::resolve::resolve_resolver::{Resolver, clean_name};
 
 use super::graph_types::{CallTarget, GraphBuilder};
 
@@ -63,7 +63,9 @@ impl GraphBuilder {
             }
             return match call.kind {
                 CallKind::Constructor => CallTarget::External(format!("{receiver}.{}", call.name)),
-                _ => CallTarget::Unresolved,
+                _ => crate::resolve::builtin_calls::builtin_qualified(state.language, &call.name)
+                    .map(CallTarget::External)
+                    .unwrap_or(CallTarget::Unresolved),
             };
         }
 
@@ -122,8 +124,13 @@ impl GraphBuilder {
         }
 
         match call.kind {
-            CallKind::Constructor => CallTarget::External(call.name.clone()),
-            _ => CallTarget::Unresolved,
+            CallKind::Constructor => CallTarget::External(
+                crate::resolve::builtin_calls::builtin_qualified(state.language, &call.name)
+                    .unwrap_or_else(|| call.name.clone()),
+            ),
+            _ => crate::resolve::builtin_calls::builtin_qualified(state.language, &call.name)
+                .map(CallTarget::External)
+                .unwrap_or(CallTarget::Unresolved),
         }
     }
 
