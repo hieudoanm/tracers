@@ -619,6 +619,12 @@
       "language": "go"
     },
     {
+      "id": "external:go:github.com/example/trace/fixtures/go/pkg/math.Circle",
+      "kind": "external_symbol",
+      "name": "Circle",
+      "language": "go"
+    },
+    {
       "id": "external:unknown:fmt",
       "kind": "external_symbol",
       "name": "fmt",
@@ -841,10 +847,10 @@
       "exported": true
     },
     {
-      "id": "method:pkg/service/service.go::*MemoryRepository.Find",
+      "id": "method:pkg/service/service.go::MemoryRepository.Find",
       "kind": "method",
       "name": "Find",
-      "qualifiedName": "*MemoryRepository.Find",
+      "qualifiedName": "MemoryRepository.Find",
       "file": "pkg/service/service.go",
       "range": {
         "start": {
@@ -859,14 +865,14 @@
         }
       },
       "language": "go",
-      "parent": "module:pkg/service/service.go",
+      "parent": "struct:pkg/service/service.go::MemoryRepository",
       "exported": true
     },
     {
-      "id": "method:pkg/service/service.go::*MemoryRepository.Save",
+      "id": "method:pkg/service/service.go::MemoryRepository.Save",
       "kind": "method",
       "name": "Save",
-      "qualifiedName": "*MemoryRepository.Save",
+      "qualifiedName": "MemoryRepository.Save",
       "file": "pkg/service/service.go",
       "range": {
         "start": {
@@ -881,29 +887,7 @@
         }
       },
       "language": "go",
-      "parent": "module:pkg/service/service.go",
-      "exported": true
-    },
-    {
-      "id": "method:pkg/service/service.go::*ShapeService.Area",
-      "kind": "method",
-      "name": "Area",
-      "qualifiedName": "*ShapeService.Area",
-      "file": "pkg/service/service.go",
-      "range": {
-        "start": {
-          "line": 35,
-          "column": 1,
-          "byte": 678
-        },
-        "end": {
-          "line": 41,
-          "column": 2,
-          "byte": 805
-        }
-      },
-      "language": "go",
-      "parent": "module:pkg/service/service.go",
+      "parent": "struct:pkg/service/service.go::MemoryRepository",
       "exported": true
     },
     {
@@ -948,6 +932,28 @@
       },
       "language": "go",
       "parent": "interface:pkg/service/service.go::Repository",
+      "exported": true
+    },
+    {
+      "id": "method:pkg/service/service.go::ShapeService.Area",
+      "kind": "method",
+      "name": "Area",
+      "qualifiedName": "ShapeService.Area",
+      "file": "pkg/service/service.go",
+      "range": {
+        "start": {
+          "line": 35,
+          "column": 1,
+          "byte": 678
+        },
+        "end": {
+          "line": 41,
+          "column": 2,
+          "byte": 805
+        }
+      },
+      "language": "go",
+      "parent": "struct:pkg/service/service.go::ShapeService",
       "exported": true
     },
     {
@@ -1428,40 +1434,34 @@
       "language": "go"
     },
     {
-      "id": "unresolved:go:Circle",
-      "kind": "unknown",
-      "name": "Circle",
-      "language": "go"
-    },
-    {
-      "id": "unresolved:go:Find",
-      "kind": "unknown",
-      "name": "Find",
-      "language": "go"
-    },
-    {
-      "id": "unresolved:go:Rectangle",
-      "kind": "unknown",
-      "name": "Rectangle",
-      "language": "go"
-    },
-    {
-      "id": "unresolved:go:Shape",
-      "kind": "unknown",
-      "name": "Shape",
-      "language": "go"
-    },
-    {
       "id": "unresolved:go:TotalArea",
       "kind": "unknown",
       "name": "TotalArea",
       "language": "go"
     },
     {
-      "id": "variable:pkg/service/service.go::*MemoryRepository.Find.c",
+      "id": "unresolved:go:geometry.Circle",
+      "kind": "unknown",
+      "name": "geometry.Circle",
+      "language": "go"
+    },
+    {
+      "id": "unresolved:go:geometry.Rectangle",
+      "kind": "unknown",
+      "name": "geometry.Rectangle",
+      "language": "go"
+    },
+    {
+      "id": "unresolved:go:geometry.Shape",
+      "kind": "unknown",
+      "name": "geometry.Shape",
+      "language": "go"
+    },
+    {
+      "id": "variable:pkg/service/service.go::MemoryRepository.Find.c",
       "kind": "variable",
       "name": "c",
-      "qualifiedName": "*MemoryRepository.Find.c",
+      "qualifiedName": "MemoryRepository.Find.c",
       "file": "pkg/service/service.go",
       "range": {
         "start": {
@@ -1476,14 +1476,36 @@
         }
       },
       "language": "go",
-      "parent": "method:pkg/service/service.go::*MemoryRepository.Find",
+      "parent": "method:pkg/service/service.go::MemoryRepository.Find",
       "exported": false
     },
     {
-      "id": "variable:pkg/service/service.go::*ShapeService.Area.c",
+      "id": "variable:pkg/service/service.go::MemoryRepository.Find.ok",
+      "kind": "variable",
+      "name": "ok",
+      "qualifiedName": "MemoryRepository.Find.ok",
+      "file": "pkg/service/service.go",
+      "range": {
+        "start": {
+          "line": 19,
+          "column": 2,
+          "byte": 421
+        },
+        "end": {
+          "line": 19,
+          "column": 22,
+          "byte": 441
+        }
+      },
+      "language": "go",
+      "parent": "method:pkg/service/service.go::MemoryRepository.Find",
+      "exported": false
+    },
+    {
+      "id": "variable:pkg/service/service.go::ShapeService.Area.c",
       "kind": "variable",
       "name": "c",
-      "qualifiedName": "*ShapeService.Area.c",
+      "qualifiedName": "ShapeService.Area.c",
       "file": "pkg/service/service.go",
       "range": {
         "start": {
@@ -1498,7 +1520,29 @@
         }
       },
       "language": "go",
-      "parent": "method:pkg/service/service.go::*ShapeService.Area",
+      "parent": "method:pkg/service/service.go::ShapeService.Area",
+      "exported": false
+    },
+    {
+      "id": "variable:pkg/service/service.go::ShapeService.Area.ok",
+      "kind": "variable",
+      "name": "ok",
+      "qualifiedName": "ShapeService.Area.ok",
+      "file": "pkg/service/service.go",
+      "range": {
+        "start": {
+          "line": 36,
+          "column": 2,
+          "byte": 728
+        },
+        "end": {
+          "line": 36,
+          "column": 26,
+          "byte": 752
+        }
+      },
+      "language": "go",
+      "parent": "method:pkg/service/service.go::ShapeService.Area",
       "exported": false
     },
     {
@@ -1592,21 +1636,14 @@
     },
     {
       "source": "file:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*MemoryRepository.Find",
+      "target": "method:pkg/service/service.go::MemoryRepository.Find",
       "kind": "contains",
       "status": "resolved_internal",
       "origin": "syntax"
     },
     {
       "source": "file:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*MemoryRepository.Save",
-      "kind": "contains",
-      "status": "resolved_internal",
-      "origin": "syntax"
-    },
-    {
-      "source": "file:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*ShapeService.Area",
+      "target": "method:pkg/service/service.go::MemoryRepository.Save",
       "kind": "contains",
       "status": "resolved_internal",
       "origin": "syntax"
@@ -1621,6 +1658,13 @@
     {
       "source": "file:pkg/service/service.go",
       "target": "method:pkg/service/service.go::Repository.Save",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:pkg/service/service.go",
+      "target": "method:pkg/service/service.go::ShapeService.Area",
       "kind": "contains",
       "status": "resolved_internal",
       "origin": "syntax"
@@ -1662,14 +1706,28 @@
     },
     {
       "source": "file:pkg/service/service.go",
-      "target": "variable:pkg/service/service.go::*MemoryRepository.Find.c",
+      "target": "variable:pkg/service/service.go::MemoryRepository.Find.c",
       "kind": "contains",
       "status": "resolved_internal",
       "origin": "syntax"
     },
     {
       "source": "file:pkg/service/service.go",
-      "target": "variable:pkg/service/service.go::*ShapeService.Area.c",
+      "target": "variable:pkg/service/service.go::MemoryRepository.Find.ok",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:pkg/service/service.go",
+      "target": "variable:pkg/service/service.go::ShapeService.Area.c",
+      "kind": "contains",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:pkg/service/service.go",
+      "target": "variable:pkg/service/service.go::ShapeService.Area.ok",
       "kind": "contains",
       "status": "resolved_internal",
       "origin": "syntax"
@@ -1739,45 +1797,17 @@
     },
     {
       "source": "file:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*MemoryRepository.Find",
+      "target": "method:pkg/service/service.go::MemoryRepository.Find",
       "kind": "exports",
       "status": "resolved_internal",
       "origin": "syntax"
     },
     {
       "source": "file:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*MemoryRepository.Find",
-      "kind": "exports",
-      "status": "resolved_internal",
-      "origin": "import"
-    },
-    {
-      "source": "file:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*MemoryRepository.Save",
+      "target": "method:pkg/service/service.go::MemoryRepository.Save",
       "kind": "exports",
       "status": "resolved_internal",
       "origin": "syntax"
-    },
-    {
-      "source": "file:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*MemoryRepository.Save",
-      "kind": "exports",
-      "status": "resolved_internal",
-      "origin": "import"
-    },
-    {
-      "source": "file:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*ShapeService.Area",
-      "kind": "exports",
-      "status": "resolved_internal",
-      "origin": "syntax"
-    },
-    {
-      "source": "file:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*ShapeService.Area",
-      "kind": "exports",
-      "status": "resolved_internal",
-      "origin": "import"
     },
     {
       "source": "file:pkg/service/service.go",
@@ -1789,6 +1819,13 @@
     {
       "source": "file:pkg/service/service.go",
       "target": "method:pkg/service/service.go::Repository.Save",
+      "kind": "exports",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "file:pkg/service/service.go",
+      "target": "method:pkg/service/service.go::ShapeService.Area",
       "kind": "exports",
       "status": "resolved_internal",
       "origin": "syntax"
@@ -2547,7 +2584,7 @@
     },
     {
       "source": "function:src/main.go::main",
-      "target": "unresolved:go:Circle",
+      "target": "unresolved:go:geometry.Circle",
       "kind": "uses_type",
       "status": "unresolved",
       "origin": "syntax",
@@ -2568,7 +2605,7 @@
     },
     {
       "source": "function:src/main.go::main",
-      "target": "unresolved:go:Rectangle",
+      "target": "unresolved:go:geometry.Rectangle",
       "kind": "uses_type",
       "status": "unresolved",
       "origin": "syntax",
@@ -2589,7 +2626,7 @@
     },
     {
       "source": "function:src/main.go::main",
-      "target": "unresolved:go:Shape",
+      "target": "unresolved:go:geometry.Shape",
       "kind": "uses_type",
       "status": "unresolved",
       "origin": "syntax",
@@ -2610,9 +2647,9 @@
     },
     {
       "source": "interface:pkg/service/service.go::Repository",
-      "target": "unresolved:go:Circle",
+      "target": "external:go:github.com/example/trace/fixtures/go/pkg/math.Circle",
       "kind": "uses_type",
-      "status": "unresolved",
+      "status": "resolved_external",
       "origin": "syntax",
       "sites": [
         {
@@ -2642,10 +2679,10 @@
       ]
     },
     {
-      "source": "method:pkg/service/service.go::*MemoryRepository.Find",
-      "target": "unresolved:go:Circle",
+      "source": "method:pkg/service/service.go::MemoryRepository.Find",
+      "target": "external:go:github.com/example/trace/fixtures/go/pkg/math.Circle",
       "kind": "uses_type",
-      "status": "unresolved",
+      "status": "resolved_external",
       "origin": "syntax",
       "sites": [
         {
@@ -2663,10 +2700,10 @@
       ]
     },
     {
-      "source": "method:pkg/service/service.go::*MemoryRepository.Save",
-      "target": "unresolved:go:Circle",
+      "source": "method:pkg/service/service.go::MemoryRepository.Save",
+      "target": "external:go:github.com/example/trace/fixtures/go/pkg/math.Circle",
       "kind": "uses_type",
-      "status": "unresolved",
+      "status": "resolved_external",
       "origin": "syntax",
       "sites": [
         {
@@ -2684,7 +2721,7 @@
       ]
     },
     {
-      "source": "method:pkg/service/service.go::*ShapeService.Area",
+      "source": "method:pkg/service/service.go::ShapeService.Area",
       "target": "external:go:builtin::panic",
       "kind": "calls",
       "status": "resolved_external",
@@ -2705,7 +2742,28 @@
       ]
     },
     {
-      "source": "method:pkg/service/service.go::*ShapeService.Area",
+      "source": "method:pkg/service/service.go::ShapeService.Area",
+      "target": "method:pkg/service/service.go::Repository.Find",
+      "kind": "calls",
+      "status": "resolved_internal",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 36,
+            "column": 11,
+            "byte": 737
+          },
+          "end": {
+            "line": 36,
+            "column": 26,
+            "byte": 752
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:pkg/service/service.go::ShapeService.Area",
       "target": "unresolved:go:Area",
       "kind": "calls",
       "status": "unresolved",
@@ -2721,27 +2779,6 @@
             "line": 40,
             "column": 17,
             "byte": 803
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:pkg/service/service.go::*ShapeService.Area",
-      "target": "unresolved:go:Find",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 36,
-            "column": 11,
-            "byte": 737
-          },
-          "end": {
-            "line": 36,
-            "column": 26,
-            "byte": 752
           }
         }
       ]
@@ -2769,21 +2806,14 @@
     },
     {
       "source": "module:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*MemoryRepository.Find",
+      "target": "method:pkg/service/service.go::MemoryRepository.Find",
       "kind": "defines",
       "status": "resolved_internal",
       "origin": "syntax"
     },
     {
       "source": "module:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*MemoryRepository.Save",
-      "kind": "defines",
-      "status": "resolved_internal",
-      "origin": "syntax"
-    },
-    {
-      "source": "module:pkg/service/service.go",
-      "target": "method:pkg/service/service.go::*ShapeService.Area",
+      "target": "method:pkg/service/service.go::MemoryRepository.Save",
       "kind": "defines",
       "status": "resolved_internal",
       "origin": "syntax"
@@ -2798,6 +2828,13 @@
     {
       "source": "module:pkg/service/service.go",
       "target": "method:pkg/service/service.go::Repository.Save",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:pkg/service/service.go",
+      "target": "method:pkg/service/service.go::ShapeService.Area",
       "kind": "defines",
       "status": "resolved_internal",
       "origin": "syntax"
@@ -2832,14 +2869,28 @@
     },
     {
       "source": "module:pkg/service/service.go",
-      "target": "variable:pkg/service/service.go::*MemoryRepository.Find.c",
+      "target": "variable:pkg/service/service.go::MemoryRepository.Find.c",
       "kind": "defines",
       "status": "resolved_internal",
       "origin": "syntax"
     },
     {
       "source": "module:pkg/service/service.go",
-      "target": "variable:pkg/service/service.go::*ShapeService.Area.c",
+      "target": "variable:pkg/service/service.go::MemoryRepository.Find.ok",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:pkg/service/service.go",
+      "target": "variable:pkg/service/service.go::ShapeService.Area.c",
+      "kind": "defines",
+      "status": "resolved_internal",
+      "origin": "syntax"
+    },
+    {
+      "source": "module:pkg/service/service.go",
+      "target": "variable:pkg/service/service.go::ShapeService.Area.ok",
       "kind": "defines",
       "status": "resolved_internal",
       "origin": "syntax"
@@ -3091,9 +3142,9 @@
     },
     {
       "source": "struct:pkg/service/service.go::MemoryRepository",
-      "target": "unresolved:go:Circle",
+      "target": "external:go:github.com/example/trace/fixtures/go/pkg/math.Circle",
       "kind": "uses_type",
-      "status": "unresolved",
+      "status": "resolved_external",
       "origin": "syntax",
       "sites": [
         {
@@ -3156,13 +3207,13 @@
   "statistics": {
     "files": 4,
     "packages": 4,
-    "nodes": 64,
-    "edges": 162,
-    "symbols": 37,
-    "unresolvedEdges": 12,
+    "nodes": 66,
+    "edges": 163,
+    "symbols": 39,
+    "unresolvedEdges": 7,
     "diagnostics": 1,
     "byNodeKind": {
-      "external_symbol": 8,
+      "external_symbol": 9,
       "file": 4,
       "function": 5,
       "interface": 3,
@@ -3172,24 +3223,24 @@
       "property": 6,
       "repository": 1,
       "struct": 5,
-      "unknown": 6,
-      "variable": 5
+      "unknown": 5,
+      "variable": 7
     },
     "byEdgeKind": {
       "calls": 12,
-      "contains": 53,
-      "defines": 37,
-      "exports": 44,
+      "contains": 55,
+      "defines": 39,
+      "exports": 41,
       "imports": 3,
       "uses_type": 13
     },
     "byLanguage": {
-      "go": 59
+      "go": 61
     },
     "byStatus": {
-      "resolved_external": 8,
-      "resolved_internal": 142,
-      "unresolved": 12
+      "resolved_external": 12,
+      "resolved_internal": 144,
+      "unresolved": 7
     },
     "byFramework": {}
   }

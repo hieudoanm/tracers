@@ -26,10 +26,12 @@ pub(crate) fn parse_function(
         exported || visibility == Some(Visibility::Public),
     );
     builder.push(id);
+    builder.push_generics(node);
     collect_function_signature(builder, node);
     if let Some(body) = child_field(node, "body") {
         super::items::parse_item(builder, body, false);
     }
+    builder.pop_generics();
     builder.pop();
 }
 
@@ -54,9 +56,12 @@ pub(crate) fn collect_function_signature(builder: &mut SyntaxBuilder<'_>, node: 
     }
     if let Some(type_parameters) = child_field(node, "type_parameters") {
         for parameter in named_children(type_parameters) {
-            if let Some(name_node) = child_field(parameter, "name") {
-                let type_name = builder.text(name_node).to_string();
-                builder.add_type_ref(type_name, parameter);
+            // Bounds (`T: Trait`) and defaults (`T = Foo`) are real type
+            // uses; the parameter name itself is a declaration.
+            for field in ["bounds", "default_type", "type"] {
+                if let Some(type_node) = child_field(parameter, field) {
+                    collect_type_refs(builder, type_node);
+                }
             }
         }
     }

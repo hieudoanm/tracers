@@ -20,10 +20,12 @@ pub(crate) fn parse_trait(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>, exp
         exported || visibility == Some(Visibility::Public),
     );
     builder.push(id);
+    builder.push_generics(node);
     if let Some(body) = child_field(node, "body") {
         for item in named_children(body) {
             super::parse_item(builder, item, false);
         }
     }
+    builder.pop_generics();
     builder.pop();
 }

@@ -65,6 +65,7 @@ pub(crate) fn parse_impl(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
         collect_type_refs(builder, type_node);
     }
     if let Some(body) = child_field(node, "body") {
+        builder.push_generics(node);
         for item in named_children(body) {
             if !matches!(item.kind(), "function_item" | "function_signature_item") {
                 super::parse_item(builder, item, false);
@@ -89,11 +90,14 @@ pub(crate) fn parse_impl(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
                 visibility == Some(Visibility::Public),
             );
             builder.push(id);
+            builder.push_generics(item);
             collect_function_signature(builder, item);
             if let Some(function_body) = child_field(item, "body") {
                 super::parse_item(builder, function_body, false);
             }
+            builder.pop_generics();
             builder.pop();
         }
+        builder.pop_generics();
     }
 }

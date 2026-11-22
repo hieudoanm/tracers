@@ -15,7 +15,7 @@ use crate::util::{SyntaxBuilder, child_field, first_named, is_upper_camel, named
 
 use super::imports::collect_specs_named;
 use super::items::parse_item;
-use super::types::{collect_go_type_refs, go_type_name};
+use super::types::{collect_go_type_refs, go_type_expr_name};
 use super::visibility::go_visibility;
 
 pub(crate) fn parse_type_spec(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
@@ -46,17 +46,24 @@ pub(crate) fn parse_declaration(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_
     let mut specs = Vec::new();
     collect_specs_named(node, &mut specs);
     for spec in specs {
-        let name = child_field(spec, "name")
-            .or_else(|| {
-                child_field(spec, "left")
-                    .and_then(|left| first_named(left))
-                    .filter(|name| name.kind() == "identifier")
-            })
-            .map(|name| builder.text(name).to_string());
-        let Some(name) = name else {
-            continue;
-        };
-        if name.contains('.') {
+        // `var a, b T` / `a, b := f()` declare multiple names per spec.
+        let mut cursor = spec.walk();
+        let mut name_nodes: Vec<TsNode<'_>> =
+            spec.children_by_field_name("name", &mut cursor).collect();
+        if name_nodes.is_empty() {
+            if let Some(left) = child_field(spec, "left") {
+                name_nodes = named_children(left)
+                    .into_iter()
+                    .filter(|child| child.kind() == "identifier")
+                    .collect();
+            }
+        }
+        let names: Vec<String> = name_nodes
+            .iter()
+            .map(|name| builder.text(*name).to_string())
+            .filter(|name| !name.contains('.'))
+            .collect();
+        if names.is_empty() {
             continue;
         }
         let kind = if spec.kind() == "const_spec" {
@@ -64,33 +71,41 @@ pub(crate) fn parse_declaration(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_
         } else {
             NodeKind::Variable
         };
-        let exported = is_upper_camel(&name);
-        builder.add_symbol(
-            kind,
-            name.clone(),
-            spec,
-            go_visibility(exported),
-            exported && builder.caller().is_none(),
-        );
-        let type_name = child_field(spec, "type")
-            .map(|type_node| go_type_name(builder, type_node))
-            .or_else(|| {
-                child_field(spec, "right").and_then(|right| {
-                    let value = first_named(right)?;
-                    if value.kind() == "composite_literal" {
-                        child_field(value, "type").map(|type_node| go_type_name(builder, type_node))
-                    } else {
-                        None
-                    }
-                })
-            });
-        if let Some(type_name) = type_name.filter(|name| !name.is_empty()) {
-            builder.locals.push(LocalBinding {
-                scope: builder.caller(),
-                name,
-                type_name,
-                range: range(spec),
-            });
+        let explicit_type = child_field(spec, "type")
+            .map(|type_node| go_type_expr_name(builder, type_node))
+            .filter(|name| !name.is_empty());
+        // Right-hand expressions: `a, b := f()` shares one call across
+        // names (positional results); `a, b := x, y` pairs them.
+        let value_node = child_field(spec, "right").or_else(|| child_field(spec, "value"));
+        let exprs: Vec<TsNode<'_>> = value_node
+            .map(|value| {
+                if value.kind() == "expression_list" {
+                    named_children(value)
+                } else {
+                    vec![value]
+                }
+            })
+            .unwrap_or_default();
+        for (index, name) in names.iter().enumerate() {
+            let exported = is_upper_camel(name);
+            builder.add_symbol(
+                kind,
+                name.clone(),
+                spec,
+                go_visibility(exported),
+                exported && builder.caller().is_none(),
+            );
+            let type_name = explicit_type
+                .clone()
+                .or_else(|| infer_initializer_type(builder, &exprs, index, names.len()));
+            if let Some(type_name) = type_name {
+                builder.locals.push(LocalBinding {
+                    scope: builder.caller(),
+                    name: name.clone(),
+                    type_name,
+                    range: range(spec),
+                });
+            }
         }
         if let Some(right) = child_field(spec, "right") {
             for child in named_children(right) {
@@ -100,5 +115,47 @@ pub(crate) fn parse_declaration(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_
         if let Some(value) = child_field(spec, "value") {
             parse_item(builder, value);
         }
+    }
+}
+
+/// Infer a declared name's type from its initializer expression.
+/// `exprs` are the right-hand side expressions; `index`/`name_count`
+/// describe this name's position for multi-valued calls.
+fn infer_initializer_type(
+    builder: &SyntaxBuilder<'_>,
+    exprs: &[TsNode<'_>],
+    index: usize,
+    name_count: usize,
+) -> Option<String> {
+    let expr = if exprs.len() == name_count {
+        exprs.get(index).copied()
+    } else if exprs.len() == 1 {
+        exprs.first().copied()
+    } else {
+        None
+    }?;
+    let mut value = expr;
+    // `x := &T{...}` / `x := *T{...}` wrap the literal.
+    while matches!(value.kind(), "unary_expression" | "pointer_expression") {
+        value = first_named(value)?;
+    }
+    match value.kind() {
+        "composite_literal" => child_field(value, "type")
+            .map(|type_node| go_type_expr_name(builder, type_node))
+            .filter(|name| !name.is_empty()),
+        // `x := f()` / `a, b := f()`: record a sentinel the analysis
+        // resolves through the callee's declared result types.
+        "call_expression" => {
+            let function = child_field(value, "function")?;
+            let callee = builder.text(function);
+            if callee.is_empty() || callee.len() > 200 {
+                return None;
+            }
+            // A lone call covers every name positionally; paired
+            // expressions always start at result index 0.
+            let result_index = if exprs.len() == 1 { index } else { 0 };
+            Some(format!("@call:{callee}:{result_index}"))
+        }
+        _ => None,
     }
 }

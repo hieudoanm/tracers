@@ -45,46 +45,65 @@ impl GraphBuilder {
                 if let Some(type_name) =
                     resolver.local_type(state, call.caller, &cleaned, call.range.start.byte)
                 {
-                    // `let x = a.b` records the field path as the type
-                    // expression; resolve it through declared field types.
-                    let typed = if type_name.contains('.') {
-                        self.resolve_type_expr(
+                    // `x := f()` locals carry a `@call:` sentinel resolved
+                    // through the callee's declared result types — in the
+                    // callee file's context, since result qualifiers refer
+                    // to the callee's imports (`db.NewSession` → `*gocql.Session`).
+                    let resolution = if type_name.starts_with("@call:") {
+                        self.expand_call_type(
                             index,
                             state,
                             resolver,
                             call.caller,
-                            &type_name,
                             call.range.start.byte,
+                            &type_name,
                         )
                     } else {
+                        // Qualified type names (`models.Foo`, `gocql.Session`)
+                        // resolve as types first; a field path (`pos.side`)
+                        // falls back to walking declared field types.
                         match resolver.resolve_type_name(state, call.caller, &type_name) {
                             crate::resolve::Resolution::Internal(symbol) if symbol.is_type() => {
-                                Some(symbol)
+                                Some(crate::resolve::Resolution::Internal(symbol))
                             }
                             crate::resolve::Resolution::External { qualified, .. } => {
                                 return CallTarget::External(format!("{qualified}.{}", call.name));
                             }
+                            _ if type_name.contains('.') => self.resolve_type_expr(
+                                index,
+                                state,
+                                resolver,
+                                call.caller,
+                                &type_name,
+                                call.range.start.byte,
+                            ),
                             _ => None,
                         }
                     };
-                    if let Some(symbol) = typed {
-                        // `resolve_member` walks supertypes, so trait
-                        // default methods (`visitor.visit_source_file`)
-                        // resolve through `impl Trait for Type`.
-                        if let crate::resolve::Resolution::Internal(member) = resolver
-                            .resolve_member(
-                                &symbol,
-                                &call.name,
-                                crate::resolve::resolve_types::Want::Callable,
-                            )
-                        {
-                            return CallTarget::Internal(member.node_id);
+                    match resolution {
+                        Some(crate::resolve::Resolution::Internal(symbol)) => {
+                            // `resolve_member` walks supertypes, so trait
+                            // default methods (`visitor.visit_source_file`)
+                            // resolve through `impl Trait for Type`.
+                            if let crate::resolve::Resolution::Internal(member) = resolver
+                                .resolve_member(
+                                    &symbol,
+                                    &call.name,
+                                    crate::resolve::resolve_types::Want::Callable,
+                                )
+                            {
+                                return CallTarget::Internal(member.node_id);
+                            }
+                            if let Some(member) =
+                                self.find_type_member(index, &symbol, &call.name, false)
+                            {
+                                return CallTarget::Internal(member.node_id);
+                            }
                         }
-                        if let Some(member) =
-                            self.find_type_member(index, &symbol, &call.name, false)
-                        {
-                            return CallTarget::Internal(member.node_id);
+                        Some(crate::resolve::Resolution::External { qualified, .. }) => {
+                            return CallTarget::External(format!("{qualified}.{}", call.name));
                         }
+                        _ => {}
                     }
                 }
             }
@@ -119,16 +138,22 @@ impl GraphBuilder {
                         return CallTarget::Unresolved;
                     }
                     crate::index::Binding::Module(module) => {
-                        if let ModuleRef::File(path) = module {
-                            if let Some(target) = index.files.get(path) {
-                                if let Some(symbol) =
-                                    target.top_level.get(&call.name).and_then(|indexes| {
-                                        indexes.first().and_then(|i| target.symbols.get(*i))
-                                    })
-                                {
-                                    return CallTarget::Internal(symbol.node_id.clone());
-                                }
+                        // `pkg.Func()` / `mod.func()`: member lookup inside
+                        // the bound module — file modules check exports and
+                        // top-level symbols, package modules search every
+                        // file in the package, external modules produce a
+                        // qualified external edge.
+                        match resolver.resolve_module_member(state, module, &call.name) {
+                            crate::resolve::Resolution::Internal(symbol) => {
+                                return CallTarget::Internal(symbol.node_id);
                             }
+                            crate::resolve::Resolution::External { qualified, .. } => {
+                                return CallTarget::External(qualified);
+                            }
+                            crate::resolve::Resolution::ExternalNode { node_id, .. } => {
+                                return CallTarget::Internal(node_id);
+                            }
+                            _ => {}
                         }
                     }
                     _ => {}
@@ -310,8 +335,9 @@ impl GraphBuilder {
     }
 
     /// Resolve a possibly dotted type expression (`position`, `self.engine`,
-    /// `pos.side_to_move`) to a type symbol by walking declared field types.
-    /// Returns `None` when any hop lacks type info.
+    /// `pos.side_to_move`) to a type resolution by walking declared field
+    /// types. Returns `None` when any hop lacks type info; an `External`
+    /// resolution is only produced by the final hop.
     fn resolve_type_expr(
         &self,
         index: &RepositoryIndex,
@@ -320,13 +346,13 @@ impl GraphBuilder {
         scope: Option<u32>,
         expr: &str,
         at_byte: u32,
-    ) -> Option<SymbolRef> {
+    ) -> Option<crate::resolve::Resolution> {
         use crate::resolve::Resolution;
 
-        let mut segments = expr.split('.');
+        let mut segments = expr.split('.').peekable();
         let base = segments.next()?;
-        let mut ty = if matches!(base, "self" | "this" | "Self") {
-            index.parent_type_of(state, scope?)?
+        let mut resolution = if matches!(base, "self" | "this" | "Self") {
+            Resolution::Internal(index.parent_type_of(state, scope?)?)
         } else {
             let type_name = resolver
                 .local_type(state, scope, base, at_byte)
@@ -334,19 +360,35 @@ impl GraphBuilder {
                     (base.chars().next().is_some_and(|c| c.is_uppercase()))
                         .then(|| base.to_string())
                 })?;
-            match resolver.resolve_type_name(state, scope, &type_name) {
-                Resolution::Internal(symbol) if symbol.is_type() => symbol,
-                _ => return None,
+            if type_name.starts_with("@call:") {
+                self.expand_call_type(index, state, resolver, scope, at_byte, &type_name)?
+            } else {
+                resolver.resolve_type_name(state, scope, &type_name)
             }
         };
-        for segment in segments {
-            let field_type = resolver.field_type(&ty, segment)?;
-            match resolver.resolve_type_name(state, scope, &field_type) {
-                Resolution::Internal(symbol) if symbol.is_type() => ty = symbol,
+        if let Resolution::Internal(symbol) = &resolution {
+            if !symbol.is_type() {
+                return None;
+            }
+        } else if !matches!(resolution, Resolution::External { .. }) {
+            return None;
+        }
+        while let Some(segment) = segments.next() {
+            let is_last = segments.peek().is_none();
+            let Resolution::Internal(symbol) = &resolution else {
+                // External types have no visible fields; only the final
+                // hop may land on one.
+                return if is_last { Some(resolution) } else { None };
+            };
+            let field_type = resolver.field_type(symbol, segment)?;
+            resolution = resolver.resolve_type_name(state, scope, &field_type);
+            match &resolution {
+                Resolution::Internal(symbol) if symbol.is_type() => {}
+                Resolution::External { .. } if is_last => return Some(resolution),
                 _ => return None,
             }
         }
-        Some(ty)
+        Some(resolution)
     }
 
     /// Resolve `a.b.c.name()` where `a` is a local/self/type and `b`, `c`
@@ -362,21 +404,109 @@ impl GraphBuilder {
         use crate::resolve::Resolution;
         use crate::resolve::resolve_types::Want;
 
-        let ty = self.resolve_type_expr(
+        match self.resolve_type_expr(
             index,
             state,
             resolver,
             call.caller,
             receiver,
             call.range.start.byte,
-        )?;
-        if let Resolution::Internal(member) =
-            resolver.resolve_member(&ty, &call.name, Want::Callable)
-        {
-            return Some(CallTarget::Internal(member.node_id));
+        )? {
+            Resolution::Internal(ty) => {
+                if let Resolution::Internal(member) =
+                    resolver.resolve_member(&ty, &call.name, Want::Callable)
+                {
+                    return Some(CallTarget::Internal(member.node_id));
+                }
+                self.find_type_member(index, &ty, &call.name, false)
+                    .map(|member| CallTarget::Internal(member.node_id))
+            }
+            Resolution::External { qualified, .. } => {
+                Some(CallTarget::External(format!("{qualified}.{}", call.name)))
+            }
+            _ => None,
         }
-        self.find_type_member(index, &ty, &call.name, false)
-            .map(|member| CallTarget::Internal(member.node_id))
+    }
+
+    /// Expand a `@call:{callee}:{index}` local-type sentinel (emitted for
+    /// `x := f()` / `a, b := f()` initializers) into the callee's declared
+    /// result type at `index`, resolved in the *callee file's* context —
+    /// result qualifiers like `*gocql.Session` refer to the callee's
+    /// imports, not the caller's. Returns `None` for non-sentinel names,
+    /// unresolvable callees, or result types that aren't types.
+    fn expand_call_type(
+        &self,
+        index: &RepositoryIndex,
+        state: &FileState,
+        resolver: &Resolver,
+        scope: Option<u32>,
+        at_byte: u32,
+        type_name: &str,
+    ) -> Option<crate::resolve::Resolution> {
+        use crate::resolve::Resolution;
+
+        let rest = type_name.strip_prefix("@call:")?;
+        let (callee, index_) = rest.rsplit_once(':')?;
+        let result_index: usize = index_.parse().ok()?;
+        let symbol = self.resolve_callee_symbol(index, state, resolver, scope, at_byte, callee)?;
+        let callee_state = index.files.get(&symbol.path)?;
+        let signature = callee_state
+            .parsed
+            .symbols
+            .iter()
+            .find(|data| data.local_id == symbol.local_id)
+            .and_then(|data| data.signature.clone())?;
+        let result_type = go_signature_results(&signature).get(result_index)?.clone();
+        match resolver.resolve_type_name(callee_state, Some(symbol.local_id), &result_type) {
+            Resolution::Internal(symbol) if symbol.is_type() => Some(Resolution::Internal(symbol)),
+            resolution @ Resolution::External { .. } => Some(resolution),
+            _ => None,
+        }
+    }
+
+    /// Resolve a `@call:` sentinel callee to its symbol. Handles plain
+    /// names (`newConsumer`), package qualifiers (`db.NewSession`), and
+    /// receiver calls (`t.M`, `self.M`). External callees return `None` —
+    /// their result types are unknowable without sources.
+    fn resolve_callee_symbol(
+        &self,
+        index: &RepositoryIndex,
+        state: &FileState,
+        resolver: &Resolver,
+        scope: Option<u32>,
+        at_byte: u32,
+        callee: &str,
+    ) -> Option<crate::index::SymbolRef> {
+        use crate::index::Binding;
+        use crate::resolve::Resolution;
+        use crate::resolve::resolve_types::Want;
+
+        if !callee.contains('.') && !callee.contains("::") {
+            return match resolver.resolve_callable_name(state, scope, callee) {
+                Resolution::Internal(symbol) => Some(symbol),
+                _ => None,
+            };
+        }
+        let (receiver, name) = callee.rsplit_once('.')?;
+        if receiver.contains('.') || receiver.contains("::") {
+            return None;
+        }
+        // `pkg.Func`: qualifier binds to a module/package.
+        if let Some(Binding::Module(module)) = state.bindings.get(receiver) {
+            return match resolver.resolve_module_member(state, module, name) {
+                Resolution::Internal(symbol) => Some(symbol),
+                _ => None,
+            };
+        }
+        // `recv.Method` / `self.Method`: receiver type, then member lookup.
+        let ty = self.resolve_type_expr(index, state, resolver, scope, receiver, at_byte)?;
+        let Resolution::Internal(ty) = ty else {
+            return None;
+        };
+        if let Resolution::Internal(member) = resolver.resolve_member(&ty, name, Want::Callable) {
+            return Some(member);
+        }
+        self.find_type_member(index, &ty, name, true)
     }
 
     fn find_method_on_type(
@@ -401,10 +531,30 @@ impl GraphBuilder {
     ) -> Option<SymbolRef> {
         let key = format!("{}.{}", type_symbol.qualified, member_name);
         let candidates = index.by_qualified.get(&key)?;
-        let matches: Vec<&SymbolRef> = candidates
+        let mut matches: Vec<&SymbolRef> = candidates
             .iter()
             .filter(|s| !callable_only || s.is_callable())
             .collect();
+        // Same-package preference: qualified names aren't package-scoped,
+        // so `T.M` can collide across directories (e.g. a Go struct method
+        // and an interface method on a same-named type).
+        if matches.len() > 1 {
+            let type_dir = type_symbol.path.rsplit_once('/').map(|(dir, _)| dir);
+            let same_dir: Vec<&SymbolRef> = matches
+                .iter()
+                .filter(|symbol| {
+                    symbol
+                        .path
+                        .rsplit_once('/')
+                        .map(|(dir, _)| Some(dir) == type_dir)
+                        .unwrap_or(false)
+                })
+                .copied()
+                .collect();
+            if !same_dir.is_empty() {
+                matches = same_dir;
+            }
+        }
         if matches.len() == 1 {
             return Some(matches[0].clone());
         }
@@ -461,6 +611,114 @@ impl GraphBuilder {
 /// Canonical placeholder id for an unresolved symbol reference.
 pub(crate) fn unresolved_id(language: Language, name: &str) -> String {
     format!("unresolved:{}:{name}", language.as_str())
+}
+
+/// Extract declared result types from a Go function signature's first
+/// line, e.g. `func f(a int) (*T, error) {` → `["T", "error"]`.
+/// Returns an empty vec for signatures without results or ones too
+/// malformed to parse (multi-line headers truncate at `{`).
+fn go_signature_results(signature: &str) -> Vec<String> {
+    let s = signature.trim();
+    let bytes = s.as_bytes();
+    let mut i = 0;
+    let skip_ws = |mut i: usize| {
+        while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+            i += 1;
+        }
+        i
+    };
+    // `func` keyword.
+    if !s[i..].starts_with("func") {
+        return Vec::new();
+    }
+    i = skip_ws(i + 4);
+    // Optional receiver `(r *T)`.
+    if bytes.get(i) == Some(&b'(') {
+        let Some(end) = matching_delim(bytes, i, b'(', b')') else {
+            return Vec::new();
+        };
+        i = skip_ws(end + 1);
+    }
+    // Function name.
+    while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
+        i += 1;
+    }
+    i = skip_ws(i);
+    // Optional type parameters `[T any]`.
+    if bytes.get(i) == Some(&b'[') {
+        let Some(end) = matching_delim(bytes, i, b'[', b']') else {
+            return Vec::new();
+        };
+        i = skip_ws(end + 1);
+    }
+    // Parameter list.
+    if bytes.get(i) != Some(&b'(') {
+        return Vec::new();
+    }
+    let Some(end) = matching_delim(bytes, i, b'(', b')') else {
+        return Vec::new();
+    };
+    i = skip_ws(end + 1);
+    // Result section runs to the body `{` (or end of the truncated line).
+    let rest = &s[i..];
+    let result_end = rest.find('{').unwrap_or(rest.len());
+    let result = rest[..result_end].trim();
+    if result.is_empty() {
+        return Vec::new();
+    }
+    let inner = if result.starts_with('(') && result.ends_with(')') && result.len() > 2 {
+        &result[1..result.len() - 1]
+    } else {
+        result
+    };
+    split_top_level_commas(inner)
+        .into_iter()
+        .map(|part| {
+            part.trim()
+                .trim_start_matches(['*', '&', '[', ']'])
+                .trim()
+                .to_string()
+        })
+        .filter(|part| !part.is_empty())
+        .collect()
+}
+
+/// Index just past the delimiter matching the one at `start`, or `None`.
+fn matching_delim(bytes: &[u8], start: usize, open: u8, close: u8) -> Option<usize> {
+    let mut depth = 0usize;
+    for (offset, &byte) in bytes.iter().enumerate().skip(start) {
+        if byte == open {
+            depth += 1;
+        } else if byte == close {
+            depth -= 1;
+            if depth == 0 {
+                return Some(offset);
+            }
+        }
+    }
+    None
+}
+
+/// Split on commas that are not nested inside `()`, `[]`, `{}`, or `<>`
+/// (generics like `map[string]T` / `Foo[A, B]`).
+fn split_top_level_commas(input: &str) -> Vec<String> {
+    let mut parts = Vec::new();
+    let mut depth = 0i32;
+    let mut current = String::new();
+    for c in input.chars() {
+        match c {
+            '(' | '[' | '{' | '<' => depth += 1,
+            ')' | ']' | '}' | '>' => depth -= 1,
+            ',' if depth == 0 => {
+                parts.push(std::mem::take(&mut current));
+                continue;
+            }
+            _ => {}
+        }
+        current.push(c);
+    }
+    parts.push(current);
+    parts
 }
 
 /// Return the source range for a symbol.

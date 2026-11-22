@@ -31,7 +31,7 @@ impl<'a> Resolver<'a> {
 
     pub(crate) fn resolve_module_member(
         &self,
-        _state: &FileState,
+        state: &FileState,
         module: &ModuleRef,
         name: &str,
     ) -> Resolution {
@@ -66,7 +66,7 @@ impl<'a> Resolver<'a> {
                 choose(name, self.index.symbols_in_package(package, name))
             }
             ModuleRef::External(module) => Resolution::External {
-                qualified: module.clone(),
+                qualified: join_external(state.language, module, name),
                 name: name.to_string(),
             },
         }

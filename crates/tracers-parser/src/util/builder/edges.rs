@@ -37,6 +37,9 @@ impl<'a> SyntaxBuilder<'a> {
         // Single uppercase letters in generic languages are type parameters
         // (`[T any]`, `<T>`, `T extends ...`) that bind lexically rather
         // than referencing a declared type.
+        if self.is_generic_param(&name) {
+            return;
+        }
         if name.len() == 1
             && name.chars().next().is_some_and(|c| c.is_ascii_uppercase())
             && matches!(

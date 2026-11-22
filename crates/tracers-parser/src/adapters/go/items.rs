@@ -1,6 +1,6 @@
 use tree_sitter::Node as TsNode;
 
-use crate::util::{SyntaxBuilder, first_named, named_children};
+use crate::util::{SyntaxBuilder, child_field, first_named, named_children};
 
 pub(crate) fn parse_item(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     match node.kind() {
@@ -33,6 +33,15 @@ pub(crate) fn parse_item(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
         }
         "short_var_declaration" | "var_declaration" | "const_declaration" => {
             super::declarations::parse_declaration(builder, node);
+        }
+        // `func(c *gin.Context) { ... }` literals: record parameter types
+        // so `c.Next()` resolves; the literal has no symbol of its own,
+        // so locals scope to the enclosing callable.
+        "func_literal" => {
+            super::calls::collect_signature_types(builder, node);
+            if let Some(body) = child_field(node, "body") {
+                parse_item(builder, body);
+            }
         }
         "block" | "statement_list" | "source_file" => {
             for child in named_children(node) {

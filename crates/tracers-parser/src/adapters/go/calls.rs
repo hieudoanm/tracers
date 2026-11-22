@@ -47,8 +47,30 @@ pub(crate) fn parse_composite(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>)
 pub(crate) fn collect_signature_types(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     if let Some(parameters) = child_field(node, "parameters") {
         for parameter in named_children(parameters) {
-            if let Some(type_node) = child_field(parameter, "type") {
-                collect_go_type_refs(builder, type_node);
+            if !matches!(
+                parameter.kind(),
+                "parameter_declaration" | "variadic_parameter_declaration"
+            ) {
+                continue;
+            }
+            let Some(type_node) = child_field(parameter, "type") else {
+                continue;
+            };
+            collect_go_type_refs(builder, type_node);
+            // Record `name Type` params so receiver calls like
+            // `repo.Find(...)` / `c.handle(...)` resolve through the
+            // declared parameter type.
+            let type_name = super::types::go_type_expr_name(builder, type_node);
+            if type_name.is_empty() {
+                continue;
+            }
+            let mut cursor = parameter.walk();
+            for name_node in parameter.children_by_field_name("name", &mut cursor) {
+                builder.add_local(
+                    builder.text(name_node).to_string(),
+                    type_name.clone(),
+                    parameter,
+                );
             }
         }
     }
