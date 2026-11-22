@@ -91,4 +91,18 @@ pub const RUBY_WEB_SIGNATURES: &[FrameworkSignature] = &[
         pattern_confidence: FrameworkConfidence::High,
         manifest_confidence: FrameworkConfidence::Medium,
     },
+    FrameworkSignature {
+        name: "pakyow",
+        display_name: "Pakyow",
+        family: FrameworkFamily::Ruby,
+        import_prefixes: &["pakyow"],
+        decorators: &[],
+        base_classes: &[],
+        calls: &[],
+        manifest_files: &["Gemfile", "Gemfile.lock", "gems.rb"],
+        manifest_deps: &["pakyow"],
+        import_confidence: FrameworkConfidence::Medium,
+        pattern_confidence: FrameworkConfidence::High,
+        manifest_confidence: FrameworkConfidence::Medium,
+    },
 ];

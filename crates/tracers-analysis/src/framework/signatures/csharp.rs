@@ -2,10 +2,12 @@
 
 use crate::framework::types::FrameworkSignature;
 
+mod auth;
 mod data;
 mod infra;
 mod jobs;
 mod messaging;
+mod misc;
 mod testing;
 mod web;
 
@@ -17,4 +19,6 @@ pub const CSHARP_SIGNATURES: &[&[FrameworkSignature]] = &[
     jobs::CSHARP_JOBS_SIGNATURES,
     testing::CSHARP_TESTING_SIGNATURES,
     infra::CSHARP_INFRA_SIGNATURES,
+    auth::CSHARP_AUTH_SIGNATURES,
+    misc::CSHARP_MISC_SIGNATURES,
 ];

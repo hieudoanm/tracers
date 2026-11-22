@@ -2,9 +2,11 @@
 
 use crate::framework::types::FrameworkSignature;
 
+mod r#async;
 mod cms;
 mod data;
 mod libs;
+mod services;
 mod testing;
 mod ui;
 mod web;
@@ -17,4 +19,6 @@ pub const PHP_SIGNATURES: &[&[FrameworkSignature]] = &[
     testing::PHP_TESTING_SIGNATURES,
     ui::PHP_UI_SIGNATURES,
     libs::PHP_LIBS_SIGNATURES,
+    services::PHP_SERVICES_SIGNATURES,
+    r#async::PHP_ASYNC_SIGNATURES,
 ];

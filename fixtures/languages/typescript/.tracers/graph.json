@@ -13,28 +13,7 @@
     "cacheEnabled": true,
     "semanticMode": "off",
     "languages": [
-      "bash",
-      "c",
-      "cpp",
-      "csharp",
-      "dart",
-      "gdscript",
-      "go",
-      "java",
-      "javascript",
-      "jsx",
-      "kotlin",
-      "matlab",
-      "php",
-      "python",
-      "r",
-      "ruby",
-      "rust",
-      "scala",
-      "swift",
-      "tsx",
-      "typescript",
-      "zig"
+      "typescript"
     ]
   },
   "languages": [
