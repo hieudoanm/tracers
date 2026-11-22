@@ -1,6 +1,6 @@
 use tracers_parser::ImportData;
 
-use crate::index::{directory_key, parent_directory, ModuleRef};
+use crate::index::{ModuleRef, directory_key, parent_directory};
 
 use crate::resolve::resolve_import_pass::ImportContext;
 use crate::resolve::resolve_path_helpers::join_dir;

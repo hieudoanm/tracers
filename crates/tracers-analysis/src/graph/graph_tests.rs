@@ -4,7 +4,7 @@ use super::*;
 use crate::index::RepositoryIndex;
 use crate::resolve::resolve_imports;
 use tempfile::tempdir;
-use tracers_core::{file_id, symbol_id, EdgeKind, Language, NodeKind, ResolutionStatus};
+use tracers_core::{EdgeKind, Language, NodeKind, ResolutionStatus, file_id, symbol_id};
 use tracers_parser::{ParsedFile, SyntaxParser};
 
 fn parse(path: &str, language: Language, source: &str) -> ParsedFile {
@@ -25,10 +25,12 @@ fn builds_file_and_symbol_nodes() {
     let builder = GraphBuilder::new();
     let result = builder.build_from_index(&index, &import_pass, &[]).unwrap();
     assert!(result.graph.node(&file_id("a.ts")).is_some());
-    assert!(result
-        .graph
-        .node(&symbol_id(NodeKind::Function, "a.ts", "foo", 0))
-        .is_some());
+    assert!(
+        result
+            .graph
+            .node(&symbol_id(NodeKind::Function, "a.ts", "foo", 0))
+            .is_some()
+    );
     assert_eq!(result.graph.node_count(), 4); // repository, file, module, function
 }
 
@@ -139,4 +141,54 @@ fn multi_file_go_package_shares_one_package_node() {
         .collect();
     assert_eq!(package_nodes.len(), 1);
     assert!(package_nodes[0].file.is_none());
+}
+
+#[test]
+fn resolves_stdlib_calls_as_external() {
+    let dir = tempdir().unwrap();
+    let parsed = vec![parse(
+        "a.rs",
+        Language::Rust,
+        "fn f() {\n    let x = Some(1).unwrap();\n    println!(\"{x}\");\n    let _ = x.expect(\"missing\");\n}\n",
+    )];
+    let mut index = RepositoryIndex::build(dir.path(), parsed).unwrap();
+    let import_pass = resolve_imports(&mut index);
+    let mut builder = GraphBuilder::new();
+    builder.include_external = true;
+    let result = builder.build_from_index(&index, &import_pass, &[]).unwrap();
+    let graph = &result.graph;
+    for name in ["unwrap", "expect", "println"] {
+        let external = format!("external:rust:std::{name}");
+        assert!(graph.node(&external).is_some(), "missing {external}");
+        assert!(graph.node(&format!("unresolved:rust:{name}")).is_none());
+    }
+    assert!(graph.edges().iter().any(|edge| {
+        edge.status == ResolutionStatus::ResolvedExternal
+            && edge.target.starts_with("external:rust:std::")
+    }));
+}
+
+#[test]
+fn drops_calls_with_garbage_names() {
+    let dir = tempdir().unwrap();
+    let parsed = vec![parse(
+        "a.py",
+        Language::Python,
+        "def f():\n    return foo()()\n",
+    )];
+    let mut index = RepositoryIndex::build(dir.path(), parsed).unwrap();
+    let import_pass = resolve_imports(&mut index);
+    let builder = GraphBuilder::new();
+    let _ = builder.build_from_index(&index, &import_pass, &[]).unwrap();
+    for state in index.files.values() {
+        for call in &state.parsed.calls {
+            assert!(
+                call.name
+                    .chars()
+                    .all(|c| c.is_alphanumeric() || c == '_' || c == '$' || "?!=".contains(c)),
+                "garbage call name: {:?}",
+                call.name
+            );
+        }
+    }
 }

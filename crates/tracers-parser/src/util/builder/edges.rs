@@ -17,10 +17,13 @@ impl<'a> SyntaxBuilder<'a> {
         kind: CallKind,
         node: TsNode<'_>,
     ) {
+        let Some(name) = clean_call_name(&name.into()) else {
+            return;
+        };
         self.calls.push(CallData {
             caller: self.caller(),
             receiver,
-            name: name.into(),
+            name,
             full: full.into(),
             kind,
             range: super::super::tree_sitter::range(node),
@@ -52,5 +55,28 @@ impl<'a> SyntaxBuilder<'a> {
             relation,
             range: super::super::tree_sitter::range(node),
         });
+    }
+}
+
+/// Return `name` when it is a plausible terminal callee identifier.
+///
+/// Parser fallbacks occasionally slice raw expression text, leaking
+/// multi-line call chains, char literals, or generic arguments into the
+/// callee name (e.g. `"<String>()\n .split('-')"`). Such names poison
+/// `by_name` lookups and `unresolved` placeholder nodes, so calls with
+/// non-identifier names are dropped instead of recorded.
+fn clean_call_name(name: &str) -> Option<String> {
+    let trimmed = name.trim();
+    let name = trimmed.strip_prefix("r#").unwrap_or(trimmed);
+    // Ruby predicate/bang/setter methods legitimately end in `?`, `!`, `=`.
+    let core = name.trim_end_matches(['?', '!', '=']);
+    if !core.is_empty()
+        && core
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '_' || c == '$')
+    {
+        Some(name.to_string())
+    } else {
+        None
     }
 }

@@ -776,39 +776,9 @@ expression: document
       "language": "python"
     },
     {
-      "id": "unresolved:python:find",
-      "kind": "unknown",
-      "name": "find",
-      "language": "python"
-    },
-    {
-      "id": "unresolved:python:get",
-      "kind": "unknown",
-      "name": "get",
-      "language": "python"
-    },
-    {
       "id": "unresolved:python:list",
       "kind": "unknown",
       "name": "list",
-      "language": "python"
-    },
-    {
-      "id": "unresolved:python:print",
-      "kind": "unknown",
-      "name": "print",
-      "language": "python"
-    },
-    {
-      "id": "unresolved:python:sum",
-      "kind": "unknown",
-      "name": "sum",
-      "language": "python"
-    },
-    {
-      "id": "unresolved:python:super",
-      "kind": "unknown",
-      "name": "super",
       "language": "python"
     },
     {
@@ -1043,27 +1013,6 @@ expression: document
             "line": 37,
             "column": 23,
             "byte": 887
-          }
-        }
-      ]
-    },
-    {
-      "source": "constructor:src/shapes.py::Square.__init__",
-      "target": "unresolved:python:super",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 41,
-            "column": 9,
-            "byte": 996
-          },
-          "end": {
-            "line": 41,
-            "column": 16,
-            "byte": 1003
           }
         }
       ]
@@ -1664,27 +1613,6 @@ expression: document
       ]
     },
     {
-      "source": "function:src/complex.py::total",
-      "target": "unresolved:python:sum",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 7,
-            "column": 27,
-            "byte": 238
-          },
-          "end": {
-            "line": 7,
-            "column": 56,
-            "byte": 267
-          }
-        }
-      ]
-    },
-    {
       "source": "function:src/main.py::main",
       "target": "function:src/main.py::total_area",
       "kind": "calls",
@@ -1722,27 +1650,6 @@ expression: document
             "line": 26,
             "column": 58,
             "byte": 605
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/main.py::main",
-      "target": "unresolved:python:print",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 26,
-            "column": 5,
-            "byte": 552
-          },
-          "end": {
-            "line": 26,
-            "column": 61,
-            "byte": 608
           }
         }
       ]
@@ -1812,27 +1719,6 @@ expression: document
     },
     {
       "source": "function:src/main.py::total_area",
-      "target": "unresolved:python:sum",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 21,
-            "column": 12,
-            "byte": 427
-          },
-          "end": {
-            "line": 21,
-            "column": 49,
-            "byte": 464
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/main.py::total_area",
       "target": "class:src/main.py::Shape",
       "kind": "uses_type",
       "status": "resolved_internal",
@@ -1874,27 +1760,6 @@ expression: document
       ]
     },
     {
-      "source": "method:src/service.py::Repository.find",
-      "target": "unresolved:python:get",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 9,
-            "column": 16,
-            "byte": 139
-          },
-          "end": {
-            "line": 9,
-            "column": 40,
-            "byte": 163
-          }
-        }
-      ]
-    },
-    {
       "source": "method:src/service.py::ShapeService.area",
       "target": "unresolved:python:area",
       "kind": "calls",
@@ -1911,27 +1776,6 @@ expression: document
             "line": 23,
             "column": 28,
             "byte": 478
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:src/service.py::ShapeService.area",
-      "target": "unresolved:python:find",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 20,
-            "column": 17,
-            "byte": 359
-          },
-          "end": {
-            "line": 20,
-            "column": 40,
-            "byte": 382
           }
         }
       ]
@@ -2343,10 +2187,10 @@ expression: document
   "statistics": {
     "files": 5,
     "packages": 0,
-    "nodes": 52,
-    "edges": 140,
+    "nodes": 47,
+    "edges": 134,
     "symbols": 33,
-    "unresolvedEdges": 15,
+    "unresolvedEdges": 9,
     "diagnostics": 6,
     "byNodeKind": {
       "class": 8,
@@ -2356,11 +2200,11 @@ expression: document
       "method": 10,
       "module": 5,
       "repository": 1,
-      "unknown": 8,
+      "unknown": 3,
       "variable": 3
     },
     "byEdgeKind": {
-      "calls": 12,
+      "calls": 6,
       "contains": 43,
       "defines": 33,
       "exports": 38,
@@ -2369,11 +2213,11 @@ expression: document
       "uses_type": 8
     },
     "byLanguage": {
-      "python": 51
+      "python": 46
     },
     "byStatus": {
       "resolved_internal": 125,
-      "unresolved": 15
+      "unresolved": 9
     },
     "byFramework": {}
   }

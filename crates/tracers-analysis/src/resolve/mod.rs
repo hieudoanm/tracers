@@ -5,6 +5,7 @@
 //! across unrelated modules are not treated as resolved.
 
 pub mod bindings;
+pub(crate) mod builtin_calls;
 pub mod resolve_import_misc;
 pub mod resolve_import_pass;
 pub mod resolve_members;

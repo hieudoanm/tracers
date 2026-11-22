@@ -921,9 +921,39 @@
       "language": "python"
     },
     {
-      "id": "external:python:ValueError",
+      "id": "external:python:builtins::ValueError",
       "kind": "external_symbol",
       "name": "ValueError",
+      "language": "python"
+    },
+    {
+      "id": "external:python:builtins::find",
+      "kind": "external_symbol",
+      "name": "find",
+      "language": "python"
+    },
+    {
+      "id": "external:python:builtins::get",
+      "kind": "external_symbol",
+      "name": "get",
+      "language": "python"
+    },
+    {
+      "id": "external:python:builtins::print",
+      "kind": "external_symbol",
+      "name": "print",
+      "language": "python"
+    },
+    {
+      "id": "external:python:builtins::sum",
+      "kind": "external_symbol",
+      "name": "sum",
+      "language": "python"
+    },
+    {
+      "id": "external:python:builtins::super",
+      "kind": "external_symbol",
+      "name": "super",
       "language": "python"
     },
     {
@@ -1372,39 +1402,9 @@
       "language": "python"
     },
     {
-      "id": "unresolved:python:find",
-      "kind": "unknown",
-      "name": "find",
-      "language": "python"
-    },
-    {
-      "id": "unresolved:python:get",
-      "kind": "unknown",
-      "name": "get",
-      "language": "python"
-    },
-    {
       "id": "unresolved:python:list",
       "kind": "unknown",
       "name": "list",
-      "language": "python"
-    },
-    {
-      "id": "unresolved:python:print",
-      "kind": "unknown",
-      "name": "print",
-      "language": "python"
-    },
-    {
-      "id": "unresolved:python:sum",
-      "kind": "unknown",
-      "name": "sum",
-      "language": "python"
-    },
-    {
-      "id": "unresolved:python:super",
-      "kind": "unknown",
-      "name": "super",
       "language": "python"
     },
     {
@@ -1645,6 +1645,27 @@
     },
     {
       "source": "constructor:src/shapes.py::Square.__init__",
+      "target": "external:python:builtins::super",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 41,
+            "column": 9,
+            "byte": 996
+          },
+          "end": {
+            "line": 41,
+            "column": 16,
+            "byte": 1003
+          }
+        }
+      ]
+    },
+    {
+      "source": "constructor:src/shapes.py::Square.__init__",
       "target": "external:python:super().__init__",
       "kind": "calls",
       "status": "resolved_external",
@@ -1660,27 +1681,6 @@
             "line": 41,
             "column": 37,
             "byte": 1024
-          }
-        }
-      ]
-    },
-    {
-      "source": "constructor:src/shapes.py::Square.__init__",
-      "target": "unresolved:python:super",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 41,
-            "column": 9,
-            "byte": 996
-          },
-          "end": {
-            "line": 41,
-            "column": 16,
-            "byte": 1003
           }
         }
       ]
@@ -2261,6 +2261,27 @@
     },
     {
       "source": "function:src/complex.py::total",
+      "target": "external:python:builtins::sum",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 7,
+            "column": 27,
+            "byte": 238
+          },
+          "end": {
+            "line": 7,
+            "column": 56,
+            "byte": 267
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/complex.py::total",
       "target": "unresolved:python:area",
       "kind": "calls",
       "status": "unresolved",
@@ -2276,27 +2297,6 @@
             "line": 7,
             "column": 39,
             "byte": 250
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/complex.py::total",
-      "target": "unresolved:python:sum",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 7,
-            "column": 27,
-            "byte": 238
-          },
-          "end": {
-            "line": 7,
-            "column": 56,
-            "byte": 267
           }
         }
       ]
@@ -2345,6 +2345,27 @@
     },
     {
       "source": "function:src/main.py::main",
+      "target": "external:python:builtins::print",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 26,
+            "column": 5,
+            "byte": 552
+          },
+          "end": {
+            "line": 26,
+            "column": 61,
+            "byte": 608
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/main.py::main",
       "target": "function:src/main.py::total_area",
       "kind": "calls",
       "status": "resolved_internal",
@@ -2381,27 +2402,6 @@
             "line": 26,
             "column": 58,
             "byte": 605
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/main.py::main",
-      "target": "unresolved:python:print",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 26,
-            "column": 5,
-            "byte": 552
-          },
-          "end": {
-            "line": 26,
-            "column": 61,
-            "byte": 608
           }
         }
       ]
@@ -2450,6 +2450,27 @@
     },
     {
       "source": "function:src/main.py::total_area",
+      "target": "external:python:builtins::sum",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 21,
+            "column": 12,
+            "byte": 427
+          },
+          "end": {
+            "line": 21,
+            "column": 49,
+            "byte": 464
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/main.py::total_area",
       "target": "unresolved:python:area",
       "kind": "calls",
       "status": "unresolved",
@@ -2465,27 +2486,6 @@
             "line": 21,
             "column": 28,
             "byte": 443
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/main.py::total_area",
-      "target": "unresolved:python:sum",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 21,
-            "column": 12,
-            "byte": 427
-          },
-          "end": {
-            "line": 21,
-            "column": 49,
-            "byte": 464
           }
         }
       ]
@@ -2576,10 +2576,10 @@
     },
     {
       "source": "method:src/service.py::Repository.find",
-      "target": "unresolved:python:get",
+      "target": "external:python:builtins::get",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2597,7 +2597,7 @@
     },
     {
       "source": "method:src/service.py::ShapeService.area",
-      "target": "external:python:ValueError",
+      "target": "external:python:builtins::ValueError",
       "kind": "calls",
       "status": "resolved_external",
       "origin": "lexical",
@@ -2612,6 +2612,27 @@
             "line": 22,
             "column": 42,
             "byte": 450
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.py::ShapeService.area",
+      "target": "external:python:builtins::find",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 20,
+            "column": 17,
+            "byte": 359
+          },
+          "end": {
+            "line": 20,
+            "column": 40,
+            "byte": 382
           }
         }
       ]
@@ -2633,27 +2654,6 @@
             "line": 23,
             "column": 28,
             "byte": 478
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:src/service.py::ShapeService.area",
-      "target": "unresolved:python:find",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 20,
-            "column": 17,
-            "byte": 359
-          },
-          "end": {
-            "line": 20,
-            "column": 40,
-            "byte": 382
           }
         }
       ]
@@ -3068,18 +3068,18 @@
     "nodes": 58,
     "edges": 146,
     "symbols": 33,
-    "unresolvedEdges": 15,
+    "unresolvedEdges": 9,
     "diagnostics": 6,
     "byNodeKind": {
       "class": 8,
       "constructor": 6,
-      "external_symbol": 6,
+      "external_symbol": 11,
       "file": 5,
       "function": 6,
       "method": 10,
       "module": 5,
       "repository": 1,
-      "unknown": 8,
+      "unknown": 3,
       "variable": 3
     },
     "byEdgeKind": {
@@ -3095,9 +3095,9 @@
       "python": 57
     },
     "byStatus": {
-      "resolved_external": 6,
+      "resolved_external": 12,
       "resolved_internal": 125,
-      "unresolved": 15
+      "unresolved": 9
     },
     "byFramework": {}
   }

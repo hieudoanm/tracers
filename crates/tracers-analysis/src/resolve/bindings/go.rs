@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use tracers_parser::ImportData;
 
-use crate::index::{stem, Binding, ModuleRef};
+use crate::index::{Binding, ModuleRef, stem};
 
 use super::super::resolve_import_pass::ImportContext;
 

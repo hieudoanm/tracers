@@ -146,6 +146,54 @@
       "language": "rust"
     },
     {
+      "id": "external:rust:std::expect",
+      "kind": "external_symbol",
+      "name": "expect",
+      "language": "rust"
+    },
+    {
+      "id": "external:rust:std::get",
+      "kind": "external_symbol",
+      "name": "get",
+      "language": "rust"
+    },
+    {
+      "id": "external:rust:std::insert",
+      "kind": "external_symbol",
+      "name": "insert",
+      "language": "rust"
+    },
+    {
+      "id": "external:rust:std::iter",
+      "kind": "external_symbol",
+      "name": "iter",
+      "language": "rust"
+    },
+    {
+      "id": "external:rust:std::map",
+      "kind": "external_symbol",
+      "name": "map",
+      "language": "rust"
+    },
+    {
+      "id": "external:rust:std::println",
+      "kind": "external_symbol",
+      "name": "println",
+      "language": "rust"
+    },
+    {
+      "id": "external:rust:std::sum",
+      "kind": "external_symbol",
+      "name": "sum",
+      "language": "rust"
+    },
+    {
+      "id": "external:rust:std::vec",
+      "kind": "external_symbol",
+      "name": "vec",
+      "language": "rust"
+    },
+    {
       "id": "file:src/complex.rs",
       "kind": "file",
       "name": "src/complex.rs",
@@ -1273,54 +1321,6 @@
       "language": "rust"
     },
     {
-      "id": "unresolved:rust:expect",
-      "kind": "unknown",
-      "name": "expect",
-      "language": "rust"
-    },
-    {
-      "id": "unresolved:rust:get",
-      "kind": "unknown",
-      "name": "get",
-      "language": "rust"
-    },
-    {
-      "id": "unresolved:rust:insert",
-      "kind": "unknown",
-      "name": "insert",
-      "language": "rust"
-    },
-    {
-      "id": "unresolved:rust:iter",
-      "kind": "unknown",
-      "name": "iter",
-      "language": "rust"
-    },
-    {
-      "id": "unresolved:rust:map",
-      "kind": "unknown",
-      "name": "map",
-      "language": "rust"
-    },
-    {
-      "id": "unresolved:rust:println",
-      "kind": "unknown",
-      "name": "println",
-      "language": "rust"
-    },
-    {
-      "id": "unresolved:rust:sum",
-      "kind": "unknown",
-      "name": "sum",
-      "language": "rust"
-    },
-    {
-      "id": "unresolved:rust:vec",
-      "kind": "unknown",
-      "name": "vec",
-      "language": "rust"
-    },
-    {
       "id": "variable:src/main.rs::main.shapes",
       "kind": "variable",
       "name": "shapes",
@@ -2012,31 +2012,10 @@
     },
     {
       "source": "function:src/complex.rs::total",
-      "target": "unresolved:rust:area",
+      "target": "external:rust:std::iter",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 13,
-            "column": 27,
-            "byte": 267
-          },
-          "end": {
-            "line": 13,
-            "column": 35,
-            "byte": 275
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/complex.rs::total",
-      "target": "unresolved:rust:iter",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2054,10 +2033,10 @@
     },
     {
       "source": "function:src/complex.rs::total",
-      "target": "unresolved:rust:map",
+      "target": "external:rust:std::map",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2075,10 +2054,10 @@
     },
     {
       "source": "function:src/complex.rs::total",
-      "target": "unresolved:rust:sum",
+      "target": "external:rust:std::sum",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2090,6 +2069,27 @@
             "line": 13,
             "column": 42,
             "byte": 282
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/complex.rs::total",
+      "target": "unresolved:rust:area",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 13,
+            "column": 27,
+            "byte": 267
+          },
+          "end": {
+            "line": 13,
+            "column": 35,
+            "byte": 275
           }
         }
       ]
@@ -2117,31 +2117,10 @@
     },
     {
       "source": "function:src/lib.rs::total_area",
-      "target": "unresolved:rust:area",
+      "target": "external:rust:std::iter",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 40,
-            "column": 27,
-            "byte": 818
-          },
-          "end": {
-            "line": 40,
-            "column": 35,
-            "byte": 826
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/lib.rs::total_area",
-      "target": "unresolved:rust:iter",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2159,10 +2138,10 @@
     },
     {
       "source": "function:src/lib.rs::total_area",
-      "target": "unresolved:rust:map",
+      "target": "external:rust:std::map",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2180,10 +2159,10 @@
     },
     {
       "source": "function:src/lib.rs::total_area",
-      "target": "unresolved:rust:sum",
+      "target": "external:rust:std::sum",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2195,6 +2174,27 @@
             "line": 40,
             "column": 42,
             "byte": 833
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/lib.rs::total_area",
+      "target": "unresolved:rust:area",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 40,
+            "column": 27,
+            "byte": 818
+          },
+          "end": {
+            "line": 40,
+            "column": 35,
+            "byte": 826
           }
         }
       ]
@@ -2222,10 +2222,10 @@
     },
     {
       "source": "function:src/main.rs::main",
-      "target": "unresolved:rust:println",
+      "target": "external:rust:std::println",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2243,10 +2243,10 @@
     },
     {
       "source": "function:src/main.rs::main",
-      "target": "unresolved:rust:vec",
+      "target": "external:rust:std::vec",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2285,31 +2285,10 @@
     },
     {
       "source": "function:src/shapes.rs::total_area",
-      "target": "unresolved:rust:area",
+      "target": "external:rust:std::iter",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 40,
-            "column": 27,
-            "byte": 818
-          },
-          "end": {
-            "line": 40,
-            "column": 35,
-            "byte": 826
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/shapes.rs::total_area",
-      "target": "unresolved:rust:iter",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2327,10 +2306,10 @@
     },
     {
       "source": "function:src/shapes.rs::total_area",
-      "target": "unresolved:rust:map",
+      "target": "external:rust:std::map",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2348,10 +2327,10 @@
     },
     {
       "source": "function:src/shapes.rs::total_area",
-      "target": "unresolved:rust:sum",
+      "target": "external:rust:std::sum",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2363,6 +2342,27 @@
             "line": 40,
             "column": 42,
             "byte": 833
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/shapes.rs::total_area",
+      "target": "unresolved:rust:area",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 40,
+            "column": 27,
+            "byte": 818
+          },
+          "end": {
+            "line": 40,
+            "column": 35,
+            "byte": 826
           }
         }
       ]
@@ -2390,6 +2390,27 @@
     },
     {
       "source": "method:src/service.rs::InMemoryRepository.find",
+      "target": "external:rust:std::get",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 22,
+            "column": 9,
+            "byte": 498
+          },
+          "end": {
+            "line": 22,
+            "column": 27,
+            "byte": 516
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::InMemoryRepository.find",
       "target": "unresolved:rust:cloned",
       "kind": "calls",
       "status": "unresolved",
@@ -2405,27 +2426,6 @@
             "line": 22,
             "column": 36,
             "byte": 525
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:src/service.rs::InMemoryRepository.find",
-      "target": "unresolved:rust:get",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 22,
-            "column": 9,
-            "byte": 498
-          },
-          "end": {
-            "line": 22,
-            "column": 27,
-            "byte": 516
           }
         }
       ]
@@ -2495,10 +2495,10 @@
     },
     {
       "source": "method:src/service.rs::InMemoryRepository.save",
-      "target": "unresolved:rust:insert",
+      "target": "external:rust:std::insert",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2579,10 +2579,10 @@
     },
     {
       "source": "method:src/service.rs::ShapeService.add",
-      "target": "unresolved:rust:insert",
+      "target": "external:rust:std::insert",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2621,31 +2621,10 @@
     },
     {
       "source": "method:src/service.rs::ShapeService.area",
-      "target": "unresolved:rust:area",
+      "target": "external:rust:std::expect",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 47,
-            "column": 9,
-            "byte": 1053
-          },
-          "end": {
-            "line": 47,
-            "column": 22,
-            "byte": 1066
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:src/service.rs::ShapeService.area",
-      "target": "unresolved:rust:expect",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2663,10 +2642,10 @@
     },
     {
       "source": "method:src/service.rs::ShapeService.area",
-      "target": "unresolved:rust:get",
+      "target": "external:rust:std::get",
       "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
+      "status": "resolved_external",
+      "origin": "lexical",
       "sites": [
         {
           "start": {
@@ -2678,6 +2657,27 @@
             "line": 46,
             "column": 39,
             "byte": 1023
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::ShapeService.area",
+      "target": "unresolved:rust:area",
+      "kind": "calls",
+      "status": "unresolved",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 47,
+            "column": 9,
+            "byte": 1053
+          },
+          "end": {
+            "line": 47,
+            "column": 22,
+            "byte": 1066
           }
         }
       ]
@@ -3482,10 +3482,10 @@
     "nodes": 73,
     "edges": 192,
     "symbols": 48,
-    "unresolvedEdges": 27,
+    "unresolvedEdges": 11,
     "diagnostics": 0,
     "byNodeKind": {
-      "external_symbol": 2,
+      "external_symbol": 10,
       "file": 5,
       "function": 4,
       "method": 22,
@@ -3494,7 +3494,7 @@
       "repository": 1,
       "struct": 7,
       "trait": 4,
-      "unknown": 11,
+      "unknown": 3,
       "variable": 2
     },
     "byEdgeKind": {
@@ -3510,9 +3510,9 @@
       "rust": 72
     },
     "byStatus": {
-      "resolved_external": 4,
+      "resolved_external": 20,
       "resolved_internal": 161,
-      "unresolved": 27
+      "unresolved": 11
     },
     "byFramework": {}
   }

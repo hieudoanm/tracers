@@ -874,18 +874,6 @@ expression: document
       "language": "go"
     },
     {
-      "id": "unresolved:go:make",
-      "kind": "unknown",
-      "name": "make",
-      "language": "go"
-    },
-    {
-      "id": "unresolved:go:panic",
-      "kind": "unknown",
-      "name": "panic",
-      "language": "go"
-    },
-    {
       "id": "variable:pkg/service/service.go::*MemoryRepository.Find.c",
       "kind": "variable",
       "name": "c",
@@ -1657,27 +1645,6 @@ expression: document
     },
     {
       "source": "function:pkg/service/service.go::NewMemoryRepository",
-      "target": "unresolved:go:make",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 15,
-            "column": 34,
-            "byte": 320
-          },
-          "end": {
-            "line": 15,
-            "column": 63,
-            "byte": 349
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:pkg/service/service.go::NewMemoryRepository",
       "target": "struct:pkg/service/service.go::MemoryRepository",
       "kind": "uses_type",
       "status": "resolved_internal",
@@ -2065,27 +2032,6 @@ expression: document
             "line": 36,
             "column": 26,
             "byte": 752
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:pkg/service/service.go::*ShapeService.Area",
-      "target": "unresolved:go:panic",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 38,
-            "column": 3,
-            "byte": 765
-          },
-          "end": {
-            "line": 38,
-            "column": 21,
-            "byte": 783
           }
         }
       ]
@@ -2500,10 +2446,10 @@ expression: document
   "statistics": {
     "files": 4,
     "packages": 4,
-    "nodes": 62,
-    "edges": 158,
+    "nodes": 60,
+    "edges": 156,
     "symbols": 37,
-    "unresolvedEdges": 15,
+    "unresolvedEdges": 13,
     "diagnostics": 1,
     "byNodeKind": {
       "external_symbol": 3,
@@ -2516,11 +2462,11 @@ expression: document
       "property": 6,
       "repository": 1,
       "struct": 5,
-      "unknown": 9,
+      "unknown": 7,
       "variable": 5
     },
     "byEdgeKind": {
-      "calls": 8,
+      "calls": 6,
       "contains": 53,
       "defines": 37,
       "exports": 44,
@@ -2528,12 +2474,12 @@ expression: document
       "uses_type": 13
     },
     "byLanguage": {
-      "go": 57
+      "go": 55
     },
     "byStatus": {
       "resolved_external": 3,
       "resolved_internal": 140,
-      "unresolved": 15
+      "unresolved": 13
     },
     "byFramework": {}
   }
