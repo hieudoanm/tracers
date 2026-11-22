@@ -9,13 +9,16 @@
 use std::path::{Path, PathBuf};
 
 use tracers_core::Language;
-use tracers_parser::{grammar_version, ParsedFile};
+use tracers_parser::{ParsedFile, grammar_version};
 
 #[cfg(test)]
 use crate::config::CacheConfig;
 use crate::config::TracersConfig;
 
-const CACHE_FORMAT_VERSION: &str = "1";
+// Bump when parser adapter extraction semantics change: cached `ParsedFile`
+// results would otherwise go stale across releases since source hashes and
+// grammar versions don't capture adapter logic.
+const CACHE_FORMAT_VERSION: &str = "2";
 const TRACERS_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
@@ -227,12 +230,16 @@ mod tests {
         assert!(cache.store(&parsed));
         let loaded = cache.load("src/a.ts", Language::TypeScript, "abc").unwrap();
         assert_eq!(loaded, parsed);
-        assert!(cache
-            .load("src/b.ts", Language::TypeScript, "abc")
-            .is_none());
-        assert!(cache
-            .load("src/a.ts", Language::TypeScript, "def")
-            .is_none());
+        assert!(
+            cache
+                .load("src/b.ts", Language::TypeScript, "abc")
+                .is_none()
+        );
+        assert!(
+            cache
+                .load("src/a.ts", Language::TypeScript, "def")
+                .is_none()
+        );
     }
 
     #[test]
@@ -241,13 +248,17 @@ mod tests {
         let cache = SyntaxCache::new(dir.path().to_path_buf(), true);
         let parsed = parsed();
 
-        assert!(cache
-            .load("src/a.ts", Language::TypeScript, "abc")
-            .is_none());
+        assert!(
+            cache
+                .load("src/a.ts", Language::TypeScript, "abc")
+                .is_none()
+        );
         assert!(cache.store(&parsed));
-        assert!(cache
-            .load("src/a.ts", Language::TypeScript, "abc")
-            .is_some());
+        assert!(
+            cache
+                .load("src/a.ts", Language::TypeScript, "abc")
+                .is_some()
+        );
 
         let counts = cache.counts();
         assert_eq!(counts.hits, 1);
@@ -260,9 +271,11 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let cache = SyntaxCache::new(dir.path().to_path_buf(), false);
         assert!(!cache.store(&parsed()));
-        assert!(cache
-            .load("src/a.ts", Language::TypeScript, "abc")
-            .is_none());
+        assert!(
+            cache
+                .load("src/a.ts", Language::TypeScript, "abc")
+                .is_none()
+        );
     }
 
     #[test]

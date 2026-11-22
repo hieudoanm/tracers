@@ -21,6 +21,7 @@ pub(crate) fn build_from_parsed(
     let import_pass = crate::resolve::resolve_imports(&mut index);
 
     let manifests = discover_manifests(root);
+    index.external_deps = crate::deps::extract_external_deps(&manifests);
     let detector = FrameworkDetector::new();
     let detection = detector.detect(root, &parsed_files, &manifests);
 

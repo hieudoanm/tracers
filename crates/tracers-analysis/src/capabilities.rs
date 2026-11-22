@@ -101,11 +101,15 @@ pub fn capabilities(language: Language, files: usize) -> LanguageCapability {
         ),
         Language::C | Language::Cpp | Language::Dart | Language::Scala | Language::R => (
             None,
-            &["Symbol extraction only; imports, calls and cross-file resolution are not implemented."],
+            &[
+                "Symbol extraction only; imports, calls and cross-file resolution are not implemented.",
+            ],
         ),
         Language::Zig | Language::Bash | Language::Matlab | Language::GdScript => (
             None,
-            &["Grammar is parsed for syntax trees only; no symbols, imports or calls are extracted."],
+            &[
+                "Grammar is parsed for syntax trees only; no symbols, imports or calls are extracted.",
+            ],
         ),
         Language::Markdown => (
             None,

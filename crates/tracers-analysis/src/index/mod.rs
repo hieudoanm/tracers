@@ -19,4 +19,4 @@ pub use helpers::{
     python_module_name, rust_module_qualified, stem,
 };
 pub use repository::{GoModule, PackageState, RepositoryIndex};
-pub use types::{symbol_ref, Binding, FileState, ModuleRef, SymbolRef};
+pub use types::{Binding, FileState, ModuleRef, SymbolRef, symbol_ref};

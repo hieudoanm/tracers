@@ -776,12 +776,6 @@ expression: document
       "language": "python"
     },
     {
-      "id": "unresolved:python:list",
-      "kind": "unknown",
-      "name": "list",
-      "language": "python"
-    },
-    {
       "id": "variable:src/main.py::main.shapes",
       "kind": "variable",
       "name": "shapes",
@@ -1676,27 +1670,6 @@ expression: document
       ]
     },
     {
-      "source": "function:src/main.py::main",
-      "target": "unresolved:python:list",
-      "kind": "uses_type",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 25,
-            "column": 13,
-            "byte": 499
-          },
-          "end": {
-            "line": 25,
-            "column": 17,
-            "byte": 503
-          }
-        }
-      ]
-    },
-    {
       "source": "function:src/main.py::total_area",
       "target": "unresolved:python:area",
       "kind": "calls",
@@ -1734,27 +1707,6 @@ expression: document
             "line": 19,
             "column": 34,
             "byte": 353
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/main.py::total_area",
-      "target": "unresolved:python:list",
-      "kind": "uses_type",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 19,
-            "column": 24,
-            "byte": 343
-          },
-          "end": {
-            "line": 19,
-            "column": 28,
-            "byte": 347
           }
         }
       ]
@@ -2187,10 +2139,10 @@ expression: document
   "statistics": {
     "files": 5,
     "packages": 0,
-    "nodes": 47,
-    "edges": 134,
+    "nodes": 46,
+    "edges": 132,
     "symbols": 33,
-    "unresolvedEdges": 9,
+    "unresolvedEdges": 7,
     "diagnostics": 6,
     "byNodeKind": {
       "class": 8,
@@ -2200,7 +2152,7 @@ expression: document
       "method": 10,
       "module": 5,
       "repository": 1,
-      "unknown": 3,
+      "unknown": 2,
       "variable": 3
     },
     "byEdgeKind": {
@@ -2210,14 +2162,14 @@ expression: document
       "exports": 38,
       "imports": 2,
       "inherits": 4,
-      "uses_type": 8
+      "uses_type": 6
     },
     "byLanguage": {
-      "python": 46
+      "python": 45
     },
     "byStatus": {
       "resolved_internal": 125,
-      "unresolved": 9
+      "unresolved": 7
     },
     "byFramework": {}
   }

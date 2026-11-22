@@ -478,15 +478,33 @@
       "language": "python"
     },
     {
+      "id": "external:python:builtins::float",
+      "kind": "external_symbol",
+      "name": "float",
+      "language": "python"
+    },
+    {
       "id": "external:python:builtins::get",
       "kind": "external_symbol",
       "name": "get",
       "language": "python"
     },
     {
+      "id": "external:python:builtins::list",
+      "kind": "external_symbol",
+      "name": "list",
+      "language": "python"
+    },
+    {
       "id": "external:python:builtins::print",
       "kind": "external_symbol",
       "name": "print",
+      "language": "python"
+    },
+    {
+      "id": "external:python:builtins::str",
+      "kind": "external_symbol",
+      "name": "str",
       "language": "python"
     },
     {
@@ -947,12 +965,6 @@
       "language": "python"
     },
     {
-      "id": "unresolved:python:list",
-      "kind": "unknown",
-      "name": "list",
-      "language": "python"
-    },
-    {
       "id": "variable:src/main.py::main.shapes",
       "kind": "variable",
       "name": "shapes",
@@ -1189,6 +1201,81 @@
       ]
     },
     {
+      "source": "constructor:src/complex.py::Circle.__init__",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 5,
+            "column": 27,
+            "byte": 131
+          },
+          "end": {
+            "line": 5,
+            "column": 32,
+            "byte": 136
+          }
+        }
+      ]
+    },
+    {
+      "source": "constructor:src/shapes.py::Circle.__init__",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 9,
+            "column": 32,
+            "byte": 132
+          },
+          "end": {
+            "line": 9,
+            "column": 37,
+            "byte": 137
+          }
+        }
+      ]
+    },
+    {
+      "source": "constructor:src/shapes.py::Rectangle.__init__",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 24,
+            "column": 31,
+            "byte": 524
+          },
+          "end": {
+            "line": 24,
+            "column": 36,
+            "byte": 529
+          }
+        },
+        {
+          "start": {
+            "line": 24,
+            "column": 46,
+            "byte": 539
+          },
+          "end": {
+            "line": 24,
+            "column": 51,
+            "byte": 544
+          }
+        }
+      ]
+    },
+    {
       "source": "constructor:src/shapes.py::Square.__init__",
       "target": "external:python:builtins::super",
       "kind": "calls",
@@ -1226,6 +1313,27 @@
             "line": 41,
             "column": 37,
             "byte": 1024
+          }
+        }
+      ]
+    },
+    {
+      "source": "constructor:src/shapes.py::Square.__init__",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 40,
+            "column": 30,
+            "byte": 972
+          },
+          "end": {
+            "line": 40,
+            "column": 35,
+            "byte": 977
           }
         }
       ]
@@ -1974,9 +2082,9 @@
     },
     {
       "source": "function:src/main.py::main",
-      "target": "unresolved:python:list",
+      "target": "external:python:builtins::list",
       "kind": "uses_type",
-      "status": "unresolved",
+      "status": "resolved_external",
       "origin": "syntax",
       "sites": [
         {
@@ -2058,9 +2166,30 @@
     },
     {
       "source": "function:src/main.py::total_area",
-      "target": "unresolved:python:list",
+      "target": "external:python:builtins::float",
       "kind": "uses_type",
-      "status": "unresolved",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 19,
+            "column": 40,
+            "byte": 359
+          },
+          "end": {
+            "line": 19,
+            "column": 45,
+            "byte": 364
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/main.py::total_area",
+      "target": "external:python:builtins::list",
+      "kind": "uses_type",
+      "status": "resolved_external",
       "origin": "syntax",
       "sites": [
         {
@@ -2115,6 +2244,144 @@
             "line": 28,
             "column": 30,
             "byte": 556
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/utils.py::circle_area",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 11,
+            "column": 25,
+            "byte": 190
+          },
+          "end": {
+            "line": 11,
+            "column": 30,
+            "byte": 195
+          }
+        },
+        {
+          "start": {
+            "line": 11,
+            "column": 35,
+            "byte": 200
+          },
+          "end": {
+            "line": 11,
+            "column": 40,
+            "byte": 205
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/utils.py::format_float",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 6,
+            "column": 25,
+            "byte": 75
+          },
+          "end": {
+            "line": 6,
+            "column": 30,
+            "byte": 80
+          }
+        }
+      ]
+    },
+    {
+      "source": "function:src/utils.py::format_float",
+      "target": "external:python:builtins::str",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 6,
+            "column": 35,
+            "byte": 85
+          },
+          "end": {
+            "line": 6,
+            "column": 38,
+            "byte": 88
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/complex.py::Circle.area",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 6,
+            "column": 23,
+            "byte": 172
+          },
+          "end": {
+            "line": 6,
+            "column": 28,
+            "byte": 177
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/complex.py::Shape.area",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 3,
+            "column": 23,
+            "byte": 73
+          },
+          "end": {
+            "line": 3,
+            "column": 28,
+            "byte": 78
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/main.py::Shape.area",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 15,
+            "column": 23,
+            "byte": 299
+          },
+          "end": {
+            "line": 15,
+            "column": 28,
+            "byte": 304
           }
         }
       ]
@@ -2199,6 +2466,90 @@
             "line": 23,
             "column": 28,
             "byte": 478
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/shapes.py::Circle.area",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 12,
+            "column": 23,
+            "byte": 200
+          },
+          "end": {
+            "line": 12,
+            "column": 28,
+            "byte": 205
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/shapes.py::Circle.perimeter",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 16,
+            "column": 28,
+            "byte": 331
+          },
+          "end": {
+            "line": 16,
+            "column": 33,
+            "byte": 336
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/shapes.py::Rectangle.area",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 28,
+            "column": 23,
+            "byte": 634
+          },
+          "end": {
+            "line": 28,
+            "column": 28,
+            "byte": 639
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/shapes.py::Rectangle.perimeter",
+      "target": "external:python:builtins::float",
+      "kind": "uses_type",
+      "status": "resolved_external",
+      "origin": "syntax",
+      "sites": [
+        {
+          "start": {
+            "line": 32,
+            "column": 28,
+            "byte": 757
+          },
+          "end": {
+            "line": 32,
+            "column": 33,
+            "byte": 762
           }
         }
       ]
@@ -2610,21 +2961,21 @@
   "statistics": {
     "files": 5,
     "packages": 0,
-    "nodes": 58,
-    "edges": 146,
+    "nodes": 60,
+    "edges": 161,
     "symbols": 33,
-    "unresolvedEdges": 9,
+    "unresolvedEdges": 7,
     "diagnostics": 6,
     "byNodeKind": {
       "class": 8,
       "constructor": 6,
-      "external_symbol": 11,
+      "external_symbol": 14,
       "file": 5,
       "function": 6,
       "method": 10,
       "module": 5,
       "repository": 1,
-      "unknown": 3,
+      "unknown": 2,
       "variable": 3
     },
     "byEdgeKind": {
@@ -2634,15 +2985,15 @@
       "exports": 38,
       "imports": 2,
       "inherits": 4,
-      "uses_type": 8
+      "uses_type": 23
     },
     "byLanguage": {
-      "python": 57
+      "python": 59
     },
     "byStatus": {
-      "resolved_external": 12,
+      "resolved_external": 29,
       "resolved_internal": 125,
-      "unresolved": 9
+      "unresolved": 7
     },
     "byFramework": {}
   }

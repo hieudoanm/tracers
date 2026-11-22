@@ -9,16 +9,17 @@
 pub mod cache;
 pub mod capabilities;
 pub mod config;
+mod deps;
 pub mod error;
 pub mod framework;
 pub mod graph;
 pub mod index;
 pub mod resolve;
 
-pub use capabilities::{all_capabilities, capabilities, LanguageCapability};
+pub use capabilities::{LanguageCapability, all_capabilities, capabilities};
 pub use config::{
-    AnalysisConfig, CacheConfig, OutputConfig, SemanticMode, TracersConfig, CONFIG_FILE_NAME,
-    DEFAULT_CACHE_DIR, DEFAULT_MAX_FILE_SIZE,
+    AnalysisConfig, CONFIG_FILE_NAME, CacheConfig, DEFAULT_CACHE_DIR, DEFAULT_MAX_FILE_SIZE,
+    OutputConfig, SemanticMode, TracersConfig,
 };
 pub use error::{AnalysisError, Result};
 pub use graph::{GraphBuildResult, GraphBuilder};

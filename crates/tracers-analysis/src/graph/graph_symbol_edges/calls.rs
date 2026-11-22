@@ -1,4 +1,4 @@
-use tracers_core::{external_id, Edge, EdgeKind, ResolutionOrigin, ResolutionStatus};
+use tracers_core::{Edge, EdgeKind, ResolutionOrigin, ResolutionStatus, external_id};
 
 use crate::index::{FileState, RepositoryIndex};
 use crate::resolve::resolve_resolver::Resolver;

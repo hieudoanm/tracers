@@ -61,6 +61,17 @@ impl GraphBuilder {
                     _ => {}
                 }
             }
+            // Receiver didn't resolve internally: it may be a stdlib or
+            // manifest-declared package qualifier (`fmt.Println`,
+            // `serde_json::json!`, `os.path.join`, `console.log`).
+            if let Some(qualified) = crate::resolve::builtin_calls::receiver_external_target(
+                state.language,
+                &cleaned,
+                &call.name,
+                &index.external_deps,
+            ) {
+                return CallTarget::External(qualified);
+            }
             return match call.kind {
                 CallKind::Constructor => CallTarget::External(format!("{receiver}.{}", call.name)),
                 _ => crate::resolve::builtin_calls::builtin_qualified(state.language, &call.name)

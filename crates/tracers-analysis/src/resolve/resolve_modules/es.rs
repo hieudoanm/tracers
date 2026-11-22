@@ -13,6 +13,11 @@ pub(crate) fn resolve_es(
     let specifier = import.module.trim();
     if specifier.starts_with('.') {
         let base = join_relative(&ctx.path, specifier);
+        // Exact path first: non-JS targets (`.md` docs, `.rs`, `.py`) carry
+        // their real extension and need no candidate expansion.
+        if ctx.index.files.contains_key(&base) {
+            return Ok(ModuleRef::File(base));
+        }
         for candidate in es_candidates(&base) {
             if ctx.index.files.contains_key(&candidate) {
                 return Ok(ModuleRef::File(candidate));

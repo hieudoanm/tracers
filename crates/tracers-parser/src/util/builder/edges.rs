@@ -31,10 +31,33 @@ impl<'a> SyntaxBuilder<'a> {
     }
 
     pub(crate) fn add_type_ref(&mut self, name: impl Into<String>, node: TsNode<'_>) {
-        let name = name.into();
-        if name.is_empty() || super::super::builtins::is_builtin_type(&name) {
+        let Some(name) = clean_symbol_name(&name.into()) else {
+            return;
+        };
+        // Single uppercase letters in generic languages are type parameters
+        // (`[T any]`, `<T>`, `T extends ...`) that bind lexically rather
+        // than referencing a declared type.
+        if name.len() == 1
+            && name.chars().next().is_some_and(|c| c.is_ascii_uppercase())
+            && matches!(
+                self.language,
+                tracers_core::Language::Rust
+                    | tracers_core::Language::Go
+                    | tracers_core::Language::Kotlin
+                    | tracers_core::Language::Swift
+                    | tracers_core::Language::Java
+                    | tracers_core::Language::CSharp
+                    | tracers_core::Language::TypeScript
+                    | tracers_core::Language::Tsx
+                    | tracers_core::Language::Cpp
+                    | tracers_core::Language::Dart
+                    | tracers_core::Language::Scala
+            )
+        {
             return;
         }
+        // Builtin/primitive names are kept: analysis maps known stdlib types
+        // to `resolved_external` edges and drops the rest.
         self.type_refs.push(TypeRefData {
             from: self.caller(),
             name,
@@ -49,12 +72,39 @@ impl<'a> SyntaxBuilder<'a> {
         relation: HeritageRelation,
         node: TsNode<'_>,
     ) {
+        let Some(name) = clean_symbol_name(&name.into()) else {
+            return;
+        };
         self.heritage.push(HeritageData {
             from,
-            name: name.into(),
+            name,
             relation,
             range: super::super::tree_sitter::range(node),
         });
+    }
+}
+
+/// Return `name` when it is a plausible type/symbol reference name.
+///
+/// Adapter fallbacks occasionally slice raw expression text, leaking
+/// char literals (`'a`), multi-line chains, or generic argument lists
+/// into type references and heritage names. Qualified names keep their
+/// `.`/`::` separators; trailing `?`/`!` cover Swift optionals and
+/// Rust never-type/never-return markers.
+fn clean_symbol_name(name: &str) -> Option<String> {
+    let name = name.trim();
+    if name.is_empty() || name.len() > 200 {
+        return None;
+    }
+    let core = name.trim_end_matches(['?', '!']);
+    if !core.is_empty()
+        && core
+            .chars()
+            .all(|c| c.is_alphanumeric() || matches!(c, '_' | '$' | '.' | ':'))
+    {
+        Some(name.to_string())
+    } else {
+        None
     }
 }
 
