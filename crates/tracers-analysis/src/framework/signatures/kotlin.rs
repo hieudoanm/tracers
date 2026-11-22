@@ -72,4 +72,18 @@ pub const KOTLIN_SIGNATURES: &[FrameworkSignature] = &[
         pattern_confidence: FrameworkConfidence::High,
         manifest_confidence: FrameworkConfidence::Medium,
     },
+    FrameworkSignature {
+        name: "kotest",
+        display_name: "Kotest",
+        family: FrameworkFamily::Kotlin,
+        import_prefixes: &["io.kotest"],
+        decorators: &[],
+        base_classes: &[],
+        calls: &[],
+        manifest_files: &["build.gradle", "build.gradle.kts", "pom.xml"],
+        manifest_deps: &["io.kotest"],
+        import_confidence: FrameworkConfidence::Medium,
+        pattern_confidence: FrameworkConfidence::High,
+        manifest_confidence: FrameworkConfidence::Medium,
+    },
 ];
