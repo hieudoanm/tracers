@@ -41,6 +41,9 @@ pub struct RepositoryIndex {
     /// Dependency names declared by package manifests (Cargo.toml, go.mod,
     /// package.json, ...). Populated after indexing from manifest contents.
     pub external_deps: std::collections::BTreeSet<String>,
+    /// Rust crate names (as written in `use` paths) → crate-root directory.
+    /// Populated from `Cargo.toml` manifests before import resolution.
+    pub rust_crates: std::collections::BTreeMap<String, String>,
 }
 
 impl RepositoryIndex {

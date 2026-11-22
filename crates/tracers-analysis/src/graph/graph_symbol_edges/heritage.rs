@@ -21,6 +21,16 @@ pub(crate) fn add_heritage_edges(
             continue;
         };
         let resolution = resolver.resolve_type_name(state, Some(heritage.from), &heritage.name);
+        let resolution = match resolution {
+            Resolution::ExternalNode { node_id, .. } => Resolution::External {
+                qualified: node_id
+                    .strip_prefix("external:unresolved:")
+                    .unwrap_or(&node_id)
+                    .to_string(),
+                name: String::new(),
+            },
+            other => other,
+        };
         let relation = match heritage.relation {
             HeritageRelation::Implements => EdgeKind::Implements,
             _ => EdgeKind::Inherits,

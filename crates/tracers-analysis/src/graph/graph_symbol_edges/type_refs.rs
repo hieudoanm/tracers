@@ -22,6 +22,18 @@ pub(crate) fn add_type_ref_edges(
             .unwrap_or_else(|| state.module_id.clone());
 
         let resolution = resolver.resolve_type_name(state, type_ref.from, &type_ref.name);
+        // `ExternalNode` ids are `external:unresolved:{qualified}`
+        // placeholders; recover the qualified name for a canonical node.
+        let resolution = match resolution {
+            Resolution::ExternalNode { node_id, .. } => Resolution::External {
+                qualified: node_id
+                    .strip_prefix("external:unresolved:")
+                    .unwrap_or(&node_id)
+                    .to_string(),
+                name: String::new(),
+            },
+            other => other,
+        };
         match resolution {
             Resolution::Internal(symbol) => {
                 graph.add_edge(

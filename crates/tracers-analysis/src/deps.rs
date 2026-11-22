@@ -55,6 +55,11 @@ fn add(deps: &mut BTreeSet<String>, raw: &str) {
         return;
     }
     deps.insert(name.to_string());
+    // Rust crate names and Python modules use `_` where manifests write `-`
+    // (`chess-core` → `chess_core`, `foo-bar` → `foo_bar`).
+    if name.contains('-') {
+        deps.insert(name.replace('-', "_"));
+    }
     // Also index the final path segment: `github.com/x/y` is imported as `y`.
     if let Some(last) = name.rsplit('/').next() {
         deps.insert(last.to_string());
@@ -313,4 +318,41 @@ fn csproj(text: &str, deps: &mut BTreeSet<String>) {
             }
         }
     }
+}
+
+/// Map Rust crate names (as used in `use crate_name::...`) to their
+/// crate-root directory (the directory containing `Cargo.toml`).
+///
+/// The crate name is `[lib] name` when present, else `[package] name`
+/// with `-` replaced by `_` (the identifier Rust code actually uses).
+pub(crate) fn extract_rust_crates(
+    manifests: &ManifestContents,
+) -> std::collections::BTreeMap<String, String> {
+    let mut crates = std::collections::BTreeMap::new();
+    for (path, text) in &manifests.files {
+        if !path.ends_with("Cargo.toml") {
+            continue;
+        }
+        let Ok(value) = toml::from_str::<toml::Value>(text) else {
+            continue;
+        };
+        let package_name = value
+            .get("package")
+            .and_then(|p| p.get("name"))
+            .and_then(|n| n.as_str());
+        let lib_name = value
+            .get("lib")
+            .and_then(|l| l.get("name"))
+            .and_then(|n| n.as_str());
+        let crate_name = lib_name.or(package_name).map(|name| name.replace('-', "_"));
+        let Some(crate_name) = crate_name else {
+            continue;
+        };
+        let crate_root = path
+            .rsplit_once('/')
+            .map(|(dir, _)| dir.to_string())
+            .unwrap_or_default();
+        crates.insert(crate_name, crate_root);
+    }
+    crates
 }

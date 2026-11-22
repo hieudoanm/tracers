@@ -78,6 +78,43 @@ impl<'a> ImportContext<'a> {
         };
 
         if import.is_export {
+            // Rust `pub use path::Name` flattens to a module path with no
+            // item list — the re-exported name is the last path segment
+            // (or the `as` alias).
+            if import.items.is_empty() && import.kind == tracers_parser::ImportKind::Rust {
+                let name = import.alias.clone().or_else(|| {
+                    import
+                        .module
+                        .rsplit("::")
+                        .next()
+                        .filter(|s| !s.is_empty())
+                        .map(str::to_string)
+                });
+                if let Some(name) = name {
+                    if name == "*" {
+                        if let ModuleRef::File(path) = &module {
+                            if let Some(state) = self.index.files.get(path) {
+                                for (export_name, ids) in &state.exports {
+                                    for id in ids {
+                                        re_exports.insert(export_name.clone(), id.clone());
+                                    }
+                                }
+                            }
+                        }
+                        return;
+                    }
+                    let resolution = self.resolve_module_name(
+                        &module,
+                        &name,
+                        allow_private,
+                        module_name.as_deref(),
+                    );
+                    if let Resolution::Internal(symbol) = resolution {
+                        re_exports.insert(name, symbol.node_id);
+                    }
+                }
+                return;
+            }
             for item in &import.items {
                 if item.name == "*" {
                     if let ModuleRef::File(path) = &module {
@@ -141,36 +178,48 @@ impl<'a> ImportContext<'a> {
 pub fn resolve_imports(index: &mut RepositoryIndex) -> ImportPass {
     let paths: Vec<String> = index.files.keys().cloned().collect();
     let mut pass = ImportPass::default();
-    for path in paths {
-        let Some(state) = index.files.get(&path) else {
-            continue;
-        };
-        let imports = state.parsed.imports.clone();
-        let mut context = ImportContext {
-            index,
-            state,
-            path: path.clone(),
-            language: state.language,
-            diagnostics: Vec::new(),
-            edges: Vec::new(),
-            package_pairs: BTreeSet::new(),
-        };
-        let mut bindings = BTreeMap::new();
-        let mut re_exports: BTreeMap<String, String> = BTreeMap::new();
-        for import in &imports {
-            context.process(import, &mut bindings, &mut re_exports);
+    // Two rounds: `pub use` re-exports land in `state.exports` during the
+    // pass, so names re-exported by a file processed later would otherwise
+    // be invisible to earlier files (`use chess_core::Position` → lib.rs
+    // `pub use position::Position`). Round 1 only warms the export maps;
+    // its edges/diagnostics are discarded.
+    for round in 0..2 {
+        if round == 1 {
+            pass.edges.clear();
+            pass.diagnostics.clear();
+            pass.package_pairs.clear();
         }
-        pass.diagnostics.append(&mut context.diagnostics);
-        pass.edges.append(&mut context.edges);
-        pass.package_pairs.append(&mut context.package_pairs);
-        if let Some(state) = index.files.get_mut(&path) {
-            state.bindings = bindings;
-            for (name, node_id) in re_exports {
-                state.exports.entry(name).or_default().push(node_id);
+        for path in &paths {
+            let Some(state) = index.files.get(path) else {
+                continue;
+            };
+            let imports = state.parsed.imports.clone();
+            let mut context = ImportContext {
+                index,
+                state,
+                path: path.clone(),
+                language: state.language,
+                diagnostics: Vec::new(),
+                edges: Vec::new(),
+                package_pairs: BTreeSet::new(),
+            };
+            let mut bindings = BTreeMap::new();
+            let mut re_exports: BTreeMap<String, String> = BTreeMap::new();
+            for import in &imports {
+                context.process(import, &mut bindings, &mut re_exports);
             }
-            for ids in state.exports.values_mut() {
-                ids.sort();
-                ids.dedup();
+            pass.diagnostics.append(&mut context.diagnostics);
+            pass.edges.append(&mut context.edges);
+            pass.package_pairs.append(&mut context.package_pairs);
+            if let Some(state) = index.files.get_mut(path) {
+                state.bindings = bindings;
+                for (name, node_id) in re_exports {
+                    state.exports.entry(name).or_default().push(node_id);
+                }
+                for ids in state.exports.values_mut() {
+                    ids.sort();
+                    ids.dedup();
+                }
             }
         }
     }

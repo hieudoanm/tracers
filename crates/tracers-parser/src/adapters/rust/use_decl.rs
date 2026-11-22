@@ -1,12 +1,17 @@
 use tree_sitter::Node as TsNode;
 
 use crate::syntax::{ImportData, ImportKind};
-use crate::util::{child_field, first_named, named_children, range, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, first_named, named_children, range};
 
 pub(crate) fn parse_use(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     let Some(argument) = child_field(node, "argument") else {
         return;
     };
+    // `pub use` re-exports the imported names; `pub(crate)`/`pub(super)`
+    // stay private to the crate/module tree.
+    let is_export = named_children(node)
+        .into_iter()
+        .any(|child| child.kind() == "visibility_modifier" && builder.text(child).trim() == "pub");
     let mut bindings = Vec::new();
     flatten_use(builder, argument, "", &mut bindings);
     for (path, alias) in bindings {
@@ -19,7 +24,7 @@ pub(crate) fn parse_use(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
             items: Vec::new(),
             kind: ImportKind::Rust,
             range: range(node),
-            is_export: false,
+            is_export,
         });
     }
 }

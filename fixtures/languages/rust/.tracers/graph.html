@@ -459,7 +459,7 @@
   "repository": {
     "id": "repository:.",
     "name": "rust",
-    "root": "/Users/hieudoan/git/github.com/hieudoanm/tracers/crates/tracers-cli/../../fixtures/languages/rust",
+    "root": "fixtures/languages/rust",
     "fileCount": 5,
     "languageCount": 23
   },
@@ -592,6 +592,12 @@
       "id": "external:rust:Self",
       "kind": "external_symbol",
       "name": "Self",
+      "language": "rust"
+    },
+    {
+      "id": "external:rust:std::cloned",
+      "kind": "external_symbol",
+      "name": "cloned",
       "language": "rust"
     },
     {
@@ -1764,12 +1770,6 @@
       "language": "rust"
     },
     {
-      "id": "unresolved:rust:cloned",
-      "kind": "unknown",
-      "name": "cloned",
-      "language": "rust"
-    },
-    {
       "id": "variable:src/main.rs::main.shapes",
       "kind": "variable",
       "name": "shapes",
@@ -2839,6 +2839,27 @@
     },
     {
       "source": "method:src/service.rs::InMemoryRepository.find",
+      "target": "external:rust:std::cloned",
+      "kind": "calls",
+      "status": "resolved_external",
+      "origin": "lexical",
+      "sites": [
+        {
+          "start": {
+            "line": 22,
+            "column": 9,
+            "byte": 498
+          },
+          "end": {
+            "line": 22,
+            "column": 36,
+            "byte": 525
+          }
+        }
+      ]
+    },
+    {
+      "source": "method:src/service.rs::InMemoryRepository.find",
       "target": "external:rust:std::get",
       "kind": "calls",
       "status": "resolved_external",
@@ -2854,27 +2875,6 @@
             "line": 22,
             "column": 27,
             "byte": 516
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:src/service.rs::InMemoryRepository.find",
-      "target": "unresolved:rust:cloned",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 22,
-            "column": 9,
-            "byte": 498
-          },
-          "end": {
-            "line": 22,
-            "column": 36,
-            "byte": 525
           }
         }
       ]
@@ -3781,10 +3781,10 @@
     "nodes": 72,
     "edges": 186,
     "symbols": 48,
-    "unresolvedEdges": 5,
+    "unresolvedEdges": 4,
     "diagnostics": 0,
     "byNodeKind": {
-      "external_symbol": 10,
+      "external_symbol": 11,
       "file": 5,
       "function": 4,
       "method": 22,
@@ -3793,7 +3793,7 @@
       "repository": 1,
       "struct": 7,
       "trait": 4,
-      "unknown": 2,
+      "unknown": 1,
       "variable": 2
     },
     "byEdgeKind": {
@@ -3809,9 +3809,9 @@
       "rust": 71
     },
     "byStatus": {
-      "resolved_external": 20,
+      "resolved_external": 21,
       "resolved_internal": 161,
-      "unresolved": 5
+      "unresolved": 4
     },
     "byFramework": {}
   }
