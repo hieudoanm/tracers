@@ -3,9 +3,9 @@
 use blake3;
 
 use tracers_core::diagnostic::{Diagnostic, DiagnosticKind};
-use tracers_parser::discovery::DiscoveredFile;
-use tracers_parser::parser::{read_source, SyntaxParser};
 use tracers_parser::ParsedFile;
+use tracers_parser::discovery::DiscoveredFile;
+use tracers_parser::parser::{SyntaxParser, read_source};
 
 use crate::cache::SyntaxCache;
 use crate::error::AnalysisError;

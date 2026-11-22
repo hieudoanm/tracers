@@ -1,12 +1,17 @@
 use tree_sitter::Node as TsNode;
 
-use crate::util::{child_field, first_named, is_builtin_type, named_children, SyntaxBuilder};
+use crate::util::{SyntaxBuilder, child_field, first_named, is_builtin_type, named_children};
 
 pub(crate) fn collect_go_type_refs(builder: &mut SyntaxBuilder<'_>, node: TsNode<'_>) {
     match node.kind() {
         "type_identifier" => {
             let name = builder.text(node).to_string();
-            if !is_builtin_type(&name) {
+            // Single uppercase letters are almost always generic type
+            // parameters (`[T any]`), which bind lexically rather than
+            // referencing a package type.
+            let is_type_param =
+                name.len() == 1 && name.chars().next().is_some_and(|c| c.is_ascii_uppercase());
+            if !is_builtin_type(&name) && !is_type_param {
                 builder.add_type_ref(name, node);
             }
         }

@@ -926,12 +926,6 @@ expression: document
       "language": "kotlin"
     },
     {
-      "id": "unresolved:kotlin:T",
-      "kind": "unknown",
-      "name": "T",
-      "language": "kotlin"
-    },
-    {
       "id": "unresolved:kotlin:area",
       "kind": "unknown",
       "name": "area",
@@ -2005,27 +1999,6 @@ expression: document
       ]
     },
     {
-      "source": "method:src/Service.kt::InMemoryRepository.save",
-      "target": "unresolved:kotlin:T",
-      "kind": "uses_type",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 6,
-            "column": 34,
-            "byte": 175
-          },
-          "end": {
-            "line": 6,
-            "column": 35,
-            "byte": 176
-          }
-        }
-      ]
-    },
-    {
       "source": "method:src/Service.kt::ShapeService.area",
       "target": "unresolved:kotlin:area",
       "kind": "calls",
@@ -2366,10 +2339,10 @@ expression: document
   "statistics": {
     "files": 4,
     "packages": 2,
-    "nodes": 58,
-    "edges": 148,
+    "nodes": 57,
+    "edges": 147,
     "symbols": 37,
-    "unresolvedEdges": 12,
+    "unresolvedEdges": 11,
     "diagnostics": 0,
     "byNodeKind": {
       "class": 8,
@@ -2383,7 +2356,7 @@ expression: document
       "package": 2,
       "property": 7,
       "repository": 1,
-      "unknown": 9
+      "unknown": 8
     },
     "byEdgeKind": {
       "calls": 10,
@@ -2393,15 +2366,15 @@ expression: document
       "implements": 3,
       "imports": 1,
       "inherits": 1,
-      "uses_type": 10
+      "uses_type": 9
     },
     "byLanguage": {
-      "kotlin": 55
+      "kotlin": 54
     },
     "byStatus": {
       "resolved_external": 1,
       "resolved_internal": 135,
-      "unresolved": 12
+      "unresolved": 11
     },
     "byFramework": {}
   }

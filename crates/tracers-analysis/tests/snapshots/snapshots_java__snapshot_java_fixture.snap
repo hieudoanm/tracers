@@ -550,18 +550,6 @@ expression: document
       "name": "repository"
     },
     {
-      "id": "unresolved:java:Map<String, T>",
-      "kind": "unknown",
-      "name": "Map<String, T>",
-      "language": "java"
-    },
-    {
-      "id": "unresolved:java:T",
-      "kind": "unknown",
-      "name": "T",
-      "language": "java"
-    },
-    {
       "id": "unresolved:java:area",
       "kind": "unknown",
       "name": "area",
@@ -631,48 +619,6 @@ expression: document
             "line": 2,
             "column": 39,
             "byte": 73
-          }
-        }
-      ]
-    },
-    {
-      "source": "class:src/Service.java::Service.InMemoryRepository",
-      "target": "unresolved:java:Map<String, T>",
-      "kind": "uses_type",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 8,
-            "column": 23,
-            "byte": 164
-          },
-          "end": {
-            "line": 8,
-            "column": 37,
-            "byte": 178
-          }
-        }
-      ]
-    },
-    {
-      "source": "class:src/Service.java::Service.ShapeService",
-      "target": "class:src/Service.java::Service.InMemoryRepository",
-      "kind": "uses_type",
-      "status": "resolved_internal",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 20,
-            "column": 23,
-            "byte": 446
-          },
-          "end": {
-            "line": 20,
-            "column": 49,
-            "byte": 472
           }
         }
       ]
@@ -909,27 +855,6 @@ expression: document
       ]
     },
     {
-      "source": "method:Complex.java::Complex.total",
-      "target": "interface:Complex.java::Shape",
-      "kind": "uses_type",
-      "status": "resolved_internal",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 3,
-            "column": 37,
-            "byte": 185
-          },
-          "end": {
-            "line": 3,
-            "column": 44,
-            "byte": 192
-          }
-        }
-      ]
-    },
-    {
       "source": "method:src/Math.java::Math.twice",
       "target": "method:src/Math.java::Math.add",
       "kind": "calls",
@@ -988,27 +913,6 @@ expression: document
             "line": 15,
             "column": 34,
             "byte": 366
-          }
-        }
-      ]
-    },
-    {
-      "source": "method:src/Service.java::Service.InMemoryRepository.save",
-      "target": "unresolved:java:T",
-      "kind": "uses_type",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 14,
-            "column": 37,
-            "byte": 321
-          },
-          "end": {
-            "line": 14,
-            "column": 38,
-            "byte": 322
           }
         }
       ]
@@ -1228,10 +1132,10 @@ expression: document
   "statistics": {
     "files": 3,
     "packages": 0,
-    "nodes": 37,
-    "edges": 62,
+    "nodes": 35,
+    "edges": 58,
     "symbols": 21,
-    "unresolvedEdges": 7,
+    "unresolvedEdges": 5,
     "diagnostics": 0,
     "byNodeKind": {
       "class": 6,
@@ -1243,7 +1147,7 @@ expression: document
       "module": 3,
       "property": 3,
       "repository": 1,
-      "unknown": 7
+      "unknown": 5
     },
     "byEdgeKind": {
       "calls": 6,
@@ -1251,15 +1155,15 @@ expression: document
       "defines": 21,
       "implements": 1,
       "imports": 2,
-      "uses_type": 5
+      "uses_type": 1
     },
     "byLanguage": {
-      "java": 36
+      "java": 34
     },
     "byStatus": {
       "resolved_external": 2,
-      "resolved_internal": 53,
-      "unresolved": 7
+      "resolved_internal": 51,
+      "unresolved": 5
     },
     "byFramework": {}
   }

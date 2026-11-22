@@ -61,19 +61,33 @@ impl SyntaxParser {
             .map_err(|error| ParseError::Setup(error.to_string()))?;
         let tree = self.parser.parse(source, None).ok_or(ParseError::NoTree)?;
         let mut parsed = adapters::parse(language, path, source, &tree);
-        collect_parse_diagnostics(&mut parsed, &tree);
+        collect_parse_diagnostics(&mut parsed, &tree, source);
         Ok(parsed)
     }
 }
 
-fn collect_parse_diagnostics(parsed: &mut ParsedFile, tree: &Tree) {
-    let mut errors: Vec<SourceRange> = Vec::new();
+fn collect_parse_diagnostics(parsed: &mut ParsedFile, tree: &Tree, source: &str) {
+    let mut errors: Vec<(SourceRange, String)> = Vec::new();
     let mut missing: Vec<SourceRange> = Vec::new();
     let mut cursor = tree.walk();
     loop {
         let node = cursor.node();
         if node.is_error() {
-            errors.push(range(node));
+            // Include a short excerpt of the offending text so diagnostics
+            // are actionable without a separate editor round-trip.
+            let excerpt = node
+                .utf8_text(source.as_bytes())
+                .unwrap_or("")
+                .chars()
+                .take(60)
+                .collect::<String>();
+            let excerpt = excerpt.trim();
+            let message = if excerpt.is_empty() {
+                "syntax error; file was partially analysed".to_string()
+            } else {
+                format!("syntax error near `{excerpt}`; file was partially analysed")
+            };
+            errors.push((range(node), message));
         } else if node.is_missing() {
             missing.push(range(node));
         }
@@ -89,15 +103,12 @@ fn collect_parse_diagnostics(parsed: &mut ParsedFile, tree: &Tree) {
                 let count = errors.len() + missing.len();
                 parsed.parse_error_count = count;
                 let max_reported = 20;
-                for site in errors.iter().take(max_reported) {
+                for (site, message) in errors.iter().take(max_reported) {
                     parsed.diagnostics.push(
-                        Diagnostic::error(
-                            DiagnosticKind::ParseError,
-                            "syntax error; file was partially analysed",
-                        )
-                        .with_file(parsed.path.clone())
-                        .with_language(parsed.language)
-                        .with_range(*site),
+                        Diagnostic::error(DiagnosticKind::ParseError, message.clone())
+                            .with_file(parsed.path.clone())
+                            .with_language(parsed.language)
+                            .with_range(*site),
                     );
                 }
                 let remaining = max_reported.saturating_sub(errors.len());
@@ -206,7 +217,7 @@ mod markdown_tests {
             .unwrap();
         assert_eq!(parsed.imports.len(), 2);
         assert_eq!(parsed.imports[0].module, "Other Note");
-        assert_eq!(parsed.imports[1].module, "docs/page.md");
+        assert_eq!(parsed.imports[1].module, "./docs/page.md");
     }
 
     #[test]
@@ -222,6 +233,6 @@ mod markdown_tests {
             .unwrap();
         assert_eq!(parsed.imports.len(), 2);
         assert_eq!(parsed.imports[0].module, "Linked Page");
-        assert_eq!(parsed.imports[1].module, "ü.md");
+        assert_eq!(parsed.imports[1].module, "./ü.md");
     }
 }

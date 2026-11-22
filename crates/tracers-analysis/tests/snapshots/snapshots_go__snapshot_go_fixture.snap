@@ -850,12 +850,6 @@ expression: document
       "language": "go"
     },
     {
-      "id": "unresolved:go:Printf",
-      "kind": "unknown",
-      "name": "Printf",
-      "language": "go"
-    },
-    {
       "id": "unresolved:go:Rectangle",
       "kind": "unknown",
       "name": "Rectangle",
@@ -1816,27 +1810,6 @@ expression: document
     },
     {
       "source": "function:src/main.go::main",
-      "target": "unresolved:go:Printf",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 14,
-            "column": 2,
-            "byte": 182
-          },
-          "end": {
-            "line": 14,
-            "column": 62,
-            "byte": 242
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/main.go::main",
       "target": "unresolved:go:TotalArea",
       "kind": "calls",
       "status": "unresolved",
@@ -2426,7 +2399,7 @@ expression: document
     {
       "severity": "error",
       "kind": "parse_error",
-      "message": "syntax error; file was partially analysed",
+      "message": "syntax error near `example.com/geometry`; file was partially analysed",
       "file": "src/main.go",
       "range": {
         "start": {
@@ -2446,10 +2419,10 @@ expression: document
   "statistics": {
     "files": 4,
     "packages": 4,
-    "nodes": 60,
-    "edges": 156,
+    "nodes": 59,
+    "edges": 155,
     "symbols": 37,
-    "unresolvedEdges": 13,
+    "unresolvedEdges": 12,
     "diagnostics": 1,
     "byNodeKind": {
       "external_symbol": 3,
@@ -2462,11 +2435,11 @@ expression: document
       "property": 6,
       "repository": 1,
       "struct": 5,
-      "unknown": 7,
+      "unknown": 6,
       "variable": 5
     },
     "byEdgeKind": {
-      "calls": 6,
+      "calls": 5,
       "contains": 53,
       "defines": 37,
       "exports": 44,
@@ -2474,12 +2447,12 @@ expression: document
       "uses_type": 13
     },
     "byLanguage": {
-      "go": 55
+      "go": 54
     },
     "byStatus": {
       "resolved_external": 3,
       "resolved_internal": 140,
-      "unresolved": 13
+      "unresolved": 12
     },
     "byFramework": {}
   }

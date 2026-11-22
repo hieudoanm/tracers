@@ -158,12 +158,6 @@
       "language": "go"
     },
     {
-      "id": "external:go:[]geometry.Shape",
-      "kind": "external_symbol",
-      "name": "Shape",
-      "language": "go"
-    },
-    {
       "id": "external:go:builtin::make",
       "kind": "external_symbol",
       "name": "make",
@@ -173,6 +167,12 @@
       "id": "external:go:builtin::panic",
       "kind": "external_symbol",
       "name": "panic",
+      "language": "go"
+    },
+    {
+      "id": "external:go:fmt.Printf",
+      "kind": "external_symbol",
+      "name": "Printf",
       "language": "go"
     },
     {
@@ -994,12 +994,6 @@
       "id": "unresolved:go:Find",
       "kind": "unknown",
       "name": "Find",
-      "language": "go"
-    },
-    {
-      "id": "unresolved:go:Printf",
-      "kind": "unknown",
-      "name": "Printf",
       "language": "go"
     },
     {
@@ -2068,31 +2062,10 @@
     },
     {
       "source": "function:src/main.go::main",
-      "target": "external:go:[]geometry.Shape",
+      "target": "external:go:fmt.Printf",
       "kind": "calls",
       "status": "resolved_external",
       "origin": "lexical",
-      "sites": [
-        {
-          "start": {
-            "line": 10,
-            "column": 12,
-            "byte": 81
-          },
-          "end": {
-            "line": 13,
-            "column": 3,
-            "byte": 180
-          }
-        }
-      ]
-    },
-    {
-      "source": "function:src/main.go::main",
-      "target": "unresolved:go:Printf",
-      "kind": "calls",
-      "status": "unresolved",
-      "origin": "syntax",
       "sites": [
         {
           "start": {
@@ -2720,7 +2693,7 @@
     {
       "severity": "error",
       "kind": "parse_error",
-      "message": "syntax error; file was partially analysed",
+      "message": "syntax error near `example.com/geometry`; file was partially analysed",
       "file": "src/main.go",
       "range": {
         "start": {
@@ -2740,10 +2713,10 @@
   "statistics": {
     "files": 4,
     "packages": 4,
-    "nodes": 67,
-    "edges": 163,
+    "nodes": 66,
+    "edges": 162,
     "symbols": 37,
-    "unresolvedEdges": 13,
+    "unresolvedEdges": 12,
     "diagnostics": 1,
     "byNodeKind": {
       "external_symbol": 10,
@@ -2756,11 +2729,11 @@
       "property": 6,
       "repository": 1,
       "struct": 5,
-      "unknown": 7,
+      "unknown": 6,
       "variable": 5
     },
     "byEdgeKind": {
-      "calls": 13,
+      "calls": 12,
       "contains": 53,
       "defines": 37,
       "exports": 44,
@@ -2768,12 +2741,12 @@
       "uses_type": 13
     },
     "byLanguage": {
-      "go": 62
+      "go": 61
     },
     "byStatus": {
       "resolved_external": 10,
       "resolved_internal": 140,
-      "unresolved": 13
+      "unresolved": 12
     },
     "byFramework": {}
   }

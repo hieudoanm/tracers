@@ -980,12 +980,6 @@ expression: document
       "language": "swift"
     },
     {
-      "id": "unresolved:swift:T",
-      "kind": "unknown",
-      "name": "T",
-      "language": "swift"
-    },
-    {
       "id": "unresolved:swift:area",
       "kind": "unknown",
       "name": "area",
@@ -1061,27 +1055,6 @@ expression: document
             "line": 2,
             "column": 21,
             "byte": 61
-          }
-        }
-      ]
-    },
-    {
-      "source": "class:src/Service.swift::InMemoryRepository",
-      "target": "unresolved:swift:T",
-      "kind": "uses_type",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 2,
-            "column": 25,
-            "byte": 54
-          },
-          "end": {
-            "line": 2,
-            "column": 26,
-            "byte": 55
           }
         }
       ]
@@ -1752,27 +1725,6 @@ expression: document
       ]
     },
     {
-      "source": "method:src/Service.swift::InMemoryRepository.save",
-      "target": "unresolved:swift:T",
-      "kind": "uses_type",
-      "status": "unresolved",
-      "origin": "syntax",
-      "sites": [
-        {
-          "start": {
-            "line": 6,
-            "column": 35,
-            "byte": 162
-          },
-          "end": {
-            "line": 6,
-            "column": 36,
-            "byte": 163
-          }
-        }
-      ]
-    },
-    {
       "source": "method:src/Service.swift::ShapeService.area",
       "target": "unresolved:swift:area",
       "kind": "calls",
@@ -2232,7 +2184,7 @@ expression: document
     {
       "severity": "error",
       "kind": "parse_error",
-      "message": "syntax error; file was partially analysed",
+      "message": "syntax error near `shapes`; file was partially analysed",
       "file": "src/shapes.swift",
       "range": {
         "start": {
@@ -2252,10 +2204,10 @@ expression: document
   "statistics": {
     "files": 5,
     "packages": 0,
-    "nodes": 60,
-    "edges": 116,
+    "nodes": 59,
+    "edges": 114,
     "symbols": 39,
-    "unresolvedEdges": 14,
+    "unresolvedEdges": 12,
     "diagnostics": 1,
     "byNodeKind": {
       "class": 6,
@@ -2269,7 +2221,7 @@ expression: document
       "module": 5,
       "property": 7,
       "repository": 1,
-      "unknown": 9
+      "unknown": 8
     },
     "byEdgeKind": {
       "calls": 10,
@@ -2277,15 +2229,15 @@ expression: document
       "defines": 39,
       "imports": 2,
       "inherits": 4,
-      "uses_type": 12
+      "uses_type": 10
     },
     "byLanguage": {
-      "swift": 59
+      "swift": 58
     },
     "byStatus": {
       "resolved_external": 2,
       "resolved_internal": 100,
-      "unresolved": 14
+      "unresolved": 12
     },
     "byFramework": {}
   }

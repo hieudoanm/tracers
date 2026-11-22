@@ -12,6 +12,18 @@ pub(crate) fn resolve_go(
     import: &ImportData,
 ) -> std::result::Result<ModuleRef, Resolution> {
     let path = import.module.trim();
+    // Standard-library imports have no dot in the first path element
+    // (`errors`, `fmt`, `net/http`). Resolve them as external before
+    // directory matching so same-named internal packages don't produce
+    // spurious ambiguity.
+    if !path.is_empty()
+        && !path
+            .split('/')
+            .next()
+            .is_some_and(|first| first.contains('.'))
+    {
+        return Ok(ModuleRef::External(path.to_string()));
+    }
     let mut directories = Vec::new();
     for module in &ctx.index.go_modules {
         if path == module.module {

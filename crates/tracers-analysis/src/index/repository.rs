@@ -38,6 +38,9 @@ pub struct RepositoryIndex {
     pub go_modules: Vec<GoModule>,
     /// Reverse lookup from module id to the file that declares it.
     pub module_files: BTreeMap<String, String>,
+    /// Dependency names declared by package manifests (Cargo.toml, go.mod,
+    /// package.json, ...). Populated after indexing from manifest contents.
+    pub external_deps: std::collections::BTreeSet<String>,
 }
 
 impl RepositoryIndex {

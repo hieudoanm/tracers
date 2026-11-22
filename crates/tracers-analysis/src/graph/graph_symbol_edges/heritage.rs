@@ -1,8 +1,8 @@
 use tracers_parser::HeritageRelation;
 
 use crate::index::{FileState, RepositoryIndex};
-use crate::resolve::{resolve_resolver::Resolver, Resolution};
-use tracers_core::{external_id, Edge, EdgeKind, ResolutionOrigin, ResolutionStatus};
+use crate::resolve::{Resolution, resolve_resolver::Resolver};
+use tracers_core::{Edge, EdgeKind, ResolutionOrigin, ResolutionStatus, external_id};
 
 use super::super::graph_helpers::unresolved_id;
 use super::super::graph_types::GraphBuilder;
