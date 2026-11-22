@@ -11,7 +11,7 @@ use crate::framework::result::FrameworkDetectionResult;
 use crate::framework::scoring::{best_confidence, extract_version, language_matches};
 use crate::framework::signatures::all_signatures;
 use crate::framework::types::{
-    Framework, FrameworkConfidence, FrameworkSignal, FrameworkSignalKind, FrameworkSignature,
+    Framework, FrameworkSignal, FrameworkSignalKind, FrameworkSignature,
 };
 
 /// Detects frameworks used in a repository.
@@ -41,15 +41,14 @@ impl FrameworkDetector {
             let path = &parsed.path;
             let language = parsed.language;
 
-            // Import signals.
+            // Import signals. Cross-family matches are dropped entirely:
+            // a Rust `test()` call must not register as Jest usage.
             for import in &parsed.imports {
                 let sigs = signatures_for_import(&import.module);
                 for sig in sigs {
-                    let _confidence = if language_matches(sig.family, language) {
-                        sig.import_confidence
-                    } else {
-                        FrameworkConfidence::Low
-                    };
+                    if !language_matches(sig.family, language) {
+                        continue;
+                    }
                     signals
                         .entry(sig.name.to_string())
                         .or_default()
@@ -67,11 +66,9 @@ impl FrameworkDetector {
                 for decorator in &symbol.decorators {
                     let sigs = signatures_for_decorator(decorator);
                     for sig in sigs {
-                        let _confidence = if language_matches(sig.family, language) {
-                            sig.pattern_confidence
-                        } else {
-                            FrameworkConfidence::Low
-                        };
+                        if !language_matches(sig.family, language) {
+                            continue;
+                        }
                         signals
                             .entry(sig.name.to_string())
                             .or_default()
@@ -89,11 +86,9 @@ impl FrameworkDetector {
             for heritage in &parsed.heritage {
                 let sigs = signatures_for_base_class(&heritage.name);
                 for sig in sigs {
-                    let _confidence = if language_matches(sig.family, language) {
-                        sig.pattern_confidence
-                    } else {
-                        FrameworkConfidence::Low
-                    };
+                    if !language_matches(sig.family, language) {
+                        continue;
+                    }
                     signals
                         .entry(sig.name.to_string())
                         .or_default()
@@ -110,11 +105,9 @@ impl FrameworkDetector {
             for call in &parsed.calls {
                 let sigs = signatures_for_call(&call.name);
                 for sig in sigs {
-                    let _confidence = if language_matches(sig.family, language) {
-                        sig.pattern_confidence
-                    } else {
-                        FrameworkConfidence::Low
-                    };
+                    if !language_matches(sig.family, language) {
+                        continue;
+                    }
                     signals
                         .entry(sig.name.to_string())
                         .or_default()
