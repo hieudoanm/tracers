@@ -14,7 +14,7 @@ symbol references, and change impact.
 
 ## Highlights
 
-- 23 languages via Tree-sitter, plus framework & library detection across 303
+- 23 languages via Tree-sitter, plus framework & library detection across 368
   signatures — React, Vue, Angular, Next.js, Express, Fastify, Django, Flask,
   FastAPI, Gin, Echo, Axum, Actix, Spring, Rails, Laravel, and many more
   ([full list](guides/frameworks.md)).
