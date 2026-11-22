@@ -1,10 +1,12 @@
 /target
 **/target
 .tracers-cache/
-.tracers/
 *.dot
 .DS_Store
 .trace-cache/
 
 # Node
 node_modules/
+
+# Tracers graph export
+!.tracers/graph.dot
