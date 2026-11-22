@@ -31,4 +31,18 @@ pub const CSHARP_JOBS_SIGNATURES: &[FrameworkSignature] = &[
         pattern_confidence: FrameworkConfidence::High,
         manifest_confidence: FrameworkConfidence::Medium,
     },
+    FrameworkSignature {
+        name: "coravel",
+        display_name: "Coravel",
+        family: FrameworkFamily::CSharp,
+        import_prefixes: &["Coravel"],
+        decorators: &[],
+        base_classes: &[],
+        calls: &[],
+        manifest_files: &["*.csproj", "*.sln"],
+        manifest_deps: &["Coravel"],
+        import_confidence: FrameworkConfidence::Medium,
+        pattern_confidence: FrameworkConfidence::High,
+        manifest_confidence: FrameworkConfidence::Medium,
+    },
 ];

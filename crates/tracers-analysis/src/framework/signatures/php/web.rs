@@ -143,4 +143,18 @@ pub const PHP_WEB_SIGNATURES: &[FrameworkSignature] = &[
         pattern_confidence: FrameworkConfidence::High,
         manifest_confidence: FrameworkConfidence::Medium,
     },
+    FrameworkSignature {
+        name: "phalcon",
+        display_name: "Phalcon",
+        family: FrameworkFamily::Php,
+        import_prefixes: &["Phalcon"],
+        decorators: &[],
+        base_classes: &[],
+        calls: &[],
+        manifest_files: &["composer.json"],
+        manifest_deps: &["phalcon/cphalcon"],
+        import_confidence: FrameworkConfidence::Medium,
+        pattern_confidence: FrameworkConfidence::High,
+        manifest_confidence: FrameworkConfidence::Medium,
+    },
 ];

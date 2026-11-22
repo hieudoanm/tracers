@@ -2,72 +2,72 @@
 
 64 signatures in the TypeScript & JavaScript family.
 
-| Name            | Display name  |
-| --------------- | ------------- |
-| `react`         | React         |
-| `vue`           | Vue           |
-| `angular`       | Angular       |
-| `svelte`        | Svelte        |
-| `sveltekit`     | SvelteKit     |
-| `nextjs`        | Next.js       |
-| `nuxt`          | Nuxt          |
-| `remix`         | Remix         |
-| `astro`         | Astro         |
-| `gatsby`        | Gatsby        |
-| `solid`         | Solid         |
-| `qwik`          | Qwik          |
-| `preact`        | Preact        |
-| `lit`           | Lit           |
-| `ember`         | Ember         |
-| `tanstack`      | TanStack      |
-| `express`       | Express       |
-| `nestjs`        | NestJS        |
-| `hono`          | Hono          |
-| `fastify`       | Fastify       |
-| `koa`           | Koa           |
-| `trpc`          | tRPC          |
-| `apollo`        | Apollo        |
-| `socketio`      | Socket.IO     |
-| `graphql-yoga`  | GraphQL Yoga  |
-| `adonisjs`      | AdonisJS      |
-| `prisma`        | Prisma        |
-| `drizzle`       | Drizzle ORM   |
-| `typeorm`       | TypeORM       |
-| `sequelize`     | Sequelize     |
-| `mongoose`      | Mongoose      |
-| `kysely`        | Kysely        |
-| `supabase`      | Supabase      |
-| `firebase`      | Firebase      |
-| `antd`          | Ant Design    |
-| `mui`           | Material UI   |
-| `chakra-ui`     | Chakra UI     |
-| `mantine`       | Mantine       |
-| `tailwindcss`   | Tailwind CSS  |
-| `storybook`     | Storybook     |
-| `react-native`  | React Native  |
-| `expo`          | Expo          |
-| `electron`      | Electron      |
-| `tauri`         | Tauri         |
-| `capacitor`     | Capacitor     |
-| `clerk`         | Clerk         |
-| `posthog`       | PostHog       |
-| `sentry`        | Sentry        |
-| `payload`       | Payload CMS   |
-| `strapi`        | Strapi        |
-| `medusa`        | Medusa        |
-| `livekit`       | LiveKit       |
-| `vercel-ai-sdk` | Vercel AI SDK |
-| `langchain-js`  | LangChain.js  |
-| `swr`           | SWR           |
-| `zustand`       | Zustand       |
-| `redux`         | Redux         |
-| `axios`         | Axios         |
-| `lodash`        | Lodash        |
-| `vite`          | Vite          |
-| `vitest`        | Vitest        |
-| `jest`          | Jest          |
-| `playwright`    | Playwright    |
-| `turborepo`     | Turborepo     |
+| #   | Name            | Display name  |
+| --- | --------------- | ------------- |
+| 1   | `react`         | React         |
+| 2   | `vue`           | Vue           |
+| 3   | `angular`       | Angular       |
+| 4   | `svelte`        | Svelte        |
+| 5   | `sveltekit`     | SvelteKit     |
+| 6   | `nextjs`        | Next.js       |
+| 7   | `nuxt`          | Nuxt          |
+| 8   | `remix`         | Remix         |
+| 9   | `astro`         | Astro         |
+| 10  | `gatsby`        | Gatsby        |
+| 11  | `solid`         | Solid         |
+| 12  | `qwik`          | Qwik          |
+| 13  | `preact`        | Preact        |
+| 14  | `lit`           | Lit           |
+| 15  | `ember`         | Ember         |
+| 16  | `tanstack`      | TanStack      |
+| 17  | `express`       | Express       |
+| 18  | `nestjs`        | NestJS        |
+| 19  | `hono`          | Hono          |
+| 20  | `fastify`       | Fastify       |
+| 21  | `koa`           | Koa           |
+| 22  | `trpc`          | tRPC          |
+| 23  | `apollo`        | Apollo        |
+| 24  | `socketio`      | Socket.IO     |
+| 25  | `graphql-yoga`  | GraphQL Yoga  |
+| 26  | `adonisjs`      | AdonisJS      |
+| 27  | `prisma`        | Prisma        |
+| 28  | `drizzle`       | Drizzle ORM   |
+| 29  | `typeorm`       | TypeORM       |
+| 30  | `sequelize`     | Sequelize     |
+| 31  | `mongoose`      | Mongoose      |
+| 32  | `kysely`        | Kysely        |
+| 33  | `supabase`      | Supabase      |
+| 34  | `firebase`      | Firebase      |
+| 35  | `antd`          | Ant Design    |
+| 36  | `mui`           | Material UI   |
+| 37  | `chakra-ui`     | Chakra UI     |
+| 38  | `mantine`       | Mantine       |
+| 39  | `tailwindcss`   | Tailwind CSS  |
+| 40  | `storybook`     | Storybook     |
+| 41  | `react-native`  | React Native  |
+| 42  | `expo`          | Expo          |
+| 43  | `electron`      | Electron      |
+| 44  | `tauri`         | Tauri         |
+| 45  | `capacitor`     | Capacitor     |
+| 46  | `clerk`         | Clerk         |
+| 47  | `posthog`       | PostHog       |
+| 48  | `sentry`        | Sentry        |
+| 49  | `payload`       | Payload CMS   |
+| 50  | `strapi`        | Strapi        |
+| 51  | `medusa`        | Medusa        |
+| 52  | `livekit`       | LiveKit       |
+| 53  | `vercel-ai-sdk` | Vercel AI SDK |
+| 54  | `langchain-js`  | LangChain.js  |
+| 55  | `swr`           | SWR           |
+| 56  | `zustand`       | Zustand       |
+| 57  | `redux`         | Redux         |
+| 58  | `axios`         | Axios         |
+| 59  | `lodash`        | Lodash        |
+| 60  | `vite`          | Vite          |
+| 61  | `vitest`        | Vitest        |
+| 62  | `jest`          | Jest          |
+| 63  | `playwright`    | Playwright    |
+| 64  | `turborepo`     | Turborepo     |
 
 ---
 

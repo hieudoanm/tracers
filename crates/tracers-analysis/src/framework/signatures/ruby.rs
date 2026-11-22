@@ -5,6 +5,7 @@ use crate::framework::types::FrameworkSignature;
 mod auth;
 mod data;
 mod jobs;
+mod net;
 mod testing;
 mod tools;
 mod ui;
@@ -19,4 +20,5 @@ pub const RUBY_SIGNATURES: &[&[FrameworkSignature]] = &[
     testing::RUBY_TESTING_SIGNATURES,
     ui::RUBY_UI_SIGNATURES,
     tools::RUBY_TOOLS_SIGNATURES,
+    net::RUBY_NET_SIGNATURES,
 ];
