@@ -11,7 +11,7 @@ fn fixtures_dir() -> PathBuf {
 
 #[test]
 fn detects_react_on_fixture() {
-    let path = fixtures_dir().join("react");
+    let path = fixtures_dir().join("typescript/react");
     let builder = GraphBuilder::new();
     let result = builder.build_repository(&path).unwrap();
     let names: Vec<&str> = result.frameworks.iter().map(|f| f.name.as_str()).collect();
@@ -27,7 +27,7 @@ fn detects_react_on_fixture() {
 
 #[test]
 fn detects_django_on_fixture() {
-    let path = fixtures_dir().join("django");
+    let path = fixtures_dir().join("python/django");
     let builder = GraphBuilder::new();
     let result = builder.build_repository(&path).unwrap();
     let names: Vec<&str> = result.frameworks.iter().map(|f| f.name.as_str()).collect();
@@ -43,7 +43,7 @@ fn detects_django_on_fixture() {
 
 #[test]
 fn detects_express_on_fixture() {
-    let path = fixtures_dir().join("express");
+    let path = fixtures_dir().join("javascript/express");
     let builder = GraphBuilder::new();
     let result = builder.build_repository(&path).unwrap();
     let names: Vec<&str> = result.frameworks.iter().map(|f| f.name.as_str()).collect();
@@ -61,7 +61,7 @@ fn detects_express_on_fixture() {
 
 #[test]
 fn detects_actix_web_on_fixture() {
-    let path = fixtures_dir().join("actix-web");
+    let path = fixtures_dir().join("rust/actix-web");
     let builder = GraphBuilder::new();
     let result = builder.build_repository(&path).unwrap();
     let names: Vec<&str> = result.frameworks.iter().map(|f| f.name.as_str()).collect();
