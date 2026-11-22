@@ -1,7 +1,7 @@
 # Supported frameworks & libraries
 
 Tracers recognises frameworks, libraries, and major packages through a signature
-database of **273 entries** spanning nine language families. When a scan finds
+database of **303 entries** spanning nine language families. When a scan finds
 evidence of one, it adds a `framework` node to the graph and `uses_framework` /
 `extends_framework` edges from the matching symbols.
 
@@ -44,7 +44,7 @@ to Kotlin files, since Kotlin/JVM projects share `org.springframework` and
 | C#                      |         15 | [csharp](frameworks/csharp.md)                               |
 | PHP                     |         13 | [php](frameworks/php.md)                                     |
 | Ruby                    |         16 | [ruby](frameworks/ruby.md)                                   |
-| Kotlin                  |          5 | [kotlin](frameworks/kotlin.md)                               |
+| Kotlin                  |         35 | [kotlin](frameworks/kotlin.md)                               |
 
 ## Adding a framework
 
