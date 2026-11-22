@@ -37,11 +37,21 @@ pub fn all_signatures() -> &'static [FrameworkSignature] {
         for group in rust::RUST_SIGNATURES {
             out.extend_from_slice(group);
         }
-        out.extend_from_slice(kotlin::KOTLIN_SIGNATURES);
-        out.extend_from_slice(java::JAVA_SIGNATURES);
-        out.extend_from_slice(csharp::CSHARP_SIGNATURES);
-        out.extend_from_slice(php::PHP_SIGNATURES);
-        out.extend_from_slice(ruby::RUBY_SIGNATURES);
+        for group in kotlin::KOTLIN_SIGNATURES {
+            out.extend_from_slice(group);
+        }
+        for group in java::JAVA_SIGNATURES {
+            out.extend_from_slice(group);
+        }
+        for group in csharp::CSHARP_SIGNATURES {
+            out.extend_from_slice(group);
+        }
+        for group in php::PHP_SIGNATURES {
+            out.extend_from_slice(group);
+        }
+        for group in ruby::RUBY_SIGNATURES {
+            out.extend_from_slice(group);
+        }
         out
     })
 }

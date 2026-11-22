@@ -1,6 +1,6 @@
 # PHP frameworks & libraries
 
-13 signatures in the PHP family.
+25 signatures in the PHP family.
 
 | Name              | Display name    |
 | ----------------- | --------------- |
@@ -17,6 +17,18 @@
 | `drupal`          | Drupal          |
 | `magento`         | Magento         |
 | `craftcms`        | Craft CMS       |
+| `doctrine`        | Doctrine        |
+| `monolog`         | Monolog         |
+| `guzzle`          | Guzzle          |
+| `phpmailer`       | PHPMailer       |
+| `phpstan`         | PHPStan         |
+| `swoole`          | Swoole          |
+| `hyperf`          | Hyperf          |
+| `spiral`          | Spiral          |
+| `lumen`           | Lumen           |
+| `phpdotenv`       | phpdotenv       |
+| `ramsey-uuid`     | ramsey/uuid     |
+| `carbon`          | Carbon          |
 
 ---
 

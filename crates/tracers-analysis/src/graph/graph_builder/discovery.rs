@@ -26,8 +26,9 @@ const MANIFEST_BASENAMES: &[&str] = &[
     "next.config.mjs",
 ];
 
-/// Manifest paths matched by suffix (e.g. Rails engines under `engines/*/config/`).
-const MANIFEST_SUFFIXES: &[&str] = &["config/application.rb"];
+/// Manifest paths matched by suffix (e.g. Rails engines under `engines/*/config/`,
+/// or any `*.csproj` since project names vary).
+const MANIFEST_SUFFIXES: &[&str] = &["config/application.rb", ".csproj"];
 
 /// Upper bound on manifest files read per scan; monorepos can contain
 /// hundreds of `package.json`/`Cargo.toml` files.
