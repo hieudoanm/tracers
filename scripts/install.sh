@@ -36,7 +36,7 @@ case "$OS" in
   *)      TRIPLE="x86_64-pc-windows-msvc" ;;
 esac
 
-BINARY_URL="https://github.com/${REPO}/releases/latest/download/tracers-${TRIPLE}"
+BINARY_URL="https://github.com/${REPO}/releases/latest/download/cli-tracers-${TRIPLE}"
 [[ "$OS" != "linux" && "$OS" != "darwin" ]] && BINARY_URL="${BINARY_URL}.exe"
 TMP_BIN="$(mktemp -t tracers)"
 if command -v curl >/dev/null 2>&1 \
