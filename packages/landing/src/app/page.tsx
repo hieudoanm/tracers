@@ -6,14 +6,14 @@ import Hero from '@/components/molecules/Hero';
 import SectionHead from '@/components/molecules/SectionHead';
 import Terminal from '@/components/molecules/Terminal';
 import {
-  LuActivity,
-  LuBot,
-  LuBoxes,
-  LuCrosshair,
-  LuGlobe,
-  LuLink,
-  LuZap,
-} from 'react-icons/lu';
+  PiPulse,
+  PiRobot,
+  PiCube,
+  PiCrosshair,
+  PiGlobe,
+  PiLink,
+  PiLightning,
+} from 'react-icons/pi';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -23,37 +23,37 @@ const GITHUB = 'https://github.com/hieudoanm/tracers';
 
 const FEATURES: Feature[] = [
   {
-    icon: LuGlobe,
+    icon: PiGlobe,
     title: '20+ languages',
     body: 'TypeScript, Python, Go, Rust, Kotlin, Swift, Java, C#, PHP, Ruby, C, C++, Dart, Scala, R, Zig, and more — all through maintained Tree-sitter grammars.',
   },
   {
-    icon: LuLink,
+    icon: PiLink,
     title: 'Honest resolution',
     body: 'Every relationship is marked resolved_internal, resolved_external, unresolved, or ambiguous — tracers never pretends a guess is a fact.',
   },
   {
-    icon: LuActivity,
+    icon: PiPulse,
     title: 'Call & dependency graphs',
     body: 'Direct and transitive dependencies, callers and callees, references, inheritance — bounded, deterministic traversals over indexed graph data.',
   },
   {
-    icon: LuCrosshair,
+    icon: PiCrosshair,
     title: 'Impact analysis',
     body: 'See exactly which symbols depend on a target, with the path that connects them — static reachability, not runtime guesswork.',
   },
   {
-    icon: LuBoxes,
+    icon: PiCube,
     title: 'Interactive explorer',
     body: 'Every scan emits a standalone graph.html — a D3-force canvas explorer with search, filtering, and ego-network inspection. Works from file://.',
   },
   {
-    icon: LuZap,
+    icon: PiLightning,
     title: 'Fast & incremental',
     body: 'Parallel parsing with per-worker parsers and a content-addressed syntax cache — rescans only re-parse what changed.',
   },
   {
-    icon: LuBot,
+    icon: PiRobot,
     title: 'MCP server',
     body: 'tracers mcp exposes the whole graph — callers, callees, deps, impact, cycles — to MCP clients like Claude Desktop and Cursor over stdio.',
   },
