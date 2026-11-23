@@ -17,6 +17,7 @@ const NAV_LINKS = [
   { label: 'How it works', href: '#how-it-works' },
   { label: 'Install', href: '#install' },
   { label: 'Docs', href: '/docs/' },
+  { label: 'Downloads', href: '/downloads/' },
 ];
 
 const DESCRIPTION =
@@ -56,7 +57,6 @@ export const metadata: Metadata = {
   },
 };
 
-
 const JSON_LD = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -64,18 +64,20 @@ const JSON_LD = {
       '@type': 'WebSite',
       name: 'tracers',
       url: 'https://hieudoanm.github.io/tracers/',
-      description: 'Tracers parses 20+ languages with Tree-sitter and builds a unified graph of symbols, calls, imports, and dependencies — query callers, callees, impact, and cycles locally, with no cloud.',
+      description:
+        'Tracers parses 20+ languages with Tree-sitter and builds a unified graph of symbols, calls, imports, and dependencies — query callers, callees, impact, and cycles locally, with no cloud.',
     },
     {
       '@type': 'SoftwareApplication',
       name: 'tracers',
       applicationCategory: 'DeveloperApplication',
-      description: 'Tracers parses 20+ languages with Tree-sitter and builds a unified graph of symbols, calls, imports, and dependencies — query callers, callees, impact, and cycles locally, with no cloud.',
+      description:
+        'Tracers parses 20+ languages with Tree-sitter and builds a unified graph of symbols, calls, imports, and dependencies — query callers, callees, impact, and cycles locally, with no cloud.',
       url: 'https://hieudoanm.github.io/tracers/',
       codeRepository: 'https://github.com/hieudoanm/tracers',
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     },
-  ]
+  ],
 };
 
 interface RootLayoutProps {
