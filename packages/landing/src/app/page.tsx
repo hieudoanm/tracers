@@ -240,12 +240,8 @@ const HomePage: NextPage = () => (
     <CTA
       title="Ready to map your codebase?"
       description="One scan, one binary — see every call, import, and dependency."
-      primary={{ label: 'View on GitHub', href: GITHUB, external: true }}
-      secondary={{
-        label: 'Read the README',
-        href: `${GITHUB}#readme`,
-        external: true,
-      }}
+      primary={{ label: 'Download', href: '/downloads/' }}
+      secondary={{ label: 'View Docs', href: '/docs/' }}
     />
   </main>
 );
