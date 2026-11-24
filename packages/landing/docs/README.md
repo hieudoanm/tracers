@@ -24,3 +24,10 @@ symbol references, and change impact.
 - MCP server (`tracers mcp`) — the whole graph is available to MCP clients like
   Claude Desktop and Cursor.
 - Versioned JSON graph output with resolved/unresolved edge tracking.
+
+## Installation guides
+
+- [CLI on macOS (Apple Silicon)](guides/how-to-install-cli-macos-silicon.md)
+- [CLI on macOS (Intel)](guides/how-to-install-cli-macos-intel.md)
+- [CLI on Linux](guides/how-to-install-cli-linux.md)
+- [CLI on Windows](guides/how-to-install-cli-windows.md)

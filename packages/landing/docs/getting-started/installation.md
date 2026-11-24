@@ -30,3 +30,10 @@ cargo build --release     # binary at target/release/tracers
 
 - Rust 1.85 or later
 - Cargo (comes with Rust)
+
+## Per-platform guides
+
+- [macOS (Apple Silicon)](../guides/how-to-install-cli-macos-silicon.md)
+- [macOS (Intel)](../guides/how-to-install-cli-macos-intel.md)
+- [Linux](../guides/how-to-install-cli-linux.md)
+- [Windows](../guides/how-to-install-cli-windows.md)
