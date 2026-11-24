@@ -15,7 +15,7 @@
   </defs>
 
   <!-- White notebook square -->
-  <rect x="20" y="20" width="360" height="360" fill="#ffffff" stroke="#333333" stroke-width="2"/>
+  <rect x="20" y="20" width="360" height="360" rx="40" fill="#ffffff" stroke="#333333" stroke-width="2"/>
 
   <!-- Grid lines -->
   <g stroke="#c9d6e3" stroke-width="1">
