@@ -15,7 +15,7 @@ semantic = "off"               # "auto" falls back to syntax analysis
 
 [cache]
 enabled = true
-directory = ".tracers-cache"
+directory = ".tracers/cache"
 max_age_days = 30              # 0 disables pruning
 
 [output]

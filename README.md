@@ -1,9 +1,8 @@
 # tracers
 
-[![CI](https://github.com/hieudoanm/tracers/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/hieudoanm/tracers/actions/workflows/ci.yml?branch=master)  [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/hieudoanm/tracers/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/hieudoanm/tracers/actions/workflows/ci.yml?branch=master) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Topics: `code-analysis`, `static-analysis`, `tree-sitter`, `rust`, `cli`, `graph`
-
 
 ![Tracers — Code Intelligence Graph Analysis](assets/branding/png/og.png)
 
@@ -165,7 +164,7 @@ open .tracers/graph.html
 - **Degree-Based Scaling**: Automatically scales node radii by connectivity so architectural hubs stand out.
 - **Live Search**: Instant substring search across symbol names and repository-relative file paths.
 - **Filter Drawer**: Toggle visibility of specific node kinds (Classes, Functions, Methods, etc.) and edge types (Calls, Imports, Contains, Uses Type, etc.) with real-time count badges.
-- **Physics Tuning**: Live sliders for *Node Size*, *Link Distance*, *Repulsion Force*, and *Center Gravity*.
+- **Physics Tuning**: Live sliders for _Node Size_, _Link Distance_, _Repulsion Force_, and _Center Gravity_.
 - **Interactive Inspector**: Inspect symbol kind, file path, inbound/outbound degree counts, and click connected neighbors to smoothly pan across the codebase.
 - **Resilient Rendering**: Automatically filters out missing or unresolved edge endpoints, preventing dangling edge crashes.
 
@@ -463,8 +462,8 @@ semantic = "off"
 # Enable caching (default: true)
 enabled = true
 
-# Cache directory (default: ".tracers-cache")
-directory = ".tracers-cache"
+# Cache directory (default: ".tracers/cache")
+directory = ".tracers/cache"
 
 # Evict cache entries older than this many days (default: 30; 0 disables pruning)
 max_age_days = 30

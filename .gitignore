@@ -1,6 +1,7 @@
 /target
 **/target
 .tracers-cache/
+.tracers/cache/
 *.dot
 .DS_Store
 .trace-cache/

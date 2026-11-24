@@ -10,7 +10,7 @@ use tracers_core::Language;
 use crate::error::AnalysisError;
 
 pub const CONFIG_FILE_NAME: &str = "tracers.toml";
-pub const DEFAULT_CACHE_DIR: &str = ".tracers-cache";
+pub const DEFAULT_CACHE_DIR: &str = ".tracers/cache";
 pub const DEFAULT_MAX_FILE_SIZE: u64 = 8 * 1024 * 1024;
 
 pub use types::{AnalysisConfig, CacheConfig, OutputConfig, SemanticMode, TracersConfig};
